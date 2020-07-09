@@ -1,0 +1,11 @@
+# R
+.Rhistory
+
+# dataset
+/calibrationFiles
+/P-data
+/S-data
+/singleStrokes
+
+# MATLAB
+data.mat
