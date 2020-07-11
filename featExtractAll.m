@@ -51,7 +51,10 @@ load calibration
 % double attFlat : amplitude flatness (attack phase)
 % double decFlat : amplitude flatness (decay phase)
 % double transFlat : amplitude flatness (transient phase)
-% double crest : crest factor (total duration)
+% double totCrest : crest factor (total duration)
+% double attCrest : crest factor (attack phase)
+% double decCrest : crest factor (decay phase)
+% double transCrest : crest factor (transient phase)
 % double totSpecFlat : spectral flatness (total duration)
 % double attSpecFlat : spectral flatness (attack phase)
 % double decSpecFlat : spectral flatness (decay phase)
@@ -71,7 +74,7 @@ stroke = struct('filename', [], 'subj', [], 'arm', [], ...
     'TC', [], ...
     'totFlat', [], 'attFlat', [], 'decFlat', [], 'transFlat', [], ...
     'totSpecFlat', [], 'attSpecFlat', [], 'decSpecFlat', [], 'transSpecFlat', [], ...
-    'crest', []);
+    'totCrest', [], 'attCrest', [], 'decCrest', [], 'transCrest', []);
 
 % Retrieve wav-file names
 cd singleStrokes
@@ -85,9 +88,13 @@ for i = 1:size(filesDir,1)
     stroke.series = str2double(stroke.filename(4:5));
     stroke.cond = stroke.filename(6);
     stroke.no = str2double(stroke.filename(7:end-4));
+    if i > 1
+        cd singleStrokes
+    end
     [audioStereo, stroke.fs] = audioread(filename);
     % zero-pad audio file
     stroke.audio = [zeros(100e-3*stroke.fs, 1); audioStereo(:,1); zeros(100e-3*stroke.fs, 1);];
+    cd ..
     mirAudio = miraudio(stroke.audio);
     % get onset time
     attacks = mirevents(mirAudio,'Attacks','Waveform','WaveformThreshold',0.03);
@@ -192,17 +199,20 @@ for i = 1:size(filesDir,1)
     stroke.decSC = mirgetdata(scDecay);
     stroke.totSC = mirgetdata(scTot);
     stroke.transSC = mirgetdata(scTot);
-    % Calculate amplitude flatness
-    attFlat = mirflatness(mirenvelope(miraudio(attackSegment,stroke.fs)));
-    decFlat = mirflatness(mirenvelope(miraudio(decaySegment, stroke.fs)));
-    totFlat = mirflatness(mirenvelope(miraudio(totalSegment, stroke.fs)));
-    transFlat = mirflatness(mirenvelope(miraudio(transSegment, stroke.fs)));
+    % Calculate temporal flatness
+    attFlat = mirflatness(mirenvelope(miraudio(unpad(attackSegment),stroke.fs),'Tau',1e-6));
+    decFlat = mirflatness(mirenvelope(miraudio(decaySegment, stroke.fs),'Tau',1e-6));
+    totFlat = mirflatness(mirenvelope(miraudio(unpad(totalSegment), stroke.fs),'Tau',1e-6));
+    transFlat = mirflatness(mirenvelope(miraudio(transSegment, stroke.fs),'Tau',1e-6));
     stroke.attFlat = mirgetdata(attFlat);
     stroke.decFlat = mirgetdata(decFlat);
     stroke.totFlat = mirgetdata(totFlat);
     stroke.transFlat = mirgetdata(transFlat);
     % Calculate crest factor (|x_peak| / x_rms)
-    stroke.crest = max(abs(totalSegment)) / totalRMS;
+    stroke.totCrest = max(abs(totalSegment)) / totalRMS;
+    stroke.attCrest = max(abs(attackSegment)) / attackRMS;
+    stroke.decCrest = max(abs(decaySegment)) / decayRMS;
+    stroke.transCrest = max(abs(transSegment)) / transRMS;
     % Calculate spectral flatness
     attSpecFlat = mirflatness(specAttack);
     decSpecFlat = mirflatness(specDecay);
@@ -217,5 +227,4 @@ for i = 1:size(filesDir,1)
     disp([stroke.filename ' stored (' num2str(i) ' out of ' num2str(size(filesDir,1)) ')']);
 end
 
-cd ..
 save('data.mat','data')

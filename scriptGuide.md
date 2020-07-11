@@ -19,9 +19,9 @@ Here's the extracted features:
 - SPL (attack/transient/decay/total)
 - Temporal centroid
 - Spectral centroid (attack/transient/decay/total)
-- Amplitude flatness (attack/transient/decay/total)
+- Temporal flatness (attack/transient/decay/total)
 - Spectral flatness (attack/transient/decay/total)
-- Crest factor
+- Crest factor (attack/transient/decay/total)
 
 Attack phase = max peak time - onset time
 Decay phase = offset time - max peak time
@@ -30,7 +30,7 @@ Total phase = offset time - onset time
 
 By offset time we mean the end of the decay phase as estimated by the peak-picking algorithm in MIRToolbox (i.e. directly on the waveform).
 
-Flatness is the ratio between the geometric and the aritmetic mean, so it indicates spiky vs flat distribution. Spectral flatness is well known; amplitude flatness is obtained by passing the amplitude envelope as input.
+Flatness is the ratio between the geometric and the aritmetic mean, so it indicates spiky vs flat distribution. Spectral flatness is well known; temporal flatness is obtained by passing the amplitude envelope as input.
 
 Crest factor is the ratio between peak amplitude and rms amplitude.
 
@@ -40,9 +40,9 @@ Most of the procedures (windowing, etc.) are commented in the script, let me kno
 
 Same procedure as *featExtractSingle.m*, but done for all strokes. The extracted features are saved into *data.mat* as a struct array. Note that *data.mat* is larger than the allowed file size for pushing to Github, so you will need to run the script or get it from OneDrive if needed.
 
-# exportData.m
+# exportCsv.m
 
-Exports *data.mat* to a table which is R-friendly, saved into *features.csv*.
+Exports *data.mat* to a R-friendly table, saved into *features.csv*.
 
 # batchSplit.md
 
