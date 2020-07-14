@@ -1,6 +1,11 @@
 # R
 .Rhistory
 
+# RStudio
+.Rproj.user
+README.html
+scriptGuide.html
+
 # dataset
 /calibrationFiles
 /P-data

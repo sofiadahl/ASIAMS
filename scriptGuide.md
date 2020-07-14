@@ -55,3 +55,9 @@ Contains useful code blocks for statistical analysis: import, inspection of QQ p
 # analysisOLD.R, analysisOneWay.R, analysisTwoWay.R
 
 Various obsolete R code chunks, including a linear mixed model which I never got to work.
+
+# dahl_drumming_models.*
+
+RStudio project files. 
+
+As of 2020-07-14 (version vive-la-france!) it only contains some exploratory graphs, some musings on response variable choice as well as on model choice.
