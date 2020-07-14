@@ -1,0 +1,173 @@
+---
+title: "Sei's drum!"
+author: "Michael Großbach"
+date: Draft `r Sys.Date()`
+output:
+  html_document: 
+    fig_caption: yes
+    toc: yes
+    toc_float: yes
+    code_folding: hide
+bibliography: /home/grossbach/files/_sonstiges/000literaturdb.bib
+editor_options:
+    chunk_output_type: console
+---
+
+```{r Libraries, message=FALSE}
+library(brms)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(kfigr)
+library(knitr)
+# library(pander)
+library(patchwork)
+# library(tidyr)
+```
+
+```{r Settings, echo=FALSE}
+opts_chunk$set(comment = NULL,
+               fig.width = 12,
+               fig.height = 12, 
+               echo = TRUE)
+theme_set(theme_light())
+knit_hooks$set(anchor = kfigr::hook_anchor)
+opts_knit$set(kfigr.link = TRUE,
+              kfigr.prefix = TRUE)
+# knitr::opts_chunk$set(echo = FALSE)
+options(mc.cores = parallel::detectCores())
+rstan::rstan_options(auto_write = TRUE)
+# Constants:
+MODEL <- FALSE
+FIGREF <- "Fig." # type for pics and plots, kfigr::figr()
+TABREF <- "Tab." # type for tables, kfigr::figr()
+MODREF <- "Model" # type for models, kfigr::figr()
+PRIORREF <- "Prior" # type for priors, kfigr::figr()
+SRCREF <- "Src." # type for source code blocks, kfigr::figr()
+COLOR_BLIND_PALETTE <- RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")
+```
+
+The data set was read in as is, the columns `subj`, `arm`, `cond` and `no` were converted to factors, the columns `series` and `filename` were deleted.
+
+```{r}
+read.csv("../features.csv") %>%
+  mutate(filename = NULL,
+         series = NULL,
+         subj = factor(subj),
+         arm = factor(arm),
+         cond = factor(cond),
+         no = factor(no)) ->
+  drum_beats
+```
+
+# Exploration
+
+In a first attempt to get an overview, the descriptors' density estimates were plotted, broken down by `arm` and `cond`.
+
+```{r DescriptorDensities, anchor=FIGREF}
+dep_vars <- names(drum_beats)[which(!(names(drum_beats) %in% c("subj", 
+                                                               "arm", 
+                                                               "cond", 
+                                                               "no")))]
+n_vars <- length(dep_vars)
+# for (side in levels(drum_beats$arm)) {
+  plot_lst <- vector("list", length = n_vars)
+  plt_cnt <- 1
+  for (dv in dep_vars) {
+    if (plt_cnt == n_vars) {
+      plt_pos <- c(2, 0.5)
+    } else {
+      plt_pos <- "none"
+    }
+    if (plt_cnt %% 5 == 1) {
+      ylab <- "density"
+    } else {
+      ylab <- ""
+    }
+    plot_lst[[plt_cnt]] <- ggplot(drum_beats, 
+                                  aes_string(x = dv, 
+                                             # linetype = "arm"
+                                             color = "cond")) +
+      geom_density(na.rm = TRUE) + 
+      scale_color_colorblind() +
+      ylab(ylab) +
+      geom_rug(alpha = 0.25) + 
+      theme(legend.position = plt_pos) +
+      facet_wrap(~ arm)
+    plt_cnt <- plt_cnt + 1
+  }
+  print(wrap_plots(plot_lst) +
+          plot_annotation(
+            # title = paste("Arm:", side),
+            tag_levels = "A"))
+# }
+```
+
+`r figr("DescriptorDensities", type = FIGREF)`. *Descriptor densities along with raw data points (rug ticks on x axes), broken down by arm (dominant [D] vs non-dominant [ND]) and instruction condition (controlled = C, normal = N).*
+
+***
+
+Several peculiarities are immediately apparent from the plots in `r figr("DescriptorDensities")`:
+
+* There are no substantial differences in the density distributions between normal (N) and controlled (C) strokes
+* `attDur`, `LAT`, and `attFlat` have very few unique data values (see rug ticks at bottom of plots)
+* Looking at the dominant arm alone (and excluding the vars `attDur`, `LAT`, and `attFlat` for the reason just mentioned), the densities have a trend toward a larger variance in the controlled condition (in other words: a less pointed distribution)
+
+The lack of any clear-cut differences in the raw data between conditions suggests that it will be hard to find any differences by modeling.
+
+The limited number of unique values in the attack-related measures (*e.g.* `attDur` only has `r length(unique(drum_beats$attDur))` unique values in a total of `r nrow(drum_beats)` observations across all subjects, conditions, and sides; that's only `r round(length(unique(drum_beats$attDur)) / nrow(drum_beats) * 100)` percent!) suggests that rounding errors propagated through the calculations. This is probably due to very similar, *i.e.* highly automated, and short attack times combined with the given sampling frequency, resulting in few data points, which in course of the calculations result in the observed phenomenon. But I'm just guessing here, as I do not know anything about these descriptors and how they are calculated or interpreted. Judging by the range of values of, *i.e.*, `attDur` (`r round(range(drum_beats$attDur), 2)`ms, across both sides and conditions) and a sampling frequency of 48 kHz, this leaves us at 48 * (`r round(range(drum_beats$attDur), 2)[2]` - `r round(range(drum_beats$attDur), 2)[1]`) = `r round(48 * (range(drum_beats$attDur)[2] - range(drum_beats$attDur)[1]))` points to choose beginning and end of the attack. Given the supposed highly automatized motor program used to initiate the stroke, along with the laws of physics at play here (no pun intended), it is not very surprising to see very few unique values. My limited knowledge---or rather, my ignorance of anything sound-related---aside, from a statistical standpoint these measures do not seem suited to describe any differences between the experimental conditions investigated here. 
+
+Given the very few data points in the attack phase, any descriptor derived from such a short period of time (*.e.g.*. `attSPL`) cannot be judged as being stable in the sense of being reproducible. Hence I suggest to drop all attack-derived descriptors.
+
+```{r}
+drum_beats %>%
+  mutate(attDur = NULL,
+         LAT = NULL,
+         attSPL = NULL,
+         attSC = NULL,
+         attFlat = NULL,
+         attSpecFlat = NULL) ->
+  drum_beats
+```
+
+The increase in variance for the conditions N < C does not come as a surprise as I assume normal also means highly trained and thus automatized, whereas controlled involves less automatization and more 'individualness' both within and between subjects. 
+
+## Conclusions
+
+Looking at @Danielsen2015 and the above investigated descriptors it seems reasonable to limit the modeling attempts to `totDur`, `totSPL`, `totSC`, and `TC`.
+
+# Model Considerations
+
+There are several points that need to be considered before making a decision regarding the type of modeling to be done in this study, (1) the sample size places restrictions on the external validity; (2) data from small samples can be better modeled when regularization is in place to 'tame' the estimates; (3) the hierarchical structure of the data (subjects played several trials with either their dominant or non-dominat arm under two conditions) suggests a multilevel analysis of the data which would, in addition to the Bayesian regularization via priors also results in shrinkage of the estimates; (4) given the small distribution differences between the two experimental conditions in the varying variance between conditions
+
+Given the extremely small sample size, any attempt to fit the data using traditional statistics, a.k.a. null-hypothesis significance testing, would make us vulnerable to all kinds of criticism. I therefor suggest to use Bayesian statistics instead, as it allows us to estimate probability distributions of parameters rather than confidence intervals around point estimates, and thus embraces uncertainty in estimates. 
+
+Additionally, Bayesian regression uses prior probability distributions to arrive at sensible estimates. These priors regularize estimates, or draw them toward zero, a desirable effect which has long been recognized even in traditional statistics (*e.g.* ridge regression and lasso; @Tibshirani1996).
+
+ANOVA (or regression with grouping variables) requires each subject's trials to be averaged, say, within conditions or groups (or both), to be able to assess treatment effects; this results in the individual variation within a subject to get lost while it might have been very informative to include it in the analysis. Multilevel (or hierarchical) modeling allows to include the entire data structure (`r figr("MLMstructure", type = FIGREF)`) so that no information gets lost through averaging, but all variation (both individual and treatment-driven) propagates through the analysis and ends up in the final results, allowing for more realistic credibility margins around estimates. 
+
+```{r MLMstructure, anchor=FIGREF}
+# intentionally empty chunk 
+```
+
+~~~
+Instruction:    Normal        			Controlled
+                | |    \      			/ |    \
+Player:         1 2 ... n			   1  2 ... n
+               / \
+Side   dominant non-dominant
+        / | \	    / | \
+Trial  1 ..  p     1  .. p
+~~~
+
+`r figr("MLMstructure")`. *The multilevel structure of a data set should be reflected in the analysis.*
+
+***
+
+Also, the variation in traditional statistics is considered to be fixed (think homoscedasticity in ANOVA, or the $\epsilon$ in regression formulas such as $y_i = \beta_0 + \beta_1x_i + \epsilon_i$), whereas it is an estimated quantity in Bayesian statistics and therefor can vary between conditions (or groups or subjects etc.). 
+
+## Conclusions
+
+Will start with a simple univariate model, add predictors and interactions, then a bivariate model, and finally a quadruple-variate model and see where this leads us.
+
+# References 
