@@ -8,7 +8,7 @@ output:
     toc: yes
     toc_float: yes
     code_folding: hide
-bibliography: /home/grossbach/files/_sonstiges/000literaturdb.bib
+bibliography: asiams.bib
 editor_options:
     chunk_output_type: console
 ---
@@ -50,7 +50,7 @@ COLOR_BLIND_PALETTE <- RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")
 The data set was read in as is, the columns `subj`, `arm`, `cond` and `no` were converted to factors, the columns `series` and `filename` were deleted.
 
 ```{r}
-read.csv("../features.csv") %>%
+read.csv("features.csv") %>%
   mutate(filename = NULL,
          series = NULL,
          subj = factor(subj),
@@ -169,5 +169,18 @@ Also, the variation in traditional statistics is considered to be fixed (think h
 ## Conclusions
 
 Will start with a simple univariate model, add predictors and interactions, then a bivariate model, and finally a quadruple-variate model and see where this leads us.
+
+# Simple Univariate Models
+
+Looking again at the variables *I* have decided on to be the ones to be used as response variables in the regression models---implying that this is by no means set in stone---, seems like a skewed normal or lognormal link function would be appropriate to model them.
+
+Let's start with totDur
+
+```{r}
+m0 <- brm(totDur ~ cond,
+          # family = gaussian(),
+          data = drum_beats)
+```
+
 
 # References 

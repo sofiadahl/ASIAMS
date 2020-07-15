@@ -14,3 +14,6 @@ scriptGuide.html
 
 # MATLAB
 data.mat
+
+# bib
+*.bib.bak
