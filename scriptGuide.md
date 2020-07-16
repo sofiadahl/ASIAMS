@@ -60,4 +60,4 @@ Various obsolete R code chunks, including a linear mixed model which I never got
 
 RStudio project files. The most interesting file is probably dahl_drumming_models.html, as it contains everything you want without the need to 'run' any files in R. Once you opened the html file with your browser you can click on the [Show Code] buttons to, well, show the R code. The dahl_drumming_models.Rmd file is the R markdown file from which the html is produced.
 
-As of 2020-07-14 (version vive-la-france!) it only contains some exploratory graphs, some musings on response variable choice as well as on model choice. 
+As of 2020-07-14 (version vive-la-france!) it only contains some exploratory graphs, some musings on response variable choice as well as on model choice. As of 2020-07-16, it also has a first model.
