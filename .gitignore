@@ -1,5 +1,6 @@
 # R
 .Rhistory
+m*.rda
 
 # RStudio
 .Rproj.user
@@ -17,3 +18,4 @@ data.mat
 
 # bib
 *.bib.bak
+*.bib.sav

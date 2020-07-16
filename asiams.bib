@@ -29,4 +29,103 @@
   year      = {1996},
 }
 
+@Article{Wilkinson1973,
+  author    = {Wilkinson, G. N. and Rogers, C. E.},
+  title     = {Symbolic description of factorial models for analysis of variance},
+  journal   = {Applied Statistics},
+  year      = {1973},
+  volume    = {22},
+  number    = {3},
+  pages     = {392--399},
+  doi       = {10.2307/2346786},
+  abstract  = {The paper describes the symbolic notation and syntax for specifying factorial models for analysis of variance in the control language of the GENSTAT statistical program system at Rothamsted. The notation generalizes that of Nelder (1965). Algorithm AS 65 (Rogers, 1973) converts factorial model formulae in this notation to a list of model terms represented as binary integers.
+A further extension of the syntax is discussed forspecifying models generally (including non-linear forms).},
+  file      = {:Wilkinson1973.pdf:PDF},
+  owner     = {grossbach},
+  publisher = {JSTOR},
+  timestamp = {2018.08.01},
+}
+
+@Manual{RCT2020,
+  title        = {R: A Language and Environment for Statistical Computing},
+  address      = {Vienna, Austria},
+  author       = {{R Core Team}},
+  organization = {R Foundation for Statistical Computing},
+  year         = {2020},
+  url          = {https://www.R-project.org/},
+}
+
+@Article{Buerkner2018,
+  author    = {Bürkner, Paul-Christian},
+  journal   = {The R Journal},
+  title     = {Advanced Bayesian Multilevel Modeling with the {R} Package brms},
+  year      = {2018},
+  issn      = {2073-4859},
+  number    = {1},
+  volume    = {10},
+  abstract  = {The brms package allows R users to easily specify a wide range of Bayesian single-level and multilevel models which are fit with the probabilistic programming language Stan behind the scenes. Several response distributions are supported, of which all parameters (e.g., location, scale, and shape) can be predicted. Non-linear relationships may be specified using non-linear predictor terms or semi-parametric approaches such as splines or Gaussian processes. Multivariate models can be fit as well. To make all of these modeling options possible in a multilevel framework, brms provides an intuitive and powerful formula syntax, which extends the well known formula syntax of lme4. The purpose of the present paper is to introduce this syntax in detail and to demonstrate its usefulness with four examples, each showing relevant aspects of the syntax.},
+  file      = {:Buerkner2018.pdf:PDF},
+  owner     = {grossbach},
+  timestamp = {2018.09.21},
+}
+
+@Article{Buerkner2017,
+  author    = {Paul-Christian Bürkner},
+  title     = {brms: An R Package for Bayesian Multilevel Models Using Stan},
+  doi       = {10.18637/jss.v080.i01},
+  number    = {1},
+  volume    = {80},
+  abstract  = {The brms package implements Bayesian multilevel models in R using the probabilistic programming language Stan. A wide range of distributions and link functions are supported, allowing users to fit - among others - linear, robust linear, binomial, Poisson, survival, ordinal, zero-inflated, hurdle, and even non-linear models all in a multilevel context. Further modeling options include autocorrelation of the response variable, user defined covariance structures, censored data, as well as meta-analytic standard errors. Prior specifications are flexible and explicitly encourage users to apply prior distributions that actually reflect their beliefs. In addition, model fit can easily be assessed and compared with the Watanabe-Akaike information criterion and leave-one-out cross-validation.},
+  file      = {:Buerkner2017.pdf:PDF},
+  journal   = {Journal of Statistical Software},
+  publisher = {Foundation for Open Access Statistic},
+  year      = {2017},
+}
+
+@Article{Carpenter2017,
+  author   = {Bob Carpenter and Andrew Gelman and Matthew Hoffman and Daniel Lee and Ben Goodrich and Michael Betancourt and Marcus Brubaker and Jiqiang Guo and Peter Li and Allen Riddell},
+  title    = {Stan: A Probabilistic Programming Language},
+  journal  = {Journal of Statistical Software, Articles},
+  year     = {2017},
+  volume   = {76},
+  number   = {1},
+  pages    = {1--32},
+  issn     = {1548-7660},
+  doi      = {10.18637/jss.v076.i01},
+  url      = {https://www.jstatsoft.org/v076/i01},
+  abstract = {Stan is a probabilistic programming language for specifying statistical models. A Stan program imperatively defines a log probability function over parameters conditioned on specified data and constants. As of version 2.14.0, Stan provides full Bayesian inference for continuous-variable models through Markov chain Monte Carlo methods such as the No-U-Turn sampler, an adaptive form of Hamiltonian Monte Carlo sampling. Penalized maximum likelihood estimates are calculated using optimization methods such as the limited memory Broyden-Fletcher-Goldfarb-Shanno algorithm. Stan is also a platform for computing log densities and their gradients and Hessians, which can be used in alternative algorithms such as variational Bayes, expectation propagation, and marginal inference using approximate integration. To this end, Stan is set up so that the densities, gradients, and Hessians, along with intermediate quantities of the algorithm such as acceptance probabilities, are easily accessible. Stan can be called from the command line using the cmdstan package, through R using the rstan package, and through Python using the pystan package. All three interfaces support sampling and optimization-based inference with diagnostics and posterior analysis. rstan and pystan also provide access to log probabilities, gradients, Hessians, parameter transforms, and specialized plotting.},
+  file     = {Carpenter2017.pdf:Carpenter2017.pdf:PDF},
+  keywords = {probabilistic programming; Bayesian inference; algorithmic differentiation; Stan},
+}
+
+@Misc{Gabry2020,
+  author = {Jonah Gabry and Tristan Mahr},
+  note   = {R package version 1.7.2},
+  title  = {bayesplot: Plotting for Bayesian Models},
+  year   = {2020},
+  url    = {https://mc-stan.org/bayesplot},
+}
+
+@Book{Wickham2016,
+  author    = {Hadley Wickham},
+  publisher = {Springer-Verlag New York},
+  title     = {ggplot2: Elegant Graphics for Data Analysis},
+  year      = {2016},
+  isbn      = {978-3-319-24277-4},
+  url       = {https://ggplot2.tidyverse.org},
+}
+
+@Book{Bates2010,
+  author    = {Bates, D. M.},
+  publisher = {Springer},
+  title     = {lme4: Mixed-effects Modeling with R},
+  year      = {2010},
+  note      = {This is a draft as of June 25, 2010, available at http://lme4.r-forge.r-project.org/lMMwR/lrgprt.pdf},
+  file      = {:/home/grossbach/Dropbox/literatur/buecher/Bates2010.pdf:PDF},
+  keywords  = {R Programming Language},
+  owner     = {grossbach},
+  timestamp = {2012.11.13},
+  url       = {http://lme4.r-forge.r-project.org/lMMwR/lrgprt.pdf},
+}
+
 @Comment{jabref-meta: databaseType:bibtex;}

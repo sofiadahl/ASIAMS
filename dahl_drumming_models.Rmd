@@ -8,6 +8,7 @@ output:
     toc: yes
     toc_float: yes
     code_folding: hide
+    fig_width: 3.5
 bibliography: asiams.bib
 editor_options:
     chunk_output_type: console
@@ -34,7 +35,8 @@ theme_set(theme_light())
 knit_hooks$set(anchor = kfigr::hook_anchor)
 opts_knit$set(kfigr.link = TRUE,
               kfigr.prefix = TRUE)
-# knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(fig.width = 3.5,
+                      fig.height = 3.5)
 options(mc.cores = parallel::detectCores())
 rstan::rstan_options(auto_write = TRUE)
 # Constants:
@@ -45,14 +47,15 @@ MODREF <- "Model" # type for models, kfigr::figr()
 PRIORREF <- "Prior" # type for priors, kfigr::figr()
 SRCREF <- "Src." # type for source code blocks, kfigr::figr()
 COLOR_BLIND_PALETTE <- RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")
+source("dahl_drumming_models.R")
 ```
 
-The data set was read in as is, the columns `subj`, `arm`, `cond` and `no` were converted to factors, the columns `series` and `filename` were deleted.
+The data set was read in as is, the columns `subj`, `arm`, `cond`, `series` and `no` were converted to factors, the column `filename` was deleted.
 
 ```{r}
 read.csv("features.csv") %>%
   mutate(filename = NULL,
-         series = NULL,
+         series = factor(series),
          subj = factor(subj),
          arm = factor(arm),
          cond = factor(cond),
@@ -64,13 +67,13 @@ read.csv("features.csv") %>%
 
 In a first attempt to get an overview, the descriptors' density estimates were plotted, broken down by `arm` and `cond`.
 
-```{r DescriptorDensities, anchor=FIGREF}
+```{r DescriptorDensities, anchor=FIGREF, fig.width=12, fig.height=18}
 dep_vars <- names(drum_beats)[which(!(names(drum_beats) %in% c("subj", 
                                                                "arm", 
                                                                "cond", 
-                                                               "no")))]
+                                                               "no",
+                                                               "series")))]
 n_vars <- length(dep_vars)
-# for (side in levels(drum_beats$arm)) {
   plot_lst <- vector("list", length = n_vars)
   plt_cnt <- 1
   for (dv in dep_vars) {
@@ -79,14 +82,13 @@ n_vars <- length(dep_vars)
     } else {
       plt_pos <- "none"
     }
-    if (plt_cnt %% 5 == 1) {
+    if (plt_cnt %% 4 == 1) {
       ylab <- "density"
     } else {
       ylab <- ""
     }
     plot_lst[[plt_cnt]] <- ggplot(drum_beats, 
                                   aes_string(x = dv, 
-                                             # linetype = "arm"
                                              color = "cond")) +
       geom_density(na.rm = TRUE) + 
       scale_color_colorblind() +
@@ -96,11 +98,10 @@ n_vars <- length(dep_vars)
       facet_wrap(~ arm)
     plt_cnt <- plt_cnt + 1
   }
-  print(wrap_plots(plot_lst) +
+  print(wrap_plots(plot_lst, 
+                   ncol = 4) +
           plot_annotation(
-            # title = paste("Arm:", side),
             tag_levels = "A"))
-# }
 ```
 
 `r figr("DescriptorDensities", type = FIGREF)`. *Descriptor densities along with raw data points (rug ticks on x axes), broken down by arm (dominant [D] vs non-dominant [ND]) and instruction condition (controlled = C, normal = N).*
@@ -134,7 +135,7 @@ The increase in variance for the conditions N < C does not come as a surprise as
 
 ## Conclusions
 
-Looking at @Danielsen2015 and the above investigated descriptors it seems reasonable to limit the modeling attempts to `totDur`, `totSPL`, `totSC`, and `TC`.
+Looking at the above investigated descriptors and @Danielsen2015, it seems reasonable to limit the modeling attempts to `totDur`, `totSPL`, `totSC`, and `TC`.
 
 # Model Considerations
 
@@ -147,7 +148,7 @@ Additionally, Bayesian regression uses prior probability distributions to arrive
 ANOVA (or regression with grouping variables) requires each subject's trials to be averaged, say, within conditions or groups (or both), to be able to assess treatment effects; this results in the individual variation within a subject to get lost while it might have been very informative to include it in the analysis. Multilevel (or hierarchical) modeling allows to include the entire data structure (`r figr("MLMstructure", type = FIGREF)`) so that no information gets lost through averaging, but all variation (both individual and treatment-driven) propagates through the analysis and ends up in the final results, allowing for more realistic credibility margins around estimates. 
 
 ```{r MLMstructure, anchor=FIGREF}
-# intentionally empty chunk 
+# chunk intentionally empty  
 ```
 
 ~~~
@@ -170,17 +171,73 @@ Also, the variation in traditional statistics is considered to be fixed (think h
 
 Will start with a simple univariate model, add predictors and interactions, then a bivariate model, and finally a quadruple-variate model and see where this leads us.
 
-# Simple Univariate Models
+# Modeling
 
-Looking again at the variables *I* have decided on to be the ones to be used as response variables in the regression models---implying that this is by no means set in stone---, seems like a skewed normal or lognormal link function would be appropriate to model them.
+The hypothesis is that 
 
-Let's start with totDur
+## Simple Univariate Models
+
+Looking again at the variables *I* have decided to use as response variables in the regression models---implying that this is by no means set in stone---, it seems like a skewed normal link function would be appropriate to model them.
+
+Let's start with `totDur`. Using an extended model description language [@Bates2010;@Buerkner2018], going back to Wilkinson and Rogers's [-@Wilkinson1973] modeling language, we write:
 
 ```{r}
-m0 <- brm(totDur ~ cond,
-          # family = gaussian(),
-          data = drum_beats)
+(m0_form <-bf(totDur ~ 1 + (1 | subj)))
 ```
 
+which claims that `totDur` is explained by ('~') an intercept, denoted by '1', and an additional term '(1 | subj)'. The '1' in parentheses again stands for the intercept, but the pipe '|' assigns an intercept to each level of the factor 'subj'. In this particular case this means that the model will estimate an individual intercept for each unique drummer listed in the data set column `subj`. These individual, or varying, intercepts are then used in informing the estimation of the population intercept. 
+
+```{r}
+if (MODEL) {
+  m0 <- brm(m0_form,
+            family = skew_normal(),
+            data = drum_beats)
+  m0 <- add_criterion(m0, 
+                      "loo",
+                      reloo = TRUE)
+  save(m0, 
+       file = "m0.rda")
+} else {
+  load("m0.rda")
+}
+```
+
+This null model is also termed unconditional model because it has no grouping structure apart from individuals--the 'subj' bit in the model equation above. There is some variation in every natural data set. To make sure, it's not just variation caused by different participants, we can calculate the intra-class correlation coefficient (ICC).
+
+```{r}
+m0_icc <- ICC(m0, "subj")
+```
+
+The Null model's ICC amounts to `r round(m0_icc, 2)`, which suggests that approx. `r round(m0_icc, 1) * 100` percent of the variation in the data set can be attributed to (or explained by) the grouping structure. This is highly unfortunate, as it does not leave a lot of variation to be explained by independent factors like instruction, or arm. The most likely reason for this high ICC value is the small sample size combined with high inter-individual variation. Small sample sizes combined with large trial numbers are less of a problem when subjects respond, on average, close to the population mean, even with large spread due to fluctuating alertness, increasing fatigue etc., *.e.g.* in reaction time paradigms. But here, with large intra- *and* inter-individual variation, this might become a problem.
+
+***
+
+`r figr("m0_summary", type = TABREF)`. *Model summary.*
+
+```{r m0_summary, achor = TABREF}
+(m0_summary <- summary(m0, 
+                       priors = TRUE))
+```
+
+The intercept in `r figr("m0_summary")` amounts to roughly `r round(m0_summary$fixed["Intercept", "Estimate"])`ms. In this model specification, the intercept is identical to the data set average. The table also shows that the interindividual standard deviation (`sd(Intercept)`) is large compared to the unexplained variation (`sigma`). This led to the large ICC value above. By adding more and more independent factors to the model specification, we will later try to decrease $\sigma$, *i.e.* 'explain away' as much remaining variation as possible. 
+
+```{r m0_ppcheck, anchor=FIGREF}
+pp_check(m0, nsamples = 100)
+```
+
+`r figr("m0_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+The posterior predictive plot in `r figr("m0_ppcheck")` gives an impression on how the null model would generate data, given the parameters it estimated from the empirical data. As the thick line deviates from the modeled thin lines, especially on the left side and the peak of the distribution, it is apparent that the model can be improved. It must be noted though, that for a null model the posterior predictive check is surprisingly good--yet another sign that the high ICC value poses a problem.
+
+```{r}
+# conditional_effects(m0) 
+```
+
+
+# System Setup
+
+Data wrangling and analyses were carried out with the statistical package `R` [`r version$version.string`; @RCT2020]. Bayesian modeling was done with the package `brms` [@Buerkner2017;@Buerkner2018] which uses the probabilistic language Stan as back end [@Carpenter2017]. Plots were done with the packages `bayesplot` [@Gabry2020] and `ggplot2` [@Wickham2016].
 
 # References 
