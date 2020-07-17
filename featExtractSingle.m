@@ -10,7 +10,7 @@ load calibration
 
 %% Analysis
 
-selectedStroke = 120;
+selectedStroke = 730;
 
 % Legend:
 % xxyzzkj -> PARTICIPANT# (xx), ARM (y), SERIES (zz), 
