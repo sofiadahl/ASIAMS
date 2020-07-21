@@ -236,3 +236,24 @@ title({['Subject ' num2str(stroke.subj) ...
     ', arm = ' num2str(stroke.arm) ...
     ', condition = ' num2str(stroke.cond)]})
 
+%%  Plot figure of single stroke for paper
+timeOffset = stroke.timeAxis(1);
+tAudio = (0:length(stroke.audio)-1)/stroke.fs*1e3;
+rectifiedAudio = abs(stroke.audio);
+figure
+plot(tAudio,rectifiedAudio)
+hold on
+plot(stroke.timeAxis, stroke.env, 'LineWidth',1)
+plot(stroke.onsetTime, rectifiedAudio(stroke.onsetIdx), 'ko', 'MarkerSize', 12)
+%plot(stroke.offsetTime, rectifiedAudio(stroke.offsetIdx), 'ko', 'MarkerSize', 12)
+xline(stroke.offsetTime, '-', 'LineWidth',1)
+plot(stroke.maxPeakTime, stroke.env(stroke.maxPeakIdx), 'kx', 'MarkerSize', 12)
+xline(stroke.TC, '--', 'LineWidth',1)
+xlim([stroke.timeAxis(1) 1000])
+
+a = get(gca,'XTickLabel');
+set(gca,'XTickLabel',a,'fontsize',18)
+
+legend('rectified waveform','amplitude envelope', 'onset', 'offset', 'max peak', ...
+    'temporal centroid')
+xlabel('time [ms]')
