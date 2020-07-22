@@ -137,6 +137,8 @@ The increase in variance for the conditions N < C does not come as a surprise as
 
 Looking at the above investigated descriptors and @Danielsen2015, it seems reasonable to limit the modeling attempts to `totDur`, `totSPL`, `totSC`, and `TC`.
 
+But Sofia wrote on 2020-07-09: "Francesco and I have discussed a bit related to descriptors and we want to concentrate on the “transient” period (although the name probably will change). Spectral Centroid (transSC) should be one, and I suggest transFlat for the other. Francesco, does that sound reasonable?"
+
 # Model Considerations
 
 There are several points that need to be considered before making a decision regarding the type of modeling to be done in this study, (1) the sample size places restrictions on the external validity; (2) data from small samples can be better modeled when regularization is in place to 'tame' the estimates; (3) the hierarchical structure of the data (subjects played several trials with either their dominant or non-dominat arm under two conditions) suggests a multilevel analysis of the data which would, in addition to the Bayesian regularization via priors also results in shrinkage of the estimates; (4) given the small distribution differences between the two experimental conditions in the varying variance between conditions
@@ -173,7 +175,7 @@ Will start with a simple univariate model, add predictors and interactions, then
 
 # Modeling
 
-The hypothesis is that 
+Sofia, on 2020-07-07: "The main hypothesis is that playing instruction (N/C) will affect the stroke in a way that is perceivable".
 
 ## Simple Univariate Models
 
@@ -235,6 +237,119 @@ The posterior predictive plot in `r figr("m0_ppcheck")` gives an impression on h
 # conditional_effects(m0) 
 ```
 
+## Condition Model
+
+In this model, the intercept is complemented with second 'main' or population effect, the instruction condition `cond`:
+
+```{r}
+(m1_form <-bf(totDur ~ 1 + cond + (1 | subj)))
+```
+
+I could have also specified the model without the explicit '1 + ', as the intercept is implicitly included in the model unless I explicitly exclude it. From now on I will always save some extra typing by refraining from explicitly indluding the intercept in models.
+
+So now the model not only contains the individuals as grouping structure to 'explain away' variation, but also the manipulations.
+
+The prior distributions in Bayesian models reflect the knowledge about the estimated parameters. The package `brms` automatically places weakly informative priors on parameters as soft contraints. But with more complex models involving varying parameter estimates, the statistical back end which does the heavy lifting, needs stronger priors particularly on these parameters, otherwise models don't converge:
+
+```{r}
+(m1_prior <- set_prior("normal(0, 10)", class = "sd"))
+```
+
+```{r}
+if (MODEL) {
+  m1 <- brm(m1_form,
+            family = skew_normal(),
+            data = drum_beats)
+  m1 <- add_criterion(m1, 
+                      "loo",
+                      reloo = TRUE)
+  save(m1, 
+       file = "m1.rda")
+} else {
+  load("m1.rda")
+}
+```
+
+***
+
+`r figr("m1_summary", type = TABREF)`. *Model summary.*
+
+```{r m1_summary, achor = TABREF}
+(m1_summary <- summary(m1, 
+                       priors = TRUE))
+```
+
+The intercept in `r figr("m1_summary")` amounts to roughly `r round(m1_summary$fixed["Intercept", "Estimate"])`ms. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m1_summary$fixed["condN", "Estimate"])`ms). The table also shows that the interindividual standard deviation (`sd(Intercept)` $\approx$ `r round(m1_summary$random$subj["sd(Intercept)", "Estimate"])`ms is still large compared to the unexplained variation (`sigma` $\approx$ `r round(m1_summary$spec_pars["sigma", "Estimate"])`ms). 
+
+```{r m1_ppcheck, anchor=FIGREF}
+pp_check(m1, nsamples = 100)
+```
+
+`r figr("m1_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+The posterior predictive plot in `r figr("m1_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
+
+```{r}
+conditional_effects(m1)
+```
+
+## ConditionVI Model
+
+The last model included the instruction condition, more realistically reflecting the true structure of the data set. But it did not acknowledge that each subject executed several strokes in each of these conditions. This model includes a term with a varying intercept (VI) for condition to reflect just that, which will also assist in more realistically estimate the population effect of `cond`:
+
+```{r}
+(m2_form <-bf(totDur ~ cond + 
+                (1 | subj) + 
+                (1 | cond)))
+```
+
+```{r}
+(m2_prior <- set_prior("normal(0, 5)", class = "sd"))
+```
+
+```{r}
+if (MODEL) {
+  m2 <- brm(m2_form,
+            prior = m2_prior,
+            family = skew_normal(),
+            data = drum_beats,
+            control = list(adapt_delta = 0.95))
+  m2 <- add_criterion(m2, 
+                      "loo",
+                      reloo = TRUE)
+  save(m2, 
+       file = "m2.rda")
+} else {
+  load("m2.rda")
+}
+```
+
+***
+
+`r figr("m2_summary", type = TABREF)`. *Model summary.*
+
+```{r m2_summary, achor = TABREF}
+(m2_summary <- summary(m2, 
+                       priors = TRUE))
+```
+
+The intercept in `r figr("m2_summary")` amounts to roughly `r round(m2_summary$fixed["Intercept", "Estimate"])`ms. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m2_summary$fixed["condN", "Estimate"])`ms). The table also shows that the interindividual standard deviation (`sd(Intercept)` $\approx$ `r round(m2_summary$random$subj["sd(Intercept)", "Estimate"])`ms is still large compared to the unexplained variation (`sigma` $\approx$ `r round(m2_summary$spec_pars["sigma", "Estimate"])`ms). 
+
+```{r m2_ppcheck, anchor=FIGREF}
+pp_check(m2, nsamples = 100)
+```
+
+`r figr("m2_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+The posterior predictive plot in `r figr("m2_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
+
+```{r}
+conditional_effects(m2)
+```
 
 # System Setup
 
