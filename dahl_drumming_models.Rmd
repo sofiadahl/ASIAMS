@@ -383,6 +383,177 @@ The posterior predictive plot in `r figr("m2_ppcheck")` gives an impression on h
 conditional_effects(m2)
 ```
 
+## Modeling Condition-specific Variation
+
+As is apparent from `r figr("DescriptorDensities")`, the controlled condition yielded broader density distributions in most descriptors. Hence, we model this condition-dependent variation in the next model:
+
+```{r}
+(m3_form <-bf(transSC ~ cond + 
+                (1 | subj) + 
+                (1 | cond),
+              sigma ~ cond))
+```
+
+
+```{r}
+(m3_prior <- m2_prior)
+```
+
+```{r}
+if (MODEL) {
+  m3 <- brm(m3_form,
+            prior = m3_prior,
+            family = skew_normal(),
+            data = drum_beats,
+            control = list(adapt_delta = 0.95))
+  m3 <- add_criterion(m3, 
+                      "loo",
+                      reloo = TRUE)
+  save(m3, 
+       file = "m3.rda")
+} else {
+  load("m3.rda")
+}
+```
+
+***
+
+`r figr("m3_summary", type = TABREF)`. *Model summary.*
+
+```{r m3_summary, achor = TABREF}
+(m3_summary <- summary(m3, 
+                       priors = TRUE))
+```
+
+In the Links section of the summary (`r figr("m3_summary")`) we note that sigma is no longer modeled on the identity scale but on the $\log_{2}$ scale. In the Population-Level Effects section of `r figr("m3_summary")` are now two estimates for sigma (one for the controlled [`sigma_Intercept`] and one for the normal condition [`sigma_condN`]), while there is no entry for sigma in the Family Specific section. All this due to our explicit modeling of sigma conditional on instruction condition.
+
+```{r m3_ppcheck, anchor=FIGREF}
+pp_check(m3, nsamples = 100)
+```
+
+`r figr("m3_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+```{r}
+conditional_effects(m3)
+```
+
+## Modeling Condition-specific Skewness
+
+At least some descriptors in `r figr("DescriptorDensities")` the skewness of the distribution seems to change between conditions. Hence, we model this condition-dependent skewness in the next model:
+
+```{r}
+(m4_form <-bf(transSC ~ cond + 
+                (1 | subj) + 
+                (1 | cond),
+              sigma ~ cond,
+              alpha ~ cond))
+```
+
+
+```{r}
+(m4_prior <- m3_prior)
+```
+
+```{r}
+if (MODEL) {
+  m4 <- brm(m4_form,
+            prior = m4_prior,
+            family = skew_normal(),
+            data = drum_beats,
+            control = list(adapt_delta = 0.95))
+  m4 <- add_criterion(m4, 
+                      "loo",
+                      reloo = TRUE)
+  save(m4, 
+       file = "m4.rda")
+} else {
+  load("m4.rda")
+}
+```
+
+***
+
+`r figr("m4_summary", type = TABREF)`. *Model summary.*
+
+```{r m4_summary, achor = TABREF}
+(m4_summary <- summary(m4, 
+                       priors = TRUE))
+```
+
+In the Population-Level Effects section of `r figr("m4_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
+
+```{r m4_ppcheck, anchor=FIGREF}
+pp_check(m4, nsamples = 100)
+```
+
+`r figr("m4_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+```{r}
+conditional_effects(m4)
+```
+
+## Condition + Arm Model
+
+
+```{r}
+(m5_form <-bf(transSC ~ cond + arm +
+                (1 | subj) + 
+                (1 | cond) + 
+                (1 | arm),
+              sigma ~ cond,
+              alpha ~ cond))
+```
+
+
+```{r}
+(m5_prior <- c(set_prior("normal(0, 1)", class = "sd"),
+               set_prior("normal(0, 1)", dpar = "sigma")))
+```
+
+```{r}
+if (MODEL) {
+  m5 <- brm(m5_form,
+            prior = m5_prior,
+            family = skew_normal(),
+            data = drum_beats,
+            control = list(adapt_delta = 0.95))
+  m5 <- add_criterion(m5, 
+                      "loo",
+                      reloo = TRUE)
+  save(m5, 
+       file = "m5.rda")
+} else {
+  load("m5.rda")
+}
+```
+
+***
+
+`r figr("m5_summary", type = TABREF)`. *Model summary.*
+
+```{r m5_summary, achor = TABREF}
+(m5_summary <- summary(m5, 
+                       priors = TRUE))
+```
+
+In the Population-Level Effects section of `r figr("m5_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
+
+```{r m5_ppcheck, anchor=FIGREF}
+pp_check(m5, nsamples = 100)
+```
+
+`r figr("m5_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+```{r}
+conditional_effects(m5)
+```
+
 # System Setup
 
 Data wrangling and analyses were carried out with the statistical package `R` [`r version$version.string`; @RCT2020]. Bayesian modeling was done with the package `brms` [@Buerkner2017;@Buerkner2018] which uses the probabilistic language Stan as back end [@Carpenter2017]. Plots were done with the packages `bayesplot` [@Gabry2020] and `ggplot2` [@Wickham2016].
