@@ -36,29 +36,29 @@ load calibration
 % double TC : temporal centroid [ms]
 % double totDur : total duration (offset time - onset time) [ms]
 % double attDur : attack duration (max peak time - onset time) [ms]
-% double decDur : decay duration (offset time - max peak time) [ms]
-% double decDur : transient duration (temporal centroid - max peak time) [ms]
+% double decDur : late decay duration (offset time - max peak time) [ms]
+% double transDur : early decay duration (temporal centroid - max peak time) [ms]
 % double LAT : log attack time [log(s)]
 % double totSPL : total SPL [dB SPL]
 % double attSPL : SPL of attack phase [dB SPL]
-% double decSPL : SPL of decay phase [dB SPL]
-% double transSPL : SPL of transient phase [dB SPL]
+% double decSPL : SPL of late decay phase [dB SPL]
+% double transSPL : SPL of early decay phase [dB SPL]
 % double totSC : spectral centroid (total duration) [Hz]
 % double attSC : spectral centroid (attack phase) [Hz] 
-% double decSC : spectral centroid (decay phase) [Hz]
-% double transSC : spectral centroid (transient phase) [Hz]
+% double decSC : spectral centroid (late decay phase) [Hz]
+% double transSC : spectral centroid (early decay phase) [Hz]
 % double totFlat : amplitude flatness (total duration)
 % double attFlat : amplitude flatness (attack phase)
-% double decFlat : amplitude flatness (decay phase)
-% double transFlat : amplitude flatness (transient phase)
+% double decFlat : amplitude flatness (late decay phase)
+% double transFlat : amplitude flatness (early decay phase)
 % double totCrest : crest factor (total duration)
 % double attCrest : crest factor (attack phase)
-% double decCrest : crest factor (decay phase)
-% double transCrest : crest factor (transient phase)
+% double decCrest : crest factor (late decay phase)
+% double transCrest : crest factor (early decay phase)
 % double totSpecFlat : spectral flatness (total duration)
 % double attSpecFlat : spectral flatness (attack phase)
-% double decSpecFlat : spectral flatness (decay phase)
-% double transSpecFlat : spectral flatness (transient phase)
+% double decSpecFlat : spectral flatness (late decay phase)
+% double transSpecFlat : spectral flatness (early decay phase)
 % transient phase = temporal centroid - max peak time
 
 stroke = struct('filename', [], 'subj', [], 'arm', [], ...
@@ -137,7 +137,7 @@ for i = 1:size(filesDir,1)
     % Calculate durations
     stroke.totDur = stroke.offsetTime - stroke.onsetTime;
     stroke.attDur = stroke.maxPeakTime - stroke.onsetTime;
-    stroke.decDur = stroke.offsetTime - stroke.maxPeakTime;
+    stroke.decDur = stroke.offsetTime - stroke.TC;
     stroke.transDur = stroke.TC - stroke.maxPeakTime;
     stroke.LAT = log(stroke.attDur*1e-3);
     % Segment waveform (based on descriptors)
@@ -146,7 +146,7 @@ for i = 1:size(filesDir,1)
     audioMaxPeakIdx = round(stroke.maxPeakTime*1e-3*stroke.fs);
     audioTCIdx = round(stroke.TC*1e-3*stroke.fs);
     attackSegment = stroke.audio(audioOnsetIdx:audioMaxPeakIdx);
-    decaySegment = stroke.audio(audioMaxPeakIdx:audioOffsetIdx);
+    decaySegment = stroke.audio(audioTCIdx:audioOffsetIdx);
     totalSegment = stroke.audio(audioOnsetIdx:audioOffsetIdx);
     transSegment = stroke.audio(audioMaxPeakIdx:audioTCIdx);
     % Calculate SPLs
@@ -198,7 +198,7 @@ for i = 1:size(filesDir,1)
     stroke.attSC = mirgetdata(scAttack);
     stroke.decSC = mirgetdata(scDecay);
     stroke.totSC = mirgetdata(scTot);
-    stroke.transSC = mirgetdata(scTot);
+    stroke.transSC = mirgetdata(scTrans);
     % Calculate temporal flatness
     attFlat = mirflatness(mirenvelope(miraudio(unpad(attackSegment),stroke.fs),'Tau',1e-6));
     decFlat = mirflatness(mirenvelope(miraudio(decaySegment, stroke.fs),'Tau',1e-6));

@@ -137,11 +137,36 @@ The increase in variance for the conditions N < C does not come as a surprise as
 
 Looking at the above investigated descriptors and @Danielsen2015, it seems reasonable to limit the modeling attempts to `totDur`, `totSPL`, `totSC`, and `TC`.
 
+<<<<<<< HEAD
 But Sofia wrote on 2020-07-09: "Francesco and I have discussed a bit related to descriptors and we want to concentrate on the “transient” period (although the name probably will change). Spectral Centroid (transSC) should be one, and I suggest transFlat for the other. Francesco, does that sound reasonable?"
+=======
+## Francesco's comments
+
+Update: 
+
+* The lack of data points for `attFlat` is fixed by solving a bug in the feature extraction: now the downsampling ratio for the envelope extraction is reduced, and makes the *MIRToolbox* algorithm less sensitive to frames with an rms value of 0 (which returns an incorrect value of 0, since we have a geometric mean at the numerator). Now we have a larger spread which allows high values (\sim 1 = peaky envelope, \sim 0 = smooth/flat envelope).
+* The crest factor is now calculated for the separate phases.
+
+Regarding the attack phase: I agree with the remarks regarding duration. Given the fact that we are not comparing different instruments, I wouldn't have expected a large variation. This is not surprising if we consider that our system is changing only slightly (same rototom, same drumstick, same action, a bit different tuning across subjects): in fact, the perceived timbral differences are so small that we are in trouble guessing on the descriptors.
+
+The sampling frequency is even lower ($f_s = 44100$ Hz). Even if we had a higher sample rate which could reveal some discrepancies in the attack durations, we would have to prove that they are perceptually relevant.
+
+Therefore, I am happy to discard `attDur` and `LAT` (which is obviously a log-transformed duration, only there for the sake of consistency with the literature).
+
+I am a bit more in doubt when it comes to discarding all the attack descriptors. Even if what Michael says is true from a statistical point of view, we should still be able to discriminate timbre on short time windows due to the high temporal resolution of our hearing. Attack phase descriptors (with the same definition of attack that we are using, which is most likely not coincident with perceptual attack) are employed in @camara_effects_2020, and the Oslo group has a paper under construction which analyzes drum sounds in a similar manner (see *OsloPlots.png* in the OneDrive folder).
+
+I am worried that merely taking the overall descriptors into account would introduce a lot of unnecessary and perceptually catching information --- mostly the tonal part of the signal, i.e. the drum ringing in the last part of the decay. That's why Sofia and I are suggesting to look at what we could call "main energy" or "early decay" phase (i.e. from max peak to temporal centroid).
+
+Would it be feasible to set up 4 different models (i.e. one for each phase), at least in the univariate version?
+
+As for the descriptors to include: although `TC` is employed in @Danielsen2015, the PDFs are even more similar. I would go for `Dur` (except attack?), `SPL`, `SC`, and one between `Flat`, `SpecFlat` or `Crest`.
+
+My (informal and biased) listening tests tell me that, at least for some subjects, I hear a pattern going towards a harsher (controlled) vs smoother (normal) timbre exactly at the hit point, plus slightly less (controlled) or more pitch/amplitude fluctuation. Hopefully this could be catched by spectral centroid, specrtral/temporal flatness, or crest factor. This should be independent of SPL unless the subject misinterpreted the instructions, therefore SPL acts as a sort of control variable in our model.
+>>>>>>> ee85c644e2e9174cb164e81a3e7092b9f049ee82
 
 # Model Considerations
 
-There are several points that need to be considered before making a decision regarding the type of modeling to be done in this study, (1) the sample size places restrictions on the external validity; (2) data from small samples can be better modeled when regularization is in place to 'tame' the estimates; (3) the hierarchical structure of the data (subjects played several trials with either their dominant or non-dominat arm under two conditions) suggests a multilevel analysis of the data which would, in addition to the Bayesian regularization via priors also results in shrinkage of the estimates; (4) given the small distribution differences between the two experimental conditions in the varying variance between conditions
+There are several points that need to be considered before making a decision regarding the type of modeling to be done in this study, (1) the sample size places restrictions on the external validity; (2) data from small samples can be better modeled when regularization is in place to 'tame' the estimates; (3) the hierarchical structure of the data (subjects played several trials with either their dominant or non-dominant arm under two conditions) suggests a multilevel analysis of the data which would, in addition to the Bayesian regularization via priors also results in shrinkage of the estimates; (4) given the small distribution differences between the two experimental conditions in the varying variance between conditions
 
 Given the extremely small sample size, any attempt to fit the data using traditional statistics, a.k.a. null-hypothesis significance testing, would make us vulnerable to all kinds of criticism. I therefor suggest to use Bayesian statistics instead, as it allows us to estimate probability distributions of parameters rather than confidence intervals around point estimates, and thus embraces uncertainty in estimates. 
 
@@ -187,7 +212,9 @@ Let's start with `totDur`. Using an extended model description language [@Bates2
 (m0_form <-bf(totDur ~ 1 + (1 | subj)))
 ```
 
-which claims that `totDur` is explained by ('~') an intercept, denoted by '1', and an additional term '(1 | subj)'. The '1' in parentheses again stands for the intercept, but the pipe '|' assigns an intercept to each level of the factor 'subj'. In this particular case this means that the model will estimate an individual intercept for each unique drummer listed in the data set column `subj`. These individual, or varying, intercepts are then used in informing the estimation of the population intercept. 
+which claims that `totDur` is explained by ('~') an intercept, denoted by '1', and an additional term '(1 | subj)'. The '1' in parentheses again stands for the intercept, but the pipe '|' assigns an intercept to each level of the factor 'subj'. In this particular case this means that the model will estimate an individual intercept for each unique drummer listed in the data set column `subj`. These individual, or varying, intercepts are then used in informing the estimation of the population intercept.
+
+Note: set `MODEL` to `FALSE` at the top of the script if you didn't compile/build your model yet.
 
 ```{r}
 if (MODEL) {
