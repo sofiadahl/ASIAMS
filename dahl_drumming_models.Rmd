@@ -111,35 +111,36 @@ n_vars <- length(dep_vars)
 Several peculiarities are immediately apparent from the plots in `r figr("DescriptorDensities")`:
 
 * There are no substantial differences in the density distributions between normal (N) and controlled (C) strokes
-* `attDur`, `LAT`, and `attFlat` have very few unique data values (see rug ticks at bottom of plots)
-* Looking at the dominant arm alone (and excluding the vars `attDur`, `LAT`, and `attFlat` for the reason just mentioned), the densities have a trend toward a larger variance in the controlled condition (in other words: a less pointed distribution)
+* <strike>`attDur`, `LAT`, and `attFlat` have very few unique data values (see rug ticks at bottom of plots)</strike>
+* Looking at the dominant arm alone <strike>(and excluding the vars `attDur`, `LAT`, and `attFlat` for the reason just mentioned)</strike>, the densities have a trend toward a larger variance in the controlled condition (in other words: a less pointed distribution) with additional or larger humps in the tails, respectively
 
 The lack of any clear-cut differences in the raw data between conditions suggests that it will be hard to find any differences by modeling.
 
-The limited number of unique values in the attack-related measures (*e.g.* `attDur` only has `r length(unique(drum_beats$attDur))` unique values in a total of `r nrow(drum_beats)` observations across all subjects, conditions, and sides; that's only `r round(length(unique(drum_beats$attDur)) / nrow(drum_beats) * 100)` percent!) suggests that rounding errors propagated through the calculations. This is probably due to very similar, *i.e.* highly automated, and short attack times combined with the given sampling frequency, resulting in few data points, which in course of the calculations result in the observed phenomenon. But I'm just guessing here, as I do not know anything about these descriptors and how they are calculated or interpreted. Judging by the range of values of, *i.e.*, `attDur` (`r round(range(drum_beats$attDur), 2)`ms, across both sides and conditions) and a sampling frequency of 48 kHz, this leaves us at 48 * (`r round(range(drum_beats$attDur), 2)[2]` - `r round(range(drum_beats$attDur), 2)[1]`) = `r round(48 * (range(drum_beats$attDur)[2] - range(drum_beats$attDur)[1]))` points to choose beginning and end of the attack. Given the supposed highly automatized motor program used to initiate the stroke, along with the laws of physics at play here (no pun intended), it is not very surprising to see very few unique values. My limited knowledge---or rather, my ignorance of anything sound-related---aside, from a statistical standpoint these measures do not seem suited to describe any differences between the experimental conditions investigated here. 
+<strike>The limited number of unique values in the attack-related measures (*e.g.* `attDur` only has `r length(unique(drum_beats$attDur))` unique values in a total of `r nrow(drum_beats)` observations across all subjects, conditions, and sides; that's only `r round(length(unique(drum_beats$attDur)) / nrow(drum_beats) * 100)` percent!) suggests that rounding errors propagated through the calculations. This is probably due to very similar, *i.e.* highly automated, and short attack times combined with the given sampling frequency, resulting in few data points, which in course of the calculations result in the observed phenomenon. But I'm just guessing here, as I do not know anything about these descriptors and how they are calculated or interpreted. Judging by the range of values of, *i.e.*, `attDur` (`r round(range(drum_beats$attDur), 2)`ms, across both sides and conditions) and a sampling frequency of 48 kHz, this leaves us at 48 * (`r round(range(drum_beats$attDur), 2)[2]` - `r round(range(drum_beats$attDur), 2)[1]`) = `r round(48 * (range(drum_beats$attDur)[2] - range(drum_beats$attDur)[1]))` points to choose beginning and end of the attack. Given the supposed highly automatized motor program used to initiate the stroke, along with the laws of physics at play here (no pun intended), it is not very surprising to see very few unique values. My limited knowledge---or rather, my ignorance of anything sound-related---aside, from a statistical standpoint these measures do not seem suited to describe any differences between the experimental conditions investigated here.</strike> 
 
-Given the very few data points in the attack phase, any descriptor derived from such a short period of time (*.e.g.*. `attSPL`) cannot be judged as being stable in the sense of being reproducible. Hence I suggest to drop all attack-derived descriptors.
+<strike>Given the very few data points in the attack phase, any descriptor derived from such a short period of time (*.e.g.*. `attSPL`) cannot be judged as being stable in the sense of being reproducible. Hence I suggest to drop all attack-derived descriptors.</strike>
 
 ```{r}
-drum_beats %>%
-  mutate(attDur = NULL,
-         LAT = NULL,
-         attSPL = NULL,
-         attSC = NULL,
-         attFlat = NULL,
-         attSpecFlat = NULL) ->
-  drum_beats
+# drum_beats %>%
+#   mutate(attDur = NULL,
+#          LAT = NULL,
+#          attSPL = NULL,
+#          attSC = NULL,
+#          attFlat = NULL,
+#          attSpecFlat = NULL) ->
+#   drum_beats
 ```
 
 The increase in variance for the conditions N < C does not come as a surprise as I assume normal also means highly trained and thus automatized, whereas controlled involves less automatization and more 'individualness' both within and between subjects. 
 
 ## Conclusions
 
-Looking at the above investigated descriptors and @Danielsen2015, it seems reasonable to limit the modeling attempts to `totDur`, `totSPL`, `totSC`, and `TC`.
+Looking at the above investigated descriptors and @Danielsen2015, it seems reasonable to limit the modeling attempts to `totDur`, `totSPL`, `totSC`, and `TC`. 
 
-<<<<<<< HEAD
-But Sofia wrote on 2020-07-09: "Francesco and I have discussed a bit related to descriptors and we want to concentrate on the “transient” period (although the name probably will change). Spectral Centroid (transSC) should be one, and I suggest transFlat for the other. Francesco, does that sound reasonable?"
-=======
+But Sofia wrote on 2020-07-09: "Francesco and I have discussed a bit related to descriptors and we want to concentrate on the “transient” period (although the name probably will change). Spectral Centroid (transSC) should be one, and I suggest transFlat for the other. Francesco, does that sound reasonable?"  
+
+On 2020-07-22 both Sofia and Francesco agreed upon `transSC`, `transFlat`, and `transCrest` as the probably most important response variables to look at.
+
 ## Francesco's comments
 
 Update: 
@@ -161,7 +162,7 @@ Would it be feasible to set up 4 different models (i.e. one for each phase), at 
 
 As for the descriptors to include: although `TC` is employed in @Danielsen2015, the PDFs are even more similar. I would go for `Dur` (except attack?), `SPL`, `SC`, and one between `Flat`, `SpecFlat` or `Crest`.
 
-My (informal and biased) listening tests tell me that, at least for some subjects, I hear a pattern going towards a harsher (controlled) vs smoother (normal) timbre exactly at the hit point, plus slightly less (controlled) or more pitch/amplitude fluctuation. Hopefully this could be catched by spectral centroid, specrtral/temporal flatness, or crest factor. This should be independent of SPL unless the subject misinterpreted the instructions, therefore SPL acts as a sort of control variable in our model.
+My (informal and biased) listening tests tell me that, at least for some subjects, I hear a pattern going towards a harsher (controlled) vs smoother (normal) timbre exactly at the hit point, plus slightly less (controlled) or more pitch/amplitude fluctuation. Hopefully this could be catched by spectral centroid, specrtral/temporal flatness, or crest factor. This should be independent of SPL unless the subject misinterpreted the instructions, therefore SPL acts as a sort of control variable in our model.  
 >>>>>>> ee85c644e2e9174cb164e81a3e7092b9f049ee82
 
 # Model Considerations
@@ -204,17 +205,17 @@ Sofia, on 2020-07-07: "The main hypothesis is that playing instruction (N/C) wil
 
 ## Simple Univariate Models
 
-Looking again at the variables *I* have decided to use as response variables in the regression models---implying that this is by no means set in stone---, it seems like a skewed normal link function would be appropriate to model them.
+Looking again at the variables agreed upon <strike>*I* have decided</strike> to use as response variables in the regression models<strike>---implying that this is by no means set in stone---</strike>, it seems like a skewed normal link function would be appropriate to model them.
 
-Let's start with `totDur`. Using an extended model description language [@Bates2010;@Buerkner2018], going back to Wilkinson and Rogers's [-@Wilkinson1973] modeling language, we write:
+Let's start with `transSC`<strike>`totDur`</strike>. Using an extended model description language [@Bates2010;@Buerkner2018], going back to Wilkinson and Rogers's [-@Wilkinson1973] modeling language, we write:
 
 ```{r}
-(m0_form <-bf(totDur ~ 1 + (1 | subj)))
+(m0_form <-bf(transSC ~ 1 + (1 | subj)))
 ```
 
-which claims that `totDur` is explained by ('~') an intercept, denoted by '1', and an additional term '(1 | subj)'. The '1' in parentheses again stands for the intercept, but the pipe '|' assigns an intercept to each level of the factor 'subj'. In this particular case this means that the model will estimate an individual intercept for each unique drummer listed in the data set column `subj`. These individual, or varying, intercepts are then used in informing the estimation of the population intercept.
+which claims that `transSC` is explained by ('~') an intercept, denoted by '1', and an additional term '(1 | subj)'. The '1' in parentheses again stands for the intercept, but the pipe '|' assigns an intercept to each level of the factor 'subj'. In this particular case this means that the model will estimate an individual intercept for each unique drummer listed in the data set column `subj`. These individual, or varying, intercepts are then used in informing the estimation of the population intercept.
 
-Note: set `MODEL` to `FALSE` at the top of the script if you didn't compile/build your model yet.
+Note: set `MODEL` to `TRUE` at the top of the script if you didn't compile/build your model yet.
 
 ```{r}
 if (MODEL) {
@@ -237,7 +238,7 @@ This null model is also termed unconditional model because it has no grouping st
 m0_icc <- ICC(m0, "subj")
 ```
 
-The Null model's ICC amounts to `r round(m0_icc, 2)`, which suggests that approx. `r round(m0_icc, 1) * 100` percent of the variation in the data set can be attributed to (or explained by) the grouping structure. This is highly unfortunate, as it does not leave a lot of variation to be explained by independent factors like instruction, or arm. The most likely reason for this high ICC value is the small sample size combined with high inter-individual variation. Small sample sizes combined with large trial numbers are less of a problem when subjects respond, on average, close to the population mean, even with large spread due to fluctuating alertness, increasing fatigue etc., *.e.g.* in reaction time paradigms. But here, with large intra- *and* inter-individual variation, this might become a problem.
+The Null model's ICC amounts to `r round(m0_icc, 2)`, which suggests that approx. `r round(m0_icc, 2) * 100` percent of the variation in the data set can be attributed to (or explained by) the grouping structure. This is highly unfortunate, as it does not leave a lot of variation to be explained by independent factors like instruction, or arm. The most likely reason for this high ICC value is the small sample size combined with high inter-individual variation. Small sample sizes combined with large trial numbers are less of a problem when subjects respond, on average, close to the population mean, even with large spread due to fluctuating alertness, increasing fatigue etc., *.e.g.* in reaction time paradigms. But here, with large intra- *and* inter-individual variation, this might become a problem.
 
 ***
 
@@ -248,7 +249,7 @@ The Null model's ICC amounts to `r round(m0_icc, 2)`, which suggests that approx
                        priors = TRUE))
 ```
 
-The intercept in `r figr("m0_summary")` amounts to roughly `r round(m0_summary$fixed["Intercept", "Estimate"])`ms. In this model specification, the intercept is identical to the data set average. The table also shows that the interindividual standard deviation (`sd(Intercept)`) is large compared to the unexplained variation (`sigma`). This led to the large ICC value above. By adding more and more independent factors to the model specification, we will later try to decrease $\sigma$, *i.e.* 'explain away' as much remaining variation as possible. 
+The intercept in `r figr("m0_summary")` amounts to roughly `r round(m0_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the data set average. The table also shows that the inter-individual standard deviation (`sd(Intercept)`) is large compared to the unexplained variation (`sigma`). This led to the large ICC value above. By adding more and more independent factors to the model specification, we will later try to decrease $\sigma$, *i.e.* 'explain away' as much remaining variation as possible. 
 
 ```{r m0_ppcheck, anchor=FIGREF}
 pp_check(m0, nsamples = 100)
@@ -258,7 +259,7 @@ pp_check(m0, nsamples = 100)
 
 ***
 
-The posterior predictive plot in `r figr("m0_ppcheck")` gives an impression on how the null model would generate data, given the parameters it estimated from the empirical data. As the thick line deviates from the modeled thin lines, especially on the left side and the peak of the distribution, it is apparent that the model can be improved. It must be noted though, that for a null model the posterior predictive check is surprisingly good--yet another sign that the high ICC value poses a problem.
+The posterior predictive plot in `r figr("m0_ppcheck")` gives an impression on how the null model would generate data, given the parameters it estimated from the empirical data. As the thick line deviates from the modeled thin lines, especially on the left and the right side of the peak of the distribution, it is apparent that the model can be improved.
 
 ```{r}
 # conditional_effects(m0) 
@@ -269,18 +270,20 @@ The posterior predictive plot in `r figr("m0_ppcheck")` gives an impression on h
 In this model, the intercept is complemented with second 'main' or population effect, the instruction condition `cond`:
 
 ```{r}
-(m1_form <-bf(totDur ~ 1 + cond + (1 | subj)))
+(m1_form <-bf(transSC ~ 1 + cond + (1 | subj)))
 ```
 
 I could have also specified the model without the explicit '1 + ', as the intercept is implicitly included in the model unless I explicitly exclude it. From now on I will always save some extra typing by refraining from explicitly indluding the intercept in models.
 
 So now the model not only contains the individuals as grouping structure to 'explain away' variation, but also the manipulations.
 
-The prior distributions in Bayesian models reflect the knowledge about the estimated parameters. The package `brms` automatically places weakly informative priors on parameters as soft contraints. But with more complex models involving varying parameter estimates, the statistical back end which does the heavy lifting, needs stronger priors particularly on these parameters, otherwise models don't converge:
+The prior distributions in Bayesian models reflect the knowledge about the estimated parameters. The package `brms` automatically places weakly informative priors on parameters as soft contraints. But with more complex models involving varying parameter estimates, the statistical back end which does the heavy lifting, needs stronger priors particularly on these parameters, otherwise models don't converge. The parameters most vulnerable to outliers in the data are the varying effects parameters, or random effects in traditional statistics. Therefor we place a stronger prior probability distribution over the estimate of the SD of individual intercepts:
 
 ```{r}
 (m1_prior <- set_prior("normal(0, 10)", class = "sd"))
 ```
+
+and leave the rest of the priors as suggested by the package `brms` (see `r figr("m1_summary", type = TABREF)` for their priors).
 
 ```{r}
 if (MODEL) {
@@ -299,14 +302,14 @@ if (MODEL) {
 
 ***
 
-`r figr("m1_summary", type = TABREF)`. *Model summary.*
+`r figr("m1_summary")`. *Model summary.*
 
 ```{r m1_summary, achor = TABREF}
 (m1_summary <- summary(m1, 
                        priors = TRUE))
 ```
 
-The intercept in `r figr("m1_summary")` amounts to roughly `r round(m1_summary$fixed["Intercept", "Estimate"])`ms. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m1_summary$fixed["condN", "Estimate"])`ms). The table also shows that the interindividual standard deviation (`sd(Intercept)` $\approx$ `r round(m1_summary$random$subj["sd(Intercept)", "Estimate"])`ms is still large compared to the unexplained variation (`sigma` $\approx$ `r round(m1_summary$spec_pars["sigma", "Estimate"])`ms). 
+The intercept in `r figr("m1_summary")` amounts to roughly `r round(m1_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m1_summary$fixed["condN", "Estimate"])`). The table also shows that the interindividual standard deviation (`sd(Intercept)` $\approx$ `r round(m1_summary$random$subj["sd(Intercept)", "Estimate"])` is still large compared to the unexplained variation (`sigma` $\approx$ `r round(m1_summary$spec_pars["sigma", "Estimate"])`). 
 
 ```{r m1_ppcheck, anchor=FIGREF}
 pp_check(m1, nsamples = 100)
@@ -327,10 +330,12 @@ conditional_effects(m1)
 The last model included the instruction condition, more realistically reflecting the true structure of the data set. But it did not acknowledge that each subject executed several strokes in each of these conditions. This model includes a term with a varying intercept (VI) for condition to reflect just that, which will also assist in more realistically estimate the population effect of `cond`:
 
 ```{r}
-(m2_form <-bf(totDur ~ cond + 
+(m2_form <-bf(transSC ~ cond + 
                 (1 | subj) + 
                 (1 | cond)))
 ```
+
+Including more varying parameters in the model requires the prior on them to be even stronger:
 
 ```{r}
 (m2_prior <- set_prior("normal(0, 5)", class = "sd"))
@@ -362,7 +367,7 @@ if (MODEL) {
                        priors = TRUE))
 ```
 
-The intercept in `r figr("m2_summary")` amounts to roughly `r round(m2_summary$fixed["Intercept", "Estimate"])`ms. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m2_summary$fixed["condN", "Estimate"])`ms). The table also shows that the interindividual standard deviation (`sd(Intercept)` $\approx$ `r round(m2_summary$random$subj["sd(Intercept)", "Estimate"])`ms is still large compared to the unexplained variation (`sigma` $\approx$ `r round(m2_summary$spec_pars["sigma", "Estimate"])`ms). 
+The intercept in `r figr("m2_summary")` amounts to roughly `r round(m2_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m2_summary$fixed["condN", "Estimate"])`). The table also shows that the inter-individual standard deviation (`sd(Intercept)` $\approx$ `r round(m2_summary$random$subj["sd(Intercept)", "Estimate"])` is not large anymore compared to the unexplained variation (`sigma` $\approx$ `r round(m2_summary$spec_pars["sigma", "Estimate"])`). 
 
 ```{r m2_ppcheck, anchor=FIGREF}
 pp_check(m2, nsamples = 100)
