@@ -265,12 +265,13 @@ The posterior predictive plot in `r figr("m0_ppcheck")` gives an impression on h
 # conditional_effects(m0) 
 ```
 
-## Condition Model
+## Conditions Model
 
 In this model, the intercept is complemented with second 'main' or population effect, the instruction condition `cond`:
 
 ```{r}
-(m1_form <-bf(transSC ~ 1 + cond + (1 | subj)))
+(m1_form <-bf(transSC ~ 1 + cond + 
+                (1 | subj)))
 ```
 
 I could have also specified the model without the explicit '1 + ', as the intercept is implicitly included in the model unless I explicitly exclude it. From now on I will always save some extra typing by refraining from explicitly indluding the intercept in models.
@@ -325,7 +326,7 @@ The posterior predictive plot in `r figr("m1_ppcheck")` gives an impression on h
 conditional_effects(m1)
 ```
 
-## ConditionVI Model
+## ConditionsVI Model
 
 The last model included the instruction condition, more realistically reflecting the true structure of the data set. But it did not acknowledge that each subject executed several strokes in each of these conditions. This model includes a term with a varying intercept (VI) for condition to reflect just that, which will also assist in more realistically estimate the population effect of `cond`:
 
@@ -383,20 +384,20 @@ The posterior predictive plot in `r figr("m2_ppcheck")` gives an impression on h
 conditional_effects(m2)
 ```
 
-## Modeling Condition-specific Variation
 
-As is apparent from `r figr("DescriptorDensities")`, the controlled condition yielded broader density distributions in most descriptors. Hence, we model this condition-dependent variation in the next model:
+## Condition + Arm Model
+
 
 ```{r}
-(m3_form <-bf(transSC ~ cond + 
+(m3_form <-bf(transSC ~ cond + arm +
                 (1 | subj) + 
-                (1 | cond),
-              sigma ~ cond))
+                (1 | cond) + 
+                (1 | arm)))
 ```
 
 
 ```{r}
-(m3_prior <- m2_prior)
+(m3_prior <- c(set_prior("normal(0, 1)", class = "sd")))
 ```
 
 ```{r}
@@ -425,7 +426,7 @@ if (MODEL) {
                        priors = TRUE))
 ```
 
-In the Links section of the summary (`r figr("m3_summary")`) we note that sigma is no longer modeled on the identity scale but on the $\log_{2}$ scale. In the Population-Level Effects section of `r figr("m3_summary")` are now two estimates for sigma (one for the controlled [`sigma_Intercept`] and one for the normal condition [`sigma_condN`]), while there is no entry for sigma in the Family Specific section. All this due to our explicit modeling of sigma conditional on instruction condition.
+In the Population-Level Effects section of `r figr("m3_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
 
 ```{r m3_ppcheck, anchor=FIGREF}
 pp_check(m3, nsamples = 100)
@@ -439,16 +440,14 @@ pp_check(m3, nsamples = 100)
 conditional_effects(m3)
 ```
 
-## Modeling Condition-specific Skewness
+## Condition x Arm Model
 
-At least some descriptors in `r figr("DescriptorDensities")` the skewness of the distribution seems to change between conditions. Hence, we model this condition-dependent skewness in the next model:
 
 ```{r}
-(m4_form <-bf(transSC ~ cond + 
+(m4_form <-bf(transSC ~ cond * arm +
                 (1 | subj) + 
-                (1 | cond),
-              sigma ~ cond,
-              alpha ~ cond))
+                (1 | cond) + 
+                (1 | arm)))
 ```
 
 
@@ -492,26 +491,30 @@ pp_check(m4, nsamples = 100)
 
 ***
 
-```{r}
-conditional_effects(m4)
+```{r, fig.width=12}
+wrap_plots(plot(conditional_effects(m4),
+             plot = FALSE)) +
+  plot_annotation(tag_levels = "A")
 ```
 
-## Condition + Arm Model
+## Modeling Condition-specific Variation
 
+As is apparent from `r figr("DescriptorDensities")`, the controlled condition yielded broader density distributions in most descriptors. Hence, we model condition-dependent variation in the next model:
 
 ```{r}
-(m5_form <-bf(transSC ~ cond + arm +
+(m5_form <-bf(transSC ~ cond * arm + 
                 (1 | subj) + 
-                (1 | cond) + 
+                (1 | cond) +
                 (1 | arm),
-              sigma ~ cond,
-              alpha ~ cond))
+              sigma ~ cond))
 ```
 
+This model has now two outcomes, not just one, as the models before. Spread is estimated as `sigma`, and it varies conditional on instruction condition.
+
+Here's the non-standard (additional) prior:
 
 ```{r}
-(m5_prior <- c(set_prior("normal(0, 1)", class = "sd"),
-               set_prior("normal(0, 1)", dpar = "sigma")))
+(m5_prior <- m4_prior)
 ```
 
 ```{r}
@@ -540,7 +543,7 @@ if (MODEL) {
                        priors = TRUE))
 ```
 
-In the Population-Level Effects section of `r figr("m5_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
+In the Links section of the summary (`r figr("m5_summary")`) we note that sigma is no longer modeled on the identity scale but on the $\log_{2}$ scale. In the Population-Level Effects section of `r figr("m5_summary")` we now find not only the estimates for the Intercept and `condN` but also two estimates for sigma (one for the controlled [`sigma_Intercept`] and one for the normal condition [`sigma_condN`]). Because of this, there is no entry for sigma in the Family Specific section anymore. All this due to our explicit modeling of sigma conditional on instruction condition.
 
 ```{r m5_ppcheck, anchor=FIGREF}
 pp_check(m5, nsamples = 100)
@@ -550,9 +553,213 @@ pp_check(m5, nsamples = 100)
 
 ***
 
-```{r}
-conditional_effects(m5)
+```{r m5_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
+p <- plot(conditional_effects(m5,
+                              dpar = "mu"),
+          plot = FALSE)
+p1 <- wrap_plots(p[[1]]+
+                   p[[2]] +
+                   p[[3]])
+p <- plot(conditional_effects(m5,
+                              dpar = "sigma"),
+          plot = FALSE)
+p2 <- wrap_plots(p[[1]]+
+                   p[[2]] +
+                   p[[3]])
+wrap_plots(p1, p2,
+           ncol = 1) +
+  plot_annotation(tag_levels = "A")
 ```
+
+`r figr("m5_condPlot", type = FIGREF)`. *Conditional plot.*
+
+***
+
+In `r figr("m5_condPlot")` we see a difference between the mean ('mu') estimated value for `transSC` depending on instruction condition (A), but no difference between dominant and non-dominant arm (B). Consequently, there is no interaction in (C).
+
+The spread (`sigma`) of the estimated distributions also differs between conditions (D), but again not between arms (E). The latter is not surprising because we modeled sigma to vary conditional on condition, not arm.
+
+## Modeling Arm-specific Skewness
+
+At least in some descriptors in `r figr("DescriptorDensities")` the skewness of the distribution seems to change depending on the arm. The skew normal distribution is a generalization of the Gaussian distribution, allowing for the additional shape-parameter skewness (asymmetry) to vary. Hence, we model this side-dependent skewness in the next model:
+
+```{r}
+(m6_form <-bf(transSC ~ cond * arm + 
+                (1 | subj) + 
+                (1 | cond) +
+                (1 | arm),
+              sigma ~ cond,
+              alpha ~ arm))
+```
+
+
+```{r}
+(m6_prior <- m5_prior)
+```
+
+```{r}
+if (MODEL) {
+  m6 <- brm(m6_form,
+            prior = m6_prior,
+            family = skew_normal(),
+            data = drum_beats,
+            control = list(adapt_delta = 0.95))
+  m6 <- add_criterion(m6, 
+                      "loo",
+                      reloo = TRUE)
+  save(m6, 
+       file = "m6.rda")
+} else {
+  load("m6.rda")
+}
+```
+
+***
+
+`r figr("m6_summary", type = TABREF)`. *Model summary.*
+
+```{r m6_summary, achor = TABREF}
+(m6_summary <- summary(m6, 
+                       priors = TRUE))
+```
+
+In the Population-Level Effects section of `r figr("m6_summary")` are now two estimates for the skewness parameter alpha (one for the dominant [`alpha_Intercept`] and one for the non-dominant arm [`alpha_armND`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on arm.
+
+```{r m6_ppcheck, anchor=FIGREF}
+pp_check(m6, nsamples = 100)
+```
+
+`r figr("m6_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+```{r m6_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
+p <- plot(conditional_effects(m6,
+                              dpar = "mu"),
+          plot = FALSE)
+p1 <- wrap_plots(p[[1]] + xlab("") +
+                   p[[2]] + xlab("") + ylab("") +
+                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+p <- plot(conditional_effects(m6,
+                              dpar = "alpha"),
+          plot = FALSE)
+p2 <- wrap_plots(p[[1]] + xlab("") +
+                   p[[2]] + xlab("") + ylab("") +
+                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+p <- plot(conditional_effects(m6,
+                              dpar = "sigma"),
+          plot = FALSE)
+p3 <- wrap_plots(p[[1]] +
+                   p[[2]] + ylab("") +
+                   p[[3]] + ylab("") + theme(legend.position = "bottom"))
+wrap_plots(p1, p2, p3, 
+           ncol = 1) +
+  plot_annotation(tag_levels = "A")
+```
+
+`r figr("m6_condPlot", type = FIGREF)`. *Conditional plots.*
+
+***
+
+In `r figr("m6_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). On the other hand, there is a difference in estimated skewness ('alpha') between sides (E), but not instructions (D). (F) follows from that. 'sigma' shows a clear difference between instructions (G), not so for side (H), which is mirrored in (I).
+
+## Modeling Influence of Instruction and Arm on Shape 
+
+To be able to see whether skewness and spread are depending on both experimental manipulation and arm, the model formulas for 'sigma' and 'alpha' are updated accordingly:
+
+```{r}
+(m7_form <-bf(transSC ~ cond * arm + 
+                (1 | subj) + 
+                (1 | cond) +
+                (1 | arm),
+              sigma ~ cond + arm,
+              alpha ~ arm + cond))
+```
+
+
+```{r}
+(m7_prior <- m5_prior)
+```
+
+```{r}
+if (MODEL) {
+  m7 <- brm(m7_form,
+            prior = m7_prior,
+            family = skew_normal(),
+            data = drum_beats,
+            control = list(adapt_delta = 0.95))
+  m7 <- add_criterion(m7, 
+                      "loo",
+                      reloo = TRUE)
+  save(m7, 
+       file = "m7.rda")
+} else {
+  load("m7.rda")
+}
+```
+
+***
+
+`r figr("m7_summary", type = TABREF)`. *Model summary.*
+
+```{r m7_summary, achor = TABREF}
+(m7_summary <- summary(m7, 
+                       priors = TRUE))
+```
+
+In the Population-Level Effects section of `r figr("m7_summary")` are now three estimates for the skewness parameter alpha, as well as three estimates for spread ('sigma').
+
+```{r m7_ppcheck, anchor=FIGREF}
+pp_check(m7, nsamples = 100)
+```
+
+`r figr("m7_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+```{r m7_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
+p <- plot(conditional_effects(m7,
+                              dpar = "mu"),
+          plot = FALSE)
+p1 <- wrap_plots(p[[1]] + xlab("") +
+                   p[[2]] + xlab("") + ylab("") +
+                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+p <- plot(conditional_effects(m7,
+                              dpar = "alpha"),
+          plot = FALSE)
+p2 <- wrap_plots(p[[1]] + xlab("") +
+                   p[[2]] + xlab("") + ylab("") +
+                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+p <- plot(conditional_effects(m7,
+                              dpar = "sigma"),
+          plot = FALSE)
+p3 <- wrap_plots(p[[1]] +
+                   p[[2]] + ylab("") +
+                   p[[3]] + ylab("") + theme(legend.position = "bottom"))
+wrap_plots(p1, p2, p3, 
+           ncol = 1) +
+  plot_annotation(tag_levels = "A")
+```
+
+`r figr("m7_condPlot", type = FIGREF)`. *Conditional plots.*
+
+***
+
+In `r figr("m7_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). There is a difference in estimated skewness ('alpha') both between instructions (D) and sides (E), but with opposing trends. Nevertheless, there is no interaction between them (F). 'sigma' shows a clear difference between instructions (G) as well as for side (H), but albeit their opposing trends, there is no interaction (I).
+
+## Model Comparison
+
+We compare models by their estimated log-posterior density (elpd). The smaller this value the better a model predicts the data safe the penalty for additional covariates. When the difference between two models is more than two SE apart they are considered to be 'different enough' to warrant acceptance of one over the other despite possibly smaller parsimony.
+
+```{r}
+loo_compare(m0, m1, m2, m3, m4, m5, m6, m7)
+```
+
+The model with the smallest `elpd` is `m7`, which corresponds to the last model. 
+
+# Conclusion
+
+Based on the above we can infer that instructions cause differences in the mean, the skewness, and spread of transSC (`r figr("m7_condPlot")`A, D, and G), while playing with the dominant vs non-dominant arm only seems to invoke small differences in skewness and spread, but not so in the mean (`r figr("m7_condPlot")`E and H).
 
 # System Setup
 
