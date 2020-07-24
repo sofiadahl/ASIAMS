@@ -9,6 +9,7 @@ output:
     toc_float: yes
     code_folding: hide
     fig_width: 3.5
+    number_sections: yes
 bibliography: asiams.bib
 editor_options:
     chunk_output_type: console
@@ -50,11 +51,12 @@ COLOR_BLIND_PALETTE <- RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")
 source("dahl_drumming_models.R")
 ```
 
-The data set was read in as is, the columns `subj`, `arm`, `cond`, `series` and `no` were converted to factors, the column `filename` was deleted.
+The data set was read in as is, the columns `subj`, `arm`, `cond`, `series` and `no` were converted to factors, the column `filename` was deleted. A new column was added to the dataset, `patient`, based on the `subj` prefix ('P' or 'S'), with a '0' coding for healthy controls, and a '1' for patients.
 
 ```{r}
 read.csv("features.csv") %>%
   mutate(filename = NULL,
+         patient = if_else(grepl("^P", subj), 1L, 0L),
          series = factor(series),
          subj = factor(subj),
          arm = factor(arm),
@@ -64,6 +66,8 @@ read.csv("features.csv") %>%
 ```
 
 # Exploration
+
+## Instruction Condition and Arm Used
 
 In a first attempt to get an overview, the descriptors' density estimates were plotted, broken down by `arm` and `cond`.
 
@@ -133,7 +137,7 @@ The lack of any clear-cut differences in the raw data between conditions suggest
 
 The increase in variance for the conditions N < C does not come as a surprise as I assume normal also means highly trained and thus automatized, whereas controlled involves less automatization and more 'individualness' both within and between subjects. 
 
-## Conclusions
+### Conclusions
 
 Looking at the above investigated descriptors and @Danielsen2015, it seems reasonable to limit the modeling attempts to `totDur`, `totSPL`, `totSC`, and `TC`. 
 
@@ -141,7 +145,7 @@ But Sofia wrote on 2020-07-09: "Francesco and I have discussed a bit related to 
 
 On 2020-07-22 both Sofia and Francesco agreed upon `transSC`, `transFlat`, and `transCrest` as the probably most important response variables to look at.
 
-## Francesco's comments
+### Francesco's comments
 
 Update: 
 
@@ -165,7 +169,7 @@ As for the descriptors to include: although `TC` is employed in @Danielsen2015, 
 My (informal and biased) listening tests tell me that, at least for some subjects, I hear a pattern going towards a harsher (controlled) vs smoother (normal) timbre exactly at the hit point, plus slightly less (controlled) or more pitch/amplitude fluctuation. Hopefully this could be catched by spectral centroid, specrtral/temporal flatness, or crest factor. This should be independent of SPL unless the subject misinterpreted the instructions, therefore SPL acts as a sort of control variable in our model.  
 >>>>>>> ee85c644e2e9174cb164e81a3e7092b9f049ee82
 
-# Model Considerations
+### Model Considerations
 
 There are several points that need to be considered before making a decision regarding the type of modeling to be done in this study, (1) the sample size places restrictions on the external validity; (2) data from small samples can be better modeled when regularization is in place to 'tame' the estimates; (3) the hierarchical structure of the data (subjects played several trials with either their dominant or non-dominant arm under two conditions) suggests a multilevel analysis of the data which would, in addition to the Bayesian regularization via priors also results in shrinkage of the estimates; (4) given the small distribution differences between the two experimental conditions in the varying variance between conditions
 
@@ -195,9 +199,36 @@ Trial  1 ..  p     1  .. p
 
 Also, the variation in traditional statistics is considered to be fixed (think homoscedasticity in ANOVA, or the $\epsilon$ in regression formulas such as $y_i = \beta_0 + \beta_1x_i + \epsilon_i$), whereas it is an estimated quantity in Bayesian statistics and therefor can vary between conditions (or groups or subjects etc.). 
 
-## Conclusions
+### Conclusions
 
 Will start with a simple univariate model, add predictors and interactions, then a bivariate model, and finally a quadruple-variate model and see where this leads us.
+
+## Individual Responses
+
+The humps in the density distributions in section #instruction-condition-and-arm-Used made me curious where they originate from. So in the following graph the desnity estimates of one of the descriptors, `transSC`, are plotted broken down by `subj`. and then also by `cond`, separately for patients and healthy controls.
+
+```{r DensIndivRespPlot, anchor=FIGREF}
+ggplot(drum_beats, aes(transSC, 
+                       color = subj, 
+                       linetype = cond)) + 
+  geom_density(alpha = 0.1) 
+```
+
+`r figr("DensIndivRespPlot", type = FIGREF)`. *`transSC` density distribution of participants, broken down by instruction condition.*
+
+***
+
+```{r DensIndivRespPatientsPlot, ancho=FIGREF}
+ggplot(drum_beats, aes(transSC, 
+                       color = subj, 
+                       linetype = cond)) + 
+  geom_density(alpha = 0.1) +
+  facet_wrap(~ patient)
+```
+
+`r figr("DensIndivRespPatientsPlot", type = FIGREF)`. *`transSC` density distribution of participants, broken down by instruction condition and group (patients and healthy controls).*
+
+***
 
 # Modeling
 
@@ -265,7 +296,7 @@ The posterior predictive plot in `r figr("m0_ppcheck")` gives an impression on h
 # conditional_effects(m0) 
 ```
 
-## Conditions Model
+### Conditions Model
 
 In this model, the intercept is complemented with second 'main' or population effect, the instruction condition `cond`:
 
@@ -326,7 +357,7 @@ The posterior predictive plot in `r figr("m1_ppcheck")` gives an impression on h
 conditional_effects(m1)
 ```
 
-## ConditionsVI Model
+### ConditionsVI Model
 
 The last model included the instruction condition, more realistically reflecting the true structure of the data set. But it did not acknowledge that each subject executed several strokes in each of these conditions. This model includes a term with a varying intercept (VI) for condition to reflect just that, which will also assist in more realistically estimate the population effect of `cond`:
 
@@ -385,7 +416,7 @@ conditional_effects(m2)
 ```
 
 
-## Condition + Arm Model
+### Condition + Arm Model
 
 
 ```{r}
@@ -440,7 +471,7 @@ pp_check(m3, nsamples = 100)
 conditional_effects(m3)
 ```
 
-## Condition x Arm Model
+### Condition x Arm Model
 
 
 ```{r}
@@ -497,7 +528,7 @@ wrap_plots(plot(conditional_effects(m4),
   plot_annotation(tag_levels = "A")
 ```
 
-## Modeling Condition-specific Variation
+### Modeling Condition-specific Variation
 
 As is apparent from `r figr("DescriptorDensities")`, the controlled condition yielded broader density distributions in most descriptors. Hence, we model condition-dependent variation in the next model:
 
@@ -579,7 +610,7 @@ In `r figr("m5_condPlot")` we see a difference between the mean ('mu') estimated
 
 The spread (`sigma`) of the estimated distributions also differs between conditions (D), but again not between arms (E). The latter is not surprising because we modeled sigma to vary conditional on condition, not arm.
 
-## Modeling Arm-specific Skewness
+### Modeling Arm-specific Skewness
 
 At least in some descriptors in `r figr("DescriptorDensities")` the skewness of the distribution seems to change depending on the arm. The skew normal distribution is a generalization of the Gaussian distribution, allowing for the additional shape-parameter skewness (asymmetry) to vary. Hence, we model this side-dependent skewness in the next model:
 
@@ -663,7 +694,7 @@ wrap_plots(p1, p2, p3,
 
 In `r figr("m6_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). On the other hand, there is a difference in estimated skewness ('alpha') between sides (E), but not instructions (D). (F) follows from that. 'sigma' shows a clear difference between instructions (G), not so for side (H), which is mirrored in (I).
 
-## Modeling Influence of Instruction and Arm on Shape 
+### Modeling Influence of Instruction and Arm on Shape 
 
 To be able to see whether skewness and spread are depending on both experimental manipulation and arm, the model formulas for 'sigma' and 'alpha' are updated accordingly:
 
@@ -747,9 +778,9 @@ wrap_plots(p1, p2, p3,
 
 In `r figr("m7_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). There is a difference in estimated skewness ('alpha') both between instructions (D) and sides (E), but with opposing trends. Nevertheless, there is no interaction between them (F). 'sigma' shows a clear difference between instructions (G) as well as for side (H), but albeit their opposing trends, there is no interaction (I).
 
-## Model Comparison
+### Model Comparison
 
-We compare models by their estimated log-posterior density (elpd). The smaller this value the better a model predicts the data safe the penalty for additional covariates. When the difference between two models is more than two SE apart they are considered to be 'different enough' to warrant acceptance of one over the other despite possibly smaller parsimony.
+We compare models by their estimated log-posterior density (elpd). The smaller this value the better a model predicts the data, despite the penalty for additional covariates. When the difference between two models is more than two SE apart they are considered to be 'different enough' to warrant acceptance of one over the other despite possibly smaller parsimony.
 
 ```{r}
 loo_compare(m0, m1, m2, m3, m4, m5, m6, m7)
@@ -757,9 +788,170 @@ loo_compare(m0, m1, m2, m3, m4, m5, m6, m7)
 
 The model with the smallest `elpd` is `m7`, which corresponds to the last model. 
 
-# Conclusion
+### Conclusion
 
-Based on the above we can infer that instructions cause differences in the mean, the skewness, and spread of transSC (`r figr("m7_condPlot")`A, D, and G), while playing with the dominant vs non-dominant arm only seems to invoke small differences in skewness and spread, but not so in the mean (`r figr("m7_condPlot")`E and H).
+Each row of the plot in `r figr("m7_condPlot")` represents the results of one of the three outcomes, each column shows the estimates for one condition/manipulation. The dots in these plots are the means of the posterior distributions of the respective estimate, and can be interpreted similarly to the point estimates in traditional frequentist statistics. The error bars represent 95% credible intervals, which are interpreted as comprising the true value with 95% probability, given the model and the data. 
+
+From the first row of `r figr("m7_condPlot")` we can infer that instructions had an effect on the mean, while arm had not. The second row suggests that instruction had a larger, and opposing, effect on skewness compared to arm arm, and finally, the third row claims the same for spread.
+
+On a different level of understanding these results this means that `transSC` is lower in the normal strokes, with almost no skewness (alpha is close to zero) and lower spread than in controlled strokes.
+
+Based on the above we can infer that instruction causes the most pronounced differences in `transSC`, while the playing arm only seems to invoke minor to no differences.
+
+## Adding the Response `transFlat` 
+
+In the following, the descriptor `transFlat` is added as an outcome to our model. Technically speaking, we would need to re-start our modeling attempt with the Null model and work our way up to the 'best' model as we have done with `transSC`. This is necessary because we cannot just assume that with an additional outcome (which will actually become three additional outcomes: mu, alpha and sigma) will be best explained by the same model as was with just one outcome variable.
+
+But we take a short cut here and just add `transFlat` to the best model of `transSC`.
+
+To be able to see whether skewness and spread are depending on both experimental manipulation and arm, the model formulas for 'sigma' and 'alpha' are updated accordingly:
+
+```{r}
+(m8_form <-bf(mvbind(transSC, transFlat) ~ cond + arm + 
+                (1|p|cond) +
+                (1|q|arm) + 
+                (1|r|subj),
+              sigma ~ cond + arm,
+              alpha ~ arm + cond))
+```
+
+The prior probability on the individual intercepts needs to reflect that there are now two response variables:
+
+```{r}
+#                       prior     class      coef group      resp  dpar nlpar bound
+# 1                                   b                                            
+# 2                    lkj(1)       cor                                            
+# 3                                 cor             arm                            
+# 4                                 cor            cond                            
+# 5                                 cor            subj                            
+# 6                           Intercept                                            
+# 7                                   b                 transFlat                  
+# 8                                   b     armND       transFlat                  
+# 9                                   b     condN       transFlat                  
+# 10   student_t(3, 0.8, 2.5) Intercept                 transFlat                  
+# 11     student_t(3, 0, 2.5)        sd                 transFlat                  
+# 12                                 sd             arm transFlat                  
+# 13                                 sd Intercept   arm transFlat                  
+# 14                                 sd            cond transFlat                  
+# 15                                 sd Intercept  cond transFlat                  
+# 16                                 sd            subj transFlat                  
+# 17                                 sd Intercept  subj transFlat                  
+# 18                                  b                 transFlat alpha            
+# 19                                  b     armND       transFlat alpha            
+# 20                                  b     condN       transFlat alpha            
+# 21             normal(0, 4) Intercept                 transFlat alpha            
+# 22                                  b                 transFlat sigma            
+# 23                                  b     armND       transFlat sigma            
+# 24                                  b     condN       transFlat sigma            
+# 25     student_t(3, 0, 2.5) Intercept                 transFlat sigma            
+# 26                                  b                   transSC                  
+# 27                                  b     armND         transSC                  
+# 28                                  b     condN         transSC                  
+# 29 student_t(3, 735, 136.5) Intercept                   transSC                  
+# 30   student_t(3, 0, 136.5)        sd                   transSC                  
+# 31                                 sd             arm   transSC                  
+# 32                                 sd Intercept   arm   transSC                  
+# 33                                 sd            cond   transSC                  
+# 34                                 sd Intercept  cond   transSC                  
+# 35                                 sd            subj   transSC                  
+# 36                                 sd Intercept  subj   transSC                  
+# 37                                  b                   transSC alpha            
+# 38                                  b     armND         transSC alpha            
+# 39                                  b     condN         transSC alpha            
+# 40             normal(0, 4) Intercept                   transSC alpha            
+# 41                                  b                   transSC sigma            
+# 42                                  b     armND         transSC sigma            
+# 43                                  b     condN         transSC sigma            
+# 44     student_t(3, 0, 2.5) Intercept                   transSC sigma 
+(m8_prior <- c(
+  set_prior("normal(0.8, 0.01)", class = "Intercept", resp = "transFlat"),
+  set_prior("normal(0, 0.01)",   class = "b",         resp = "transFlat"),
+  set_prior("normal(0.8, 1)",   class = "Intercept", resp = "transSC"),
+  set_prior("normal(0, 1)",     class = "b",         resp = "transSC"),
+  set_prior("normal(0, 0.01)",   class = "Intercept", resp = "transFlat", dpar = "alpha"),
+  set_prior("normal(0, 0.01)",   class = "b",         resp = "transFlat", dpar = "alpha"),
+  set_prior("normal(0, 0.1)",   class = "Intercept", resp = "transSC",   dpar = "alpha"),
+  set_prior("normal(0, 0.1)",   class = "b",         resp = "transSC",   dpar = "alpha"),
+  set_prior("normal(0, 0.05)",   class = "Intercept", resp = "transSC",   dpar = "sigma"),
+  set_prior("normal(0, 0.05)",   class = "b",         resp = "transSC",   dpar = "sigma"),
+  set_prior("normal(0, 0.01)",   class = "Intercept", resp = "transFlat", dpar = "sigma"),
+  set_prior("normal(0, 0.01)",   class = "b",         resp = "transFlat", dpar = "sigma"),
+  set_prior("normal(0, 0.05)",   class = "sd",        resp = "transSC"),
+  set_prior("normal(0, 0.01)",  class = "sd",        resp = "transFlat"),
+  set_prior("lkj(5)",           class = "cor")))
+```
+
+```{r}
+if (MODEL) {
+  t <- Sys.time()
+  m8 <- brm(m8_form,            
+            prior = m8_prior,
+            family = skew_normal(),
+            data = drum_beats,
+            inits = "0")
+  print(Sys.time() - t)
+  m8 <- add_criterion(m8, 
+                      "loo",
+                      reloo = TRUE)
+  save(m8, 
+       file = "m8.rda")
+} else {
+  load("m8.rda")
+}
+```
+
+***
+
+`r figr("m8_summary", type = TABREF)`. *Model summary.*
+
+```{r m8_summary, achor = TABREF}
+(m8_summary <- summary(m8, 
+                       priors = TRUE))
+```
+
+In the Population-Level Effects section of `r figr("m8_summary")` are now three estimates for the skewness parameter alpha, as well as three estimates for spread ('sigma').
+
+```{r m8_ppcheck, anchor=FIGREF}
+pp_check(m8, resp = "transSC", nsamples = 100)
+pp_check(m8, resp = "transFlat", nsamples = 100)
+```
+
+`r figr("m8_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+```{r m8_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
+p <- plot(conditional_effects(m8,
+                              dpar = "mu"),
+          plot = FALSE)
+p1 <- wrap_plots(p[[1]] + xlab("") +
+                   p[[2]] + xlab("") + ylab("") +
+                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+p <- plot(conditional_effects(m8,
+                              dpar = "alpha"),
+          plot = FALSE)
+p2 <- wrap_plots(p[[1]] + xlab("") +
+                   p[[2]] + xlab("") + ylab("") +
+                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+p <- plot(conditional_effects(m8,
+                              dpar = "sigma"),
+          plot = FALSE)
+p3 <- wrap_plots(p[[1]] +
+                   p[[2]] + ylab("") +
+                   p[[3]] + ylab("") + theme(legend.position = "bottom"))
+wrap_plots(p1, p2, p3, 
+           ncol = 1) +
+  plot_annotation(tag_levels = "A")
+```
+
+`r figr("m8_condPlot", type = FIGREF)`. *Conditional plots.*
+
+***
+
+In `r figr("m8_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). There is a difference in estimated skewness ('alpha') both between instructions (D) and sides (E), but with opposing trends. Nevertheless, there is no interaction between them (F). 'sigma' shows a clear difference between instructions (G) as well as for side (H), but albeit their opposing trends, there is no interaction (I).
+
+
+## transCrest
 
 # System Setup
 
