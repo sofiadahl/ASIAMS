@@ -56,7 +56,10 @@ The data set was read in as is, the columns `subj`, `arm`, `cond`, `series` and 
 ```{r}
 read.csv("features.csv") %>%
   mutate(filename = NULL,
-         patient = if_else(grepl("^P", subj), 1L, 0L),
+         patient = factor(if_else(grepl("^P", 
+                                        subj), 
+                                  1L, 
+                                  0L)),
          series = factor(series),
          subj = factor(subj),
          arm = factor(arm),
@@ -67,7 +70,7 @@ read.csv("features.csv") %>%
 
 # Exploration
 
-## Instruction Condition and Arm Used
+## Instruction Condition, and Arm Used
 
 In a first attempt to get an overview, the descriptors' density estimates were plotted, broken down by `arm` and `cond`.
 
@@ -76,7 +79,8 @@ dep_vars <- names(drum_beats)[which(!(names(drum_beats) %in% c("subj",
                                                                "arm", 
                                                                "cond", 
                                                                "no",
-                                                               "series")))]
+                                                               "series",
+                                                               "patient")))]
 n_vars <- length(dep_vars)
   plot_lst <- vector("list", length = n_vars)
   plt_cnt <- 1
@@ -205,7 +209,7 @@ Will start with a simple univariate model, add predictors and interactions, then
 
 ## Individual Responses
 
-The humps in the density distributions in section #instruction-condition-and-arm-Used made me curious where they originate from. So in the following graph the desnity estimates of one of the descriptors, `transSC`, are plotted broken down by `subj`. and then also by `cond`, separately for patients and healthy controls.
+The humps in the density distributions in section [Instruction Condition, and Arm Used] made me curious where they might originate from. So in the following graph the density estimates of one of the descriptors, `transSC`, are plotted broken down by `subj`. and then also by `cond`, separately for patients and healthy subjects.
 
 ```{r DensIndivRespPlot, anchor=FIGREF}
 ggplot(drum_beats, aes(transSC, 
@@ -218,6 +222,10 @@ ggplot(drum_beats, aes(transSC,
 
 ***
 
+It is obvious that some participants do not differ substantially between the normal and the controlled condition, whereas other do, and markedly so. Additionally, there seems to be quite a spread of the centers of distributions across a wide range of values, suggesting very individual drum sounds.
+
+The wide distribtion of centers of mass between individuals made me want to further break down the plot.
+
 ```{r DensIndivRespPatientsPlot, ancho=FIGREF}
 ggplot(drum_beats, aes(transSC, 
                        color = subj, 
@@ -226,9 +234,25 @@ ggplot(drum_beats, aes(transSC,
   facet_wrap(~ patient)
 ```
 
-`r figr("DensIndivRespPatientsPlot", type = FIGREF)`. *`transSC` density distribution of participants, broken down by instruction condition and group (patients and healthy controls).*
+`r figr("DensIndivRespPatientsPlot", type = FIGREF)`. *`transSC` density distribution of participants, broken down by instruction condition and group (patients and healthy subjects).*
 
 ***
+
+The above plot is interesting in that it seems to show that the four healthy subjects were more uniform than the patients in their `transSC` distributions and also, with the exception of S2, had very similar `transSC` distributions for the normal and the controlled conditions. In the patients, two had very similar distributions in both conditions (P1 and P5), whereas the two others showed differing results for the two conditions. So with regard to Sofia's hypothesis (ch. [Modeling]) I'd argue, at least for `transSC` alone, having drummers play normal and controlled strokes would not allow subjects to tell the difference. But maybe it would qualify as a screening test for movement disorders in drummers. Just a random thought.
+
+While breaking it down it occurred to me that looking at individual variation might also be enlightening.
+
+```{r}
+ggplot(drum_beats, aes(transSC, 
+                       color = cond, 
+                       group = series)) + 
+  geom_density(alpha = 0.1) +
+  facet_wrap(~ subj, nrow = 2)
+```
+
+And it was! The plot made visible that P1 and P5 had consistently very low transSC values. P3 was consistent within the normal instruction condition, but had, on average, higher values, and with a lot more variation, in the controlled condition. P4 had more variation in both conditions, and higher transSC values in both; in other words, P4 was consistantly bad.
+
+The healthy subjects showed comparable variation and centers of mass within conditions, and all but one (S2) also across conditions.
 
 # Modeling
 
