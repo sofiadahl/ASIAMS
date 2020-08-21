@@ -31,3 +31,8 @@ ICC <- function(x = NULL, indiv = NULL) {
   sigma <- mod_summary$spec_pars["sigma", "Estimate"]
   icc <- sd_Intercept^2 / (sd_Intercept^2 + sigma^2)
 }
+modify_prior <- function(x, prior = NULL, class = NULL, coef = NULL,
+                         group = NULL, resp = NULL, dpar = NULL,
+                         nlpar = NULL, bound = NULL) {
+
+}

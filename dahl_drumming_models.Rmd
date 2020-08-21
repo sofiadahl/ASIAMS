@@ -22,9 +22,7 @@ library(ggplot2)
 library(ggthemes)
 library(kfigr)
 library(knitr)
-# library(pander)
 library(patchwork)
-# library(tidyr)
 ```
 
 ```{r Settings, echo=FALSE}
@@ -171,24 +169,24 @@ Would it be feasible to set up 4 different models (i.e. one for each phase), at 
 As for the descriptors to include: although `TC` is employed in @Danielsen2015, the PDFs are even more similar. I would go for `Dur` (except attack?), `SPL`, `SC`, and one between `Flat`, `SpecFlat` or `Crest`.
 
 My (informal and biased) listening tests tell me that, at least for some subjects, I hear a pattern going towards a harsher (controlled) vs smoother (normal) timbre exactly at the hit point, plus slightly less (controlled) or more pitch/amplitude fluctuation. Hopefully this could be catched by spectral centroid, specrtral/temporal flatness, or crest factor. This should be independent of SPL unless the subject misinterpreted the instructions, therefore SPL acts as a sort of control variable in our model.  
->>>>>>> ee85c644e2e9174cb164e81a3e7092b9f049ee82
 
 ### Model Considerations
 
-There are several points that need to be considered before making a decision regarding the type of modeling to be done in this study, (1) the sample size places restrictions on the external validity; (2) data from small samples can be better modeled when regularization is in place to 'tame' the estimates; (3) the hierarchical structure of the data (subjects played several trials with either their dominant or non-dominant arm under two conditions) suggests a multilevel analysis of the data which would, in addition to the Bayesian regularization via priors also results in shrinkage of the estimates; (4) given the small distribution differences between the two experimental conditions in the varying variance between conditions
+There are several points that need to be considered before making a decision regarding the type of modeling to be done in this study, (1) the sample size places restrictions on the external validity; (2) data from small samples can be better modeled when regularization is in place to 'tame' the estimates; (3) the hierarchical structure of the data (subjects played several trials with either their dominant or non-dominant arm under two conditions) suggests a multilevel analysis of the data which would, in addition to the Bayesian regularization via priors, also results in shrinkage of the estimates; (4) given the small distribution differences between the two experimental conditions, along with the 
 
-Given the extremely small sample size, any attempt to fit the data using traditional statistics, a.k.a. null-hypothesis significance testing, would make us vulnerable to all kinds of criticism. I therefor suggest to use Bayesian statistics instead, as it allows us to estimate probability distributions of parameters rather than confidence intervals around point estimates, and thus embraces uncertainty in estimates. 
-
-Additionally, Bayesian regression uses prior probability distributions to arrive at sensible estimates. These priors regularize estimates, or draw them toward zero, a desirable effect which has long been recognized even in traditional statistics (*e.g.* ridge regression and lasso; @Tibshirani1996).
-
-ANOVA (or regression with grouping variables) requires each subject's trials to be averaged, say, within conditions or groups (or both), to be able to assess treatment effects; this results in the individual variation within a subject to get lost while it might have been very informative to include it in the analysis. Multilevel (or hierarchical) modeling allows to include the entire data structure (`r figr("MLMstructure", type = FIGREF)`) so that no information gets lost through averaging, but all variation (both individual and treatment-driven) propagates through the analysis and ends up in the final results, allowing for more realistic credibility margins around estimates. 
+1. Given the extremely small sample size, any attempt to fit the data using traditional statistics, a.k.a. null-hypothesis significance testing, would make us vulnerable to all kinds of criticism. I therefore suggest to use Bayesian statistics instead, as it allows us to estimate *probability distributions* of parameters rather than *confidence intervals* around point estimates, and thus embraces uncertainty in estimates. 
+1. Additionally, Bayesian regression uses prior probability distributions to arrive at sensible estimates. These priors regularize estimates, or draw them toward zero, a desirable effect which has long been recognized even in traditional statistics (*e.g.* ridge regression and lasso; @Tibshirani1996).
+1. ANOVA (or regression with grouping variables) requires each subject's trials to be averaged, say, within conditions or groups (or both), to be able to assess treatment effects; this results in the individual variation within a subject to get lost while it might have been very informative to include it in the analysis. Multilevel (or hierarchical) modeling allows to include the entire data structure (`r figr("MLMstructure", type = FIGREF)`) so that no information gets lost through averaging, but all variation (both individual and treatment-driven) propagates through the analysis and ends up in the final results, allowing for more realistic credibility margins around estimates. 
+1. Variance in traditional statistics is considered to be fixed (think homoscedasticity in ANOVA, or the $\epsilon$ in regression formulas such as $y_i = \beta_0 + \beta_1x_i + \epsilon$), whereas it is an estimated quantity in Bayesian statistics and therefore can vary between conditions (or groups or subjects etc.) and thus capture varying variance in different conditions, or groups etc. 
 
 ```{r MLMstructure, anchor=FIGREF}
 # chunk intentionally empty  
 ```
 
 ~~~
-Instruction:    Normal        			Controlled
+Group:                    Patient                       Healthy Control
+                        /        \                     /               \
+Instruction:    Normal        			Controlled   Normal        			    Controlled
                 | |    \      			/ |    \
 Player:         1 2 ... n			   1  2 ... n
                / \
@@ -200,8 +198,6 @@ Trial  1 ..  p     1  .. p
 `r figr("MLMstructure")`. *The multilevel structure of a data set should be reflected in the analysis.*
 
 ***
-
-Also, the variation in traditional statistics is considered to be fixed (think homoscedasticity in ANOVA, or the $\epsilon$ in regression formulas such as $y_i = \beta_0 + \beta_1x_i + \epsilon_i$), whereas it is an estimated quantity in Bayesian statistics and therefor can vary between conditions (or groups or subjects etc.). 
 
 ### Conclusions
 
@@ -222,11 +218,11 @@ ggplot(drum_beats, aes(transSC,
 
 ***
 
-It is obvious that some participants do not differ substantially between the normal and the controlled condition, whereas other do, and markedly so. Additionally, there seems to be quite a spread of the centers of distributions across a wide range of values, suggesting very individual drum sounds.
+It is obvious that some participants do not differ substantially between the normal and the controlled condition, whereas others do, and even markedly so. Additionally, there seems to be quite a spread of the centers of distributions across a wide range of values, suggesting very individual drum sounds.
 
-The wide distribtion of centers of mass between individuals made me want to further break down the plot.
+The wide distribution of centers of mass between individuals made me want to further break down the plot.
 
-```{r DensIndivRespPatientsPlot, ancho=FIGREF}
+```{r DensIndivRespGroupedPlot, ancho=FIGREF}
 ggplot(drum_beats, aes(transSC, 
                        color = subj, 
                        linetype = cond)) + 
@@ -234,15 +230,15 @@ ggplot(drum_beats, aes(transSC,
   facet_wrap(~ patient)
 ```
 
-`r figr("DensIndivRespPatientsPlot", type = FIGREF)`. *`transSC` density distribution of participants, broken down by instruction condition and group (patients and healthy subjects).*
+`r figr("DensIndivRespGrouped", type = FIGREF)`. *`transSC` density distribution of participants, broken down by instruction condition and group (patients and healthy subjects).*
 
 ***
 
-The above plot is interesting in that it seems to show that the four healthy subjects were more uniform than the patients in their `transSC` distributions and also, with the exception of S2, had very similar `transSC` distributions for the normal and the controlled conditions. In the patients, two had very similar distributions in both conditions (P1 and P5), whereas the two others showed differing results for the two conditions. So with regard to Sofia's hypothesis (ch. [Modeling]) I'd argue, at least for `transSC` alone, having drummers play normal and controlled strokes would not allow subjects to tell the difference. But maybe it would qualify as a screening test for movement disorders in drummers. Just a random thought.
+The above plot is interesting in that it seems to show that the four healthy subjects were more uniform than the patients in their `transSC` distributions and also, with the exception of S2, had very similar `transSC` distributions for the normal and the controlled conditions. In the patients, two had very similar distributions in both conditions (P1 and P5), whereas the two others showed differing results for the two conditions. So with regard to Sofia's hypothesis (ch. [Modeling]) I'd argue, at least for `transSC` alone, having drummers play normal and controlled strokes would not allow subjects to tell the difference in a listening test. But maybe it would qualify as a screening test for movement disorders in drummers. Just a random thought.
 
-While breaking it down it occurred to me that looking at individual variation might also be enlightening.
+While breaking it down it occurred to me that looking at individual variation (that is, between series) might also be enlightening.
 
-```{r}
+```{r DensIndivSeriesGroupedPlot, anchor=FIGREF, fig.width=7}
 ggplot(drum_beats, aes(transSC, 
                        color = cond, 
                        group = series)) + 
@@ -250,17 +246,26 @@ ggplot(drum_beats, aes(transSC,
   facet_wrap(~ subj, nrow = 2)
 ```
 
-And it was! The plot made visible that P1 and P5 had consistently very low transSC values. P3 was consistent within the normal instruction condition, but had, on average, higher values, and with a lot more variation, in the controlled condition. P4 had more variation in both conditions, and higher transSC values in both; in other words, P4 was consistantly bad.
+`r figr("DensIndivSeriesGroupedPlot", type = FIGREF)`. *Density plots of individual series.*
+
+***
+
+
+And it was! The plot in `r figr("DensIndivSeriesGroupedPlot")` made visible that P1 and P5 had consistently very low transSC values. P3 was consistent within the normal instruction condition, but had, on average, higher values, and with a lot more variation, in the controlled condition. P4 had more variation in both conditions, and higher transSC values in both; in other words, P4 was consistantly bad. (But then again: what do I know what bad is wrt `transSC`!)
 
 The healthy subjects showed comparable variation and centers of mass within conditions, and all but one (S2) also across conditions.
+
+Comparing the two rows of panels in `r figr("DensIndivSeriesGroupedPlot")` reveals that healthy subjects have *more* variation than the patients.
+
+Although tempting, we probably shouldn't get carried away and generalize to the populations of healthy drummers and ones with movement disorders, respectively.
 
 # Modeling
 
 Sofia, on 2020-07-07: "The main hypothesis is that playing instruction (N/C) will affect the stroke in a way that is perceivable".
 
-## Simple Univariate Models
+## Univariate Models
 
-Looking again at the variables agreed upon <strike>*I* have decided</strike> to use as response variables in the regression models<strike>---implying that this is by no means set in stone---</strike>, it seems like a skewed normal link function would be appropriate to model them.
+Looking at the variables agreed upon <strike>*I* have decided</strike> to use as response variables in the regression models<strike>---implying that this is by no means set in stone---</strike>, it seems like a skewed normal link function would be appropriate to model them.
 
 Let's start with `transSC`<strike>`totDur`</strike>. Using an extended model description language [@Bates2010;@Buerkner2018], going back to Wilkinson and Rogers's [-@Wilkinson1973] modeling language, we write:
 
@@ -276,6 +281,7 @@ Note: set `MODEL` to `TRUE` at the top of the script if you didn't compile/build
 if (MODEL) {
   m0 <- brm(m0_form,
             family = skew_normal(),
+            inits = "0",
             data = drum_beats)
   m0 <- add_criterion(m0, 
                       "loo",
@@ -320,20 +326,20 @@ The posterior predictive plot in `r figr("m0_ppcheck")` gives an impression on h
 # conditional_effects(m0) 
 ```
 
-### Conditions Model
+### Group Model 
 
-In this model, the intercept is complemented with second 'main' or population effect, the instruction condition `cond`:
+In this model, the intercept is complemented with second 'main' or population effect, the grouping variable `patient`:
 
 ```{r}
-(m1_form <-bf(transSC ~ 1 + cond + 
+(m1_form <- bf(transSC ~ 1 + patient + 
                 (1 | subj)))
 ```
 
 I could have also specified the model without the explicit '1 + ', as the intercept is implicitly included in the model unless I explicitly exclude it. From now on I will always save some extra typing by refraining from explicitly indluding the intercept in models.
 
-So now the model not only contains the individuals as grouping structure to 'explain away' variation, but also the manipulations.
+So now the model not only contains the individuals as grouping structure to 'explain away' variation, but also whether they belong to the patients or the healthy subjects.
 
-The prior distributions in Bayesian models reflect the knowledge about the estimated parameters. The package `brms` automatically places weakly informative priors on parameters as soft contraints. But with more complex models involving varying parameter estimates, the statistical back end which does the heavy lifting, needs stronger priors particularly on these parameters, otherwise models don't converge. The parameters most vulnerable to outliers in the data are the varying effects parameters, or random effects in traditional statistics. Therefor we place a stronger prior probability distribution over the estimate of the SD of individual intercepts:
+The prior distributions in Bayesian models reflect the knowledge about the estimated parameters. The package `brms` automatically places weakly informative priors on parameters as soft contraints. But with more complex models involving varying parameter estimates, the statistical back end which does the heavy lifting, needs stronger priors particularly on these parameters, otherwise models don't converge. The parameters most vulnerable to outliers in the data are the varying effects parameters, or random effects in traditional statistics. Therefore we place a stronger prior probability distribution over the estimate of the SD of individual intercepts:
 
 ```{r}
 (m1_prior <- set_prior("normal(0, 10)", class = "sd"))
@@ -344,6 +350,8 @@ and leave the rest of the priors as suggested by the package `brms` (see `r figr
 ```{r}
 if (MODEL) {
   m1 <- brm(m1_form,
+            prior = m1_prior,
+            inits = "0",
             family = skew_normal(),
             data = drum_beats)
   m1 <- add_criterion(m1, 
@@ -365,7 +373,7 @@ if (MODEL) {
                        priors = TRUE))
 ```
 
-The intercept in `r figr("m1_summary")` amounts to roughly `r round(m1_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m1_summary$fixed["condN", "Estimate"])`). The table also shows that the interindividual standard deviation (`sd(Intercept)` $\approx$ `r round(m1_summary$random$subj["sd(Intercept)", "Estimate"])` is still large compared to the unexplained variation (`sigma` $\approx$ `r round(m1_summary$spec_pars["sigma", "Estimate"])`). 
+The intercept in `r figr("m1_summary")` amounts to roughly `r round(m1_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `patient1` value is the mean of the posterior distribution *difference* between the healthy subjects and the patients (`r round(m1_summary$fixed["patient1", "Estimate"])`). The table also shows that the interindividual standard deviation (`sd(Intercept)` $\approx$ `r round(m1_summary$random$subj["sd(Intercept)", "Estimate"])` is still large compared to the unexplained variation (`sigma` $\approx$ `r round(m1_summary$spec_pars["sigma", "Estimate"])`). 
 
 ```{r m1_ppcheck, anchor=FIGREF}
 pp_check(m1, nsamples = 100)
@@ -375,35 +383,40 @@ pp_check(m1, nsamples = 100)
 
 ***
 
-The posterior predictive plot in `r figr("m1_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
+The posterior predictive plot in `r figr("m1_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the groups.
 
 ```{r}
 conditional_effects(m1)
 ```
 
-### ConditionsVI Model
+### Group + Condition Model
 
-The last model included the instruction condition, more realistically reflecting the true structure of the data set. But it did not acknowledge that each subject executed several strokes in each of these conditions. This model includes a term with a varying intercept (VI) for condition to reflect just that, which will also assist in more realistically estimate the population effect of `cond`:
-
-```{r}
-(m2_form <-bf(transSC ~ cond + 
-                (1 | subj) + 
-                (1 | cond)))
-```
-
-Including more varying parameters in the model requires the prior on them to be even stronger:
+In this model, the intercept is complemented with second 'main' or population effect, the instruction condition `cond`:
 
 ```{r}
-(m2_prior <- set_prior("normal(0, 5)", class = "sd"))
+(m2_form <-bf(transSC ~ patient + cond + 
+                (1 | subj)))
 ```
+
+So now the model also contains the individuals as grouping structure to 'explain away' variation, but also the manipulations.
+
+The prior distributions in Bayesian models reflect the knowledge about the estimated parameters. The package `brms` automatically places weakly informative priors on parameters as soft contraints. But with more complex models involving varying parameter estimates, the statistical back end which does the heavy lifting, needs stronger priors particularly on these parameters, otherwise models don't converge. The parameters most vulnerable to outliers in the data are the varying effects parameters, or random effects in traditional statistics. Therefore we place a stronger prior probability distribution over the estimate of the SD of individual intercepts:
+
+```{r}
+(m2_prior <- c(set_prior("normal(0, 3)",   class = "sd"),
+               set_prior("normal(0, 3)",   class = "sigma"),
+               set_prior("normal(0, 2)",   class = "alpha")))
+```
+
+and leave the rest of the priors as suggested by the package `brms` (see `r figr("m2_summary", type = TABREF)` for their priors).
 
 ```{r}
 if (MODEL) {
   m2 <- brm(m2_form,
             prior = m2_prior,
             family = skew_normal(),
-            data = drum_beats,
-            control = list(adapt_delta = 0.95))
+            inits = "0",
+            data = drum_beats)
   m2 <- add_criterion(m2, 
                       "loo",
                       reloo = TRUE)
@@ -416,14 +429,14 @@ if (MODEL) {
 
 ***
 
-`r figr("m2_summary", type = TABREF)`. *Model summary.*
+`r figr("m2_summary")`. *Model summary.*
 
 ```{r m2_summary, achor = TABREF}
 (m2_summary <- summary(m2, 
                        priors = TRUE))
 ```
 
-The intercept in `r figr("m2_summary")` amounts to roughly `r round(m2_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m2_summary$fixed["condN", "Estimate"])`). The table also shows that the inter-individual standard deviation (`sd(Intercept)` $\approx$ `r round(m2_summary$random$subj["sd(Intercept)", "Estimate"])` is not large anymore compared to the unexplained variation (`sigma` $\approx$ `r round(m2_summary$spec_pars["sigma", "Estimate"])`). 
+The intercept in `r figr("m2_summary")` amounts to roughly `r round(m2_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m2_summary$fixed["condN", "Estimate"])`). The table also shows that the interindividual standard deviation (`sd(Intercept)` $\approx$ `r round(m2_summary$random$subj["sd(Intercept)", "Estimate"])` is still large compared to the unexplained variation (`sigma` $\approx$ `r round(m2_summary$spec_pars["sigma", "Estimate"])`). 
 
 ```{r m2_ppcheck, anchor=FIGREF}
 pp_check(m2, nsamples = 100)
@@ -439,20 +452,20 @@ The posterior predictive plot in `r figr("m2_ppcheck")` gives an impression on h
 conditional_effects(m2)
 ```
 
+### Group + ConditionVI Model
 
-### Condition + Arm Model
-
+The last model included the instruction condition, more realistically reflecting the true structure of the data set. But it did not acknowledge that each subject executed several strokes in each of these conditions. This model includes a term with a varying intercept (VI) for condition to reflect just that, which will also assist in more realistically estimate the population effect of `cond`:
 
 ```{r}
-(m3_form <-bf(transSC ~ cond + arm +
-                (1 | subj) + 
-                (1 | cond) + 
-                (1 | arm)))
+(m3_form <- bf(transSC ~ patient + cond + 
+                 (1 | subj) + 
+                 (1 | cond)))
 ```
 
+Including more varying parameters in the model requires the prior on them to be even stronger:
 
 ```{r}
-(m3_prior <- c(set_prior("normal(0, 1)", class = "sd")))
+(m3_prior <- m2_prior)
 ```
 
 ```{r}
@@ -460,8 +473,8 @@ if (MODEL) {
   m3 <- brm(m3_form,
             prior = m3_prior,
             family = skew_normal(),
-            data = drum_beats,
-            control = list(adapt_delta = 0.95))
+            inits = "0",
+            data = drum_beats)
   m3 <- add_criterion(m3, 
                       "loo",
                       reloo = TRUE)
@@ -481,7 +494,7 @@ if (MODEL) {
                        priors = TRUE))
 ```
 
-In the Population-Level Effects section of `r figr("m3_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
+The intercept in `r figr("m3_summary")` amounts to roughly `r round(m3_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m3_summary$fixed["condN", "Estimate"])`). The table also shows that the inter-individual standard deviation (`sd(Intercept)` $\approx$ `r round(m3_summary$random$subj["sd(Intercept)", "Estimate"])` is not large anymore compared to the unexplained variation (`sigma` $\approx$ `r round(m3_summary$spec_pars["sigma", "Estimate"])`). 
 
 ```{r m3_ppcheck, anchor=FIGREF}
 pp_check(m3, nsamples = 100)
@@ -491,20 +504,23 @@ pp_check(m3, nsamples = 100)
 
 ***
 
+The posterior predictive plot in `r figr("m3_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
+
 ```{r}
 conditional_effects(m3)
 ```
 
-### Condition x Arm Model
+### Group x ConditionVI
 
+The last model included the instruction condition, more realistically reflecting the true structure of the data set. But it did not acknowledge that each subject executed several strokes in each of these conditions. This model includes a term with a varying intercept (VI) for condition to reflect just that, which will also assist in more realistically estimate the population effect of `cond`:
 
 ```{r}
-(m4_form <-bf(transSC ~ cond * arm +
-                (1 | subj) + 
-                (1 | cond) + 
-                (1 | arm)))
+(m4_form <- bf(transSC ~ patient * cond + 
+                 (1 | subj) + 
+                 (1 | cond)))
 ```
 
+Including more varying parameters in the model requires the prior on them to be even stronger:
 
 ```{r}
 (m4_prior <- m3_prior)
@@ -515,8 +531,8 @@ if (MODEL) {
   m4 <- brm(m4_form,
             prior = m4_prior,
             family = skew_normal(),
-            data = drum_beats,
-            control = list(adapt_delta = 0.95))
+            inits = "0",
+            data = drum_beats)
   m4 <- add_criterion(m4, 
                       "loo",
                       reloo = TRUE)
@@ -536,7 +552,7 @@ if (MODEL) {
                        priors = TRUE))
 ```
 
-In the Population-Level Effects section of `r figr("m4_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
+The intercept in `r figr("m4_summary")` amounts to roughly `r round(m4_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m4_summary$fixed["condN", "Estimate"])`). The table also shows that the inter-individual standard deviation (`sd(Intercept)` $\approx$ `r round(m4_summary$random$subj["sd(Intercept)", "Estimate"])` is not large anymore compared to the unexplained variation (`sigma` $\approx$ `r round(m4_summary$spec_pars["sigma", "Estimate"])`). 
 
 ```{r m4_ppcheck, anchor=FIGREF}
 pp_check(m4, nsamples = 100)
@@ -546,27 +562,21 @@ pp_check(m4, nsamples = 100)
 
 ***
 
-```{r, fig.width=12}
-wrap_plots(plot(conditional_effects(m4),
-             plot = FALSE)) +
-  plot_annotation(tag_levels = "A")
-```
-
-### Modeling Condition-specific Variation
-
-As is apparent from `r figr("DescriptorDensities")`, the controlled condition yielded broader density distributions in most descriptors. Hence, we model condition-dependent variation in the next model:
+The posterior predictive plot in `r figr("m4_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
 
 ```{r}
-(m5_form <-bf(transSC ~ cond * arm + 
-                (1 | subj) + 
-                (1 | cond) +
-                (1 | arm),
-              sigma ~ cond))
+conditional_effects(m4)
 ```
 
-This model has now two outcomes, not just one, as the models before. Spread is estimated as `sigma`, and it varies conditional on instruction condition.
+### Group x ConditionVI + Arm Model
 
-Here's the non-standard (additional) prior:
+
+```{r}
+(m5_form <- bf(transSC ~ patient * cond + arm +
+                 (1 | subj) + 
+                 (1 | cond)))
+```
+
 
 ```{r}
 (m5_prior <- m4_prior)
@@ -577,8 +587,8 @@ if (MODEL) {
   m5 <- brm(m5_form,
             prior = m5_prior,
             family = skew_normal(),
-            data = drum_beats,
-            control = list(adapt_delta = 0.95))
+            inits = "0",
+            data = drum_beats)
   m5 <- add_criterion(m5, 
                       "loo",
                       reloo = TRUE)
@@ -598,7 +608,7 @@ if (MODEL) {
                        priors = TRUE))
 ```
 
-In the Links section of the summary (`r figr("m5_summary")`) we note that sigma is no longer modeled on the identity scale but on the $\log_{2}$ scale. In the Population-Level Effects section of `r figr("m5_summary")` we now find not only the estimates for the Intercept and `condN` but also two estimates for sigma (one for the controlled [`sigma_Intercept`] and one for the normal condition [`sigma_condN`]). Because of this, there is no entry for sigma in the Family Specific section anymore. All this due to our explicit modeling of sigma conditional on instruction condition.
+In the Population-Level Effects section of `r figr("m5_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
 
 ```{r m5_ppcheck, anchor=FIGREF}
 pp_check(m5, nsamples = 100)
@@ -608,43 +618,18 @@ pp_check(m5, nsamples = 100)
 
 ***
 
-```{r m5_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
-p <- plot(conditional_effects(m5,
-                              dpar = "mu"),
-          plot = FALSE)
-p1 <- wrap_plots(p[[1]]+
-                   p[[2]] +
-                   p[[3]])
-p <- plot(conditional_effects(m5,
-                              dpar = "sigma"),
-          plot = FALSE)
-p2 <- wrap_plots(p[[1]]+
-                   p[[2]] +
-                   p[[3]])
-wrap_plots(p1, p2,
-           ncol = 1) +
-  plot_annotation(tag_levels = "A")
+```{r}
+conditional_effects(m5)
 ```
 
-`r figr("m5_condPlot", type = FIGREF)`. *Conditional plot.*
+### Group x Condition + ArmVI Model
 
-***
-
-In `r figr("m5_condPlot")` we see a difference between the mean ('mu') estimated value for `transSC` depending on instruction condition (A), but no difference between dominant and non-dominant arm (B). Consequently, there is no interaction in (C).
-
-The spread (`sigma`) of the estimated distributions also differs between conditions (D), but again not between arms (E). The latter is not surprising because we modeled sigma to vary conditional on condition, not arm.
-
-### Modeling Arm-specific Skewness
-
-At least in some descriptors in `r figr("DescriptorDensities")` the skewness of the distribution seems to change depending on the arm. The skew normal distribution is a generalization of the Gaussian distribution, allowing for the additional shape-parameter skewness (asymmetry) to vary. Hence, we model this side-dependent skewness in the next model:
 
 ```{r}
-(m6_form <-bf(transSC ~ cond * arm + 
+(m6_form <-bf(transSC ~ patient * cond + arm +
                 (1 | subj) + 
-                (1 | cond) +
-                (1 | arm),
-              sigma ~ cond,
-              alpha ~ arm))
+                (1 | cond) + 
+                (1 | arm)))
 ```
 
 
@@ -657,8 +642,8 @@ if (MODEL) {
   m6 <- brm(m6_form,
             prior = m6_prior,
             family = skew_normal(),
-            data = drum_beats,
-            control = list(adapt_delta = 0.95))
+            inits = "0",
+            data = drum_beats)
   m6 <- add_criterion(m6, 
                       "loo",
                       reloo = TRUE)
@@ -678,7 +663,7 @@ if (MODEL) {
                        priors = TRUE))
 ```
 
-In the Population-Level Effects section of `r figr("m6_summary")` are now two estimates for the skewness parameter alpha (one for the dominant [`alpha_Intercept`] and one for the non-dominant arm [`alpha_armND`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on arm.
+In the Population-Level Effects section of `r figr("m6_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
 
 ```{r m6_ppcheck, anchor=FIGREF}
 pp_check(m6, nsamples = 100)
@@ -688,52 +673,97 @@ pp_check(m6, nsamples = 100)
 
 ***
 
-```{r m6_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
-p <- plot(conditional_effects(m6,
-                              dpar = "mu"),
-          plot = FALSE)
-p1 <- wrap_plots(p[[1]] + xlab("") +
-                   p[[2]] + xlab("") + ylab("") +
-                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
-p <- plot(conditional_effects(m6,
-                              dpar = "alpha"),
-          plot = FALSE)
-p2 <- wrap_plots(p[[1]] + xlab("") +
-                   p[[2]] + xlab("") + ylab("") +
-                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
-p <- plot(conditional_effects(m6,
-                              dpar = "sigma"),
-          plot = FALSE)
-p3 <- wrap_plots(p[[1]] +
-                   p[[2]] + ylab("") +
-                   p[[3]] + ylab("") + theme(legend.position = "bottom"))
-wrap_plots(p1, p2, p3, 
-           ncol = 1) +
+```{r, fig.width=12}
+wrap_plots(plot(conditional_effects(m6),
+             plot = FALSE)) +
   plot_annotation(tag_levels = "A")
 ```
 
-`r figr("m6_condPlot", type = FIGREF)`. *Conditional plots.*
+### Group x Condition x ArmVI Model
 
-***
-
-In `r figr("m6_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). On the other hand, there is a difference in estimated skewness ('alpha') between sides (E), but not instructions (D). (F) follows from that. 'sigma' shows a clear difference between instructions (G), not so for side (H), which is mirrored in (I).
-
-### Modeling Influence of Instruction and Arm on Shape 
-
-To be able to see whether skewness and spread are depending on both experimental manipulation and arm, the model formulas for 'sigma' and 'alpha' are updated accordingly:
 
 ```{r}
-(m7_form <-bf(transSC ~ cond * arm + 
-                (1 | subj) + 
-                (1 | cond) +
-                (1 | arm),
-              sigma ~ cond + arm,
-              alpha ~ arm + cond))
+(m6a_form <-bf(transSC ~ patient * cond * arm +
+                 (1 | subj) + 
+                 (1 | cond) + 
+                 (1 | arm)))
 ```
 
 
 ```{r}
-(m7_prior <- m5_prior)
+(m6a_prior <- m6_prior)
+```
+
+```{r}
+if (MODEL) {
+  m6a <- brm(m6a_form,
+             prior = m6a_prior,
+             family = skew_normal(),
+             inits = "0",
+             data = drum_beats)
+  m6a <- add_criterion(m6a, 
+                       "loo",
+                       reloo = TRUE)
+  save(m6a, 
+       file = "m6a.rda")
+} else {
+  load("m6a.rda")
+}
+```
+
+***
+
+`r figr("m6a_summary", type = TABREF)`. *Model summary.*
+
+```{r m6a_summary, achor = TABREF}
+(m6a_summary <- summary(m6a, 
+                       priors = TRUE))
+```
+
+In the Population-Level Effects section of `r figr("m6a_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
+
+```{r m6a_ppcheck, anchor=FIGREF}
+pp_check(m6a, nsamples = 100)
+```
+
+`r figr("m6a_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+```{r m6a_conditionalPlots, fig.width=12}
+wrap_plots(plot(conditional_effects(m6a),
+                plot = FALSE)) +
+    plot_annotation(tag_levels = "A")
+```
+
+```{r m6a_3_way_intPlots}
+conditions <- make_conditions(drum_beats, 
+                              vars = "arm")
+conditional_effects(m6a, 
+                    effects = "patient:cond", 
+                    conditions = conditions)
+```
+
+### Modeling Condition-specific Variation
+
+As is apparent from `r figr("DescriptorDensities")`, the controlled condition yielded broader density distributions in most descriptors. Hence, we model condition-dependent variation in the next model:
+
+```{r}
+(m7_form <-bf(transSC ~ patient * cond * arm + 
+                (1 | subj) + 
+                (1 | cond) +
+                (1 | arm),
+              sigma ~ cond))
+```
+
+This model has now two outcomes, not just one, as the models before. Spread is estimated as `sigma`, and it varies conditional on instruction condition.
+
+Here's the non-standard (additional) prior:
+
+```{r}
+(m7_prior <- c(set_prior("normal(0, 3)",   class = "sd"),
+               set_prior("normal(0, 2)",   class = "alpha"),
+               set_prior("normal(0, 2)",   dpar = "sigma")))
 ```
 
 ```{r}
@@ -741,8 +771,8 @@ if (MODEL) {
   m7 <- brm(m7_form,
             prior = m7_prior,
             family = skew_normal(),
-            data = drum_beats,
-            control = list(adapt_delta = 0.95))
+            inits = "0",
+            data = drum_beats)
   m7 <- add_criterion(m7, 
                       "loo",
                       reloo = TRUE)
@@ -762,7 +792,7 @@ if (MODEL) {
                        priors = TRUE))
 ```
 
-In the Population-Level Effects section of `r figr("m7_summary")` are now three estimates for the skewness parameter alpha, as well as three estimates for spread ('sigma').
+In the Links section of the summary (`r figr("m7_summary")`) we note that sigma is no longer modeled on the identity scale but on the $\log_{2}$ scale. In the Population-Level Effects section of `r figr("m7_summary")` we now find not only the estimates for the Intercept and `condN` but also two estimates for sigma (one for the controlled [`sigma_Intercept`] and one for the normal condition [`sigma_condN`]). Because of this, there is no entry for sigma in the Family Specific section anymore. All this due to our explicit modeling of sigma conditional on instruction condition.
 
 ```{r m7_ppcheck, anchor=FIGREF}
 pp_check(m7, nsamples = 100)
@@ -772,148 +802,59 @@ pp_check(m7, nsamples = 100)
 
 ***
 
-```{r m7_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
+```{r m7_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
 p <- plot(conditional_effects(m7,
                               dpar = "mu"),
           plot = FALSE)
-p1 <- wrap_plots(p[[1]] + xlab("") +
-                   p[[2]] + xlab("") + ylab("") +
-                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
-p <- plot(conditional_effects(m7,
-                              dpar = "alpha"),
-          plot = FALSE)
-p2 <- wrap_plots(p[[1]] + xlab("") +
-                   p[[2]] + xlab("") + ylab("") +
-                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+p1 <- wrap_plots(p[[1]]+
+                   p[[2]] +
+                   p[[3]])
 p <- plot(conditional_effects(m7,
                               dpar = "sigma"),
           plot = FALSE)
-p3 <- wrap_plots(p[[1]] +
-                   p[[2]] + ylab("") +
-                   p[[3]] + ylab("") + theme(legend.position = "bottom"))
-wrap_plots(p1, p2, p3, 
+p2 <- wrap_plots(p[[1]]+
+                   p[[2]] +
+                   p[[3]])
+wrap_plots(p1, p2,
            ncol = 1) +
   plot_annotation(tag_levels = "A")
 ```
 
-`r figr("m7_condPlot", type = FIGREF)`. *Conditional plots.*
+`r figr("m7_condPlot", type = FIGREF)`. *Conditional plot.*
 
 ***
 
-In `r figr("m7_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). There is a difference in estimated skewness ('alpha') both between instructions (D) and sides (E), but with opposing trends. Nevertheless, there is no interaction between them (F). 'sigma' shows a clear difference between instructions (G) as well as for side (H), but albeit their opposing trends, there is no interaction (I).
+In `r figr("m7_condPlot")` we see a difference between the mean ('mu') estimated value for `transSC` depending on instruction condition (A), but no difference between dominant and non-dominant arm (B). Consequently, there is no interaction in (C).
 
-### Model Comparison
+The spread (`sigma`) of the estimated distributions also differs between conditions (D), but again not between arms (E). The latter is not surprising because we modeled sigma to vary conditional on condition, not arm.
 
-We compare models by their estimated log-posterior density (elpd). The smaller this value the better a model predicts the data, despite the penalty for additional covariates. When the difference between two models is more than two SE apart they are considered to be 'different enough' to warrant acceptance of one over the other despite possibly smaller parsimony.
+### Modeling Arm-specific Skewness
+
+At least in some descriptors in `r figr("DescriptorDensities")` the skewness of the distribution seems to change depending on the arm. The skew normal distribution is a generalization of the Gaussian distribution, allowing for the additional shape-parameter skewness (asymmetry) to vary. Hence, we model this side-dependent skewness in the next model:
 
 ```{r}
-loo_compare(m0, m1, m2, m3, m4, m5, m6, m7)
+(m8_form <-bf(transSC ~ patient * cond * arm + 
+                (1 | subj) + 
+                (1 | cond) +
+                (1 | arm),
+              sigma ~ cond,
+              alpha ~ arm))
 ```
 
-The model with the smallest `elpd` is `m7`, which corresponds to the last model. 
-
-### Conclusion
-
-Each row of the plot in `r figr("m7_condPlot")` represents the results of one of the three outcomes, each column shows the estimates for one condition/manipulation. The dots in these plots are the means of the posterior distributions of the respective estimate, and can be interpreted similarly to the point estimates in traditional frequentist statistics. The error bars represent 95% credible intervals, which are interpreted as comprising the true value with 95% probability, given the model and the data. 
-
-From the first row of `r figr("m7_condPlot")` we can infer that instructions had an effect on the mean, while arm had not. The second row suggests that instruction had a larger, and opposing, effect on skewness compared to arm arm, and finally, the third row claims the same for spread.
-
-On a different level of understanding these results this means that `transSC` is lower in the normal strokes, with almost no skewness (alpha is close to zero) and lower spread than in controlled strokes.
-
-Based on the above we can infer that instruction causes the most pronounced differences in `transSC`, while the playing arm only seems to invoke minor to no differences.
-
-## Adding the Response `transFlat` 
-
-In the following, the descriptor `transFlat` is added as an outcome to our model. Technically speaking, we would need to re-start our modeling attempt with the Null model and work our way up to the 'best' model as we have done with `transSC`. This is necessary because we cannot just assume that with an additional outcome (which will actually become three additional outcomes: mu, alpha and sigma) will be best explained by the same model as was with just one outcome variable.
-
-But we take a short cut here and just add `transFlat` to the best model of `transSC`.
-
-To be able to see whether skewness and spread are depending on both experimental manipulation and arm, the model formulas for 'sigma' and 'alpha' are updated accordingly:
 
 ```{r}
-(m8_form <-bf(mvbind(transSC, transFlat) ~ cond + arm + 
-                (1|p|cond) +
-                (1|q|arm) + 
-                (1|r|subj),
-              sigma ~ cond + arm,
-              alpha ~ arm + cond))
-```
-
-The prior probability on the individual intercepts needs to reflect that there are now two response variables:
-
-```{r}
-#                       prior     class      coef group      resp  dpar nlpar bound
-# 1                                   b                                            
-# 2                    lkj(1)       cor                                            
-# 3                                 cor             arm                            
-# 4                                 cor            cond                            
-# 5                                 cor            subj                            
-# 6                           Intercept                                            
-# 7                                   b                 transFlat                  
-# 8                                   b     armND       transFlat                  
-# 9                                   b     condN       transFlat                  
-# 10   student_t(3, 0.8, 2.5) Intercept                 transFlat                  
-# 11     student_t(3, 0, 2.5)        sd                 transFlat                  
-# 12                                 sd             arm transFlat                  
-# 13                                 sd Intercept   arm transFlat                  
-# 14                                 sd            cond transFlat                  
-# 15                                 sd Intercept  cond transFlat                  
-# 16                                 sd            subj transFlat                  
-# 17                                 sd Intercept  subj transFlat                  
-# 18                                  b                 transFlat alpha            
-# 19                                  b     armND       transFlat alpha            
-# 20                                  b     condN       transFlat alpha            
-# 21             normal(0, 4) Intercept                 transFlat alpha            
-# 22                                  b                 transFlat sigma            
-# 23                                  b     armND       transFlat sigma            
-# 24                                  b     condN       transFlat sigma            
-# 25     student_t(3, 0, 2.5) Intercept                 transFlat sigma            
-# 26                                  b                   transSC                  
-# 27                                  b     armND         transSC                  
-# 28                                  b     condN         transSC                  
-# 29 student_t(3, 735, 136.5) Intercept                   transSC                  
-# 30   student_t(3, 0, 136.5)        sd                   transSC                  
-# 31                                 sd             arm   transSC                  
-# 32                                 sd Intercept   arm   transSC                  
-# 33                                 sd            cond   transSC                  
-# 34                                 sd Intercept  cond   transSC                  
-# 35                                 sd            subj   transSC                  
-# 36                                 sd Intercept  subj   transSC                  
-# 37                                  b                   transSC alpha            
-# 38                                  b     armND         transSC alpha            
-# 39                                  b     condN         transSC alpha            
-# 40             normal(0, 4) Intercept                   transSC alpha            
-# 41                                  b                   transSC sigma            
-# 42                                  b     armND         transSC sigma            
-# 43                                  b     condN         transSC sigma            
-# 44     student_t(3, 0, 2.5) Intercept                   transSC sigma 
-(m8_prior <- c(
-  set_prior("normal(0.8, 0.01)", class = "Intercept", resp = "transFlat"),
-  set_prior("normal(0, 0.01)",   class = "b",         resp = "transFlat"),
-  set_prior("normal(0.8, 1)",   class = "Intercept", resp = "transSC"),
-  set_prior("normal(0, 1)",     class = "b",         resp = "transSC"),
-  set_prior("normal(0, 0.01)",   class = "Intercept", resp = "transFlat", dpar = "alpha"),
-  set_prior("normal(0, 0.01)",   class = "b",         resp = "transFlat", dpar = "alpha"),
-  set_prior("normal(0, 0.1)",   class = "Intercept", resp = "transSC",   dpar = "alpha"),
-  set_prior("normal(0, 0.1)",   class = "b",         resp = "transSC",   dpar = "alpha"),
-  set_prior("normal(0, 0.05)",   class = "Intercept", resp = "transSC",   dpar = "sigma"),
-  set_prior("normal(0, 0.05)",   class = "b",         resp = "transSC",   dpar = "sigma"),
-  set_prior("normal(0, 0.01)",   class = "Intercept", resp = "transFlat", dpar = "sigma"),
-  set_prior("normal(0, 0.01)",   class = "b",         resp = "transFlat", dpar = "sigma"),
-  set_prior("normal(0, 0.05)",   class = "sd",        resp = "transSC"),
-  set_prior("normal(0, 0.01)",  class = "sd",        resp = "transFlat"),
-  set_prior("lkj(5)",           class = "cor")))
+(m8_prior <- c(set_prior("normal(0, 3)",   class = "sd"),
+               set_prior("normal(0, 2)",   dpar = "sigma"),
+               set_prior("normal(0, 2)",   dpar = "alpha")))
 ```
 
 ```{r}
 if (MODEL) {
-  t <- Sys.time()
-  m8 <- brm(m8_form,            
+  m8 <- brm(m8_form,
             prior = m8_prior,
             family = skew_normal(),
-            data = drum_beats,
-            inits = "0")
-  print(Sys.time() - t)
+            inits = "0",
+            data = drum_beats)
   m8 <- add_criterion(m8, 
                       "loo",
                       reloo = TRUE)
@@ -933,11 +874,10 @@ if (MODEL) {
                        priors = TRUE))
 ```
 
-In the Population-Level Effects section of `r figr("m8_summary")` are now three estimates for the skewness parameter alpha, as well as three estimates for spread ('sigma').
+In the Population-Level Effects section of `r figr("m8_summary")` are now two estimates for the skewness parameter alpha (one for the dominant [`alpha_Intercept`] and one for the non-dominant arm [`alpha_armND`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on arm.
 
 ```{r m8_ppcheck, anchor=FIGREF}
-pp_check(m8, resp = "transSC", nsamples = 100)
-pp_check(m8, resp = "transFlat", nsamples = 100)
+pp_check(m8, nsamples = 100)
 ```
 
 `r figr("m8_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -972,13 +912,231 @@ wrap_plots(p1, p2, p3,
 
 ***
 
-In `r figr("m8_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). There is a difference in estimated skewness ('alpha') both between instructions (D) and sides (E), but with opposing trends. Nevertheless, there is no interaction between them (F). 'sigma' shows a clear difference between instructions (G) as well as for side (H), but albeit their opposing trends, there is no interaction (I).
+In `r figr("m8_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). On the other hand, there is a difference in estimated skewness ('alpha') between sides (E), but not instructions (D). (F) follows from that. 'sigma' shows a clear difference between instructions (G), not so for side (H), which is mirrored in (I).
+
+### Modeling Influence of Instruction and Arm on Shape 
+
+To be able to see whether skewness and spread are depending on both experimental manipulation and arm, the model formulas for 'sigma' and 'alpha' are updated accordingly:
+
+```{r}
+(m9_form <-bf(transSC ~ patient * cond * arm + 
+                (1 | subj) + 
+                (1 | cond) +
+                (1 | arm),
+              sigma ~ cond + arm,
+              alpha ~ arm + cond))
+```
+
+
+```{r}
+(m9_prior <- m8_prior)
+```
+
+```{r}
+if (MODEL) {
+  m9 <- brm(m9_form,
+            prior = m9_prior,
+            family = skew_normal(),
+            inits = "0",
+            data = drum_beats)
+  m9 <- add_criterion(m9, 
+                      "loo",
+                      reloo = TRUE)
+  save(m9, 
+       file = "m9.rda")
+} else {
+  load("m9.rda")
+}
+```
+
+***
+
+`r figr("m9_summary", type = TABREF)`. *Model summary.*
+
+```{r m9_summary, achor = TABREF}
+(m9_summary <- summary(m9, 
+                       priors = TRUE))
+```
+
+In the Population-Level Effects section of `r figr("m9_summary")` are now three estimates for the skewness parameter alpha, as well as three estimates for spread ('sigma').
+
+```{r m9_ppcheck, anchor=FIGREF}
+pp_check(m9, nsamples = 100)
+```
+
+`r figr("m9_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+```{r m9_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
+p <- plot(conditional_effects(m9, 
+                              dpar = "mu"),
+          plot = FALSE)
+p1 <- wrap_plots(p[[1]] + xlab("") +
+                   p[[2]] + xlab("") + ylab("") +
+                   p[[3]] + xlab("") + ylab("") +
+                   p[[4]] + xlab("") + ylab("") + theme(legend.position = "none") +
+                   p[[5]] + xlab("") + ylab("") + theme(legend.position = "none") +
+                   p[[6]] + xlab("") + ylab("") + theme(legend.position = "none"))
+p <- plot(conditional_effects(m9,
+                              dpar = "alpha"),
+          plot = FALSE)
+p2 <- wrap_plots(p[[1]] + xlab("") +
+                   p[[2]] + xlab("") + ylab("") +
+                   p[[3]] + xlab("") + ylab("") +
+                   p[[4]] + xlab("") + ylab("") + theme(legend.position = "none") +
+                   p[[5]] + xlab("") + ylab("") + theme(legend.position = "none") +
+                   p[[6]] + xlab("") + ylab("") + theme(legend.position = "none"))
+p <- plot(conditional_effects(m9,
+                              dpar = "sigma"),
+          plot = FALSE)
+p3 <- wrap_plots(p[[1]] +
+                   p[[2]] + ylab("") +
+                   p[[3]] + ylab("") +
+                   p[[4]] + ylab("") + theme(legend.position = "bottom") +
+                   p[[5]] + ylab("") + theme(legend.position = "bottom") +
+                   p[[6]] + ylab("") + theme(legend.position = "bottom"))
+wrap_plots(p1, p2, p3) +
+  plot_annotation(tag_levels = "A")
+```
+
+`r figr("m9_condPlot", type = FIGREF)`. *Conditional plots.*
+
+***
+
+In `r figr("m9_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). There is a difference in estimated skewness ('alpha') both between instructions (D) and sides (E), but with opposing trends. Nevertheless, there is no interaction between them (F). 'sigma' shows a clear difference between instructions (G) as well as for side (H), but albeit their opposing trends, there is no interaction (I).
+
+### Model Comparison
+
+We compare models by their estimated log-posterior density (elpd). The smaller this value the better a model predicts the data, despite the penalty for additional covariates. When the difference between two models is more than two SE apart they are considered to be 'different enough' to warrant acceptance of one over the other despite possibly smaller parsimony.
+
+```{r}
+loo_compare(m0, m2, m3, m5, m6, m6a, m7, m8, m9)
+```
+
+The model with the smallest `elpd` is `m9`, which corresponds to the last model. 
+
+### Conclusion
+
+Each row of the plot in `r figr("m9_condPlot")` represents the results of one of the three outcomes, each column shows the estimates for one condition/manipulation. The dots in these plots are the means of the posterior distributions of the respective estimate, and can be interpreted similarly to the point estimates in traditional frequentist statistics. The error bars represent 95% credible intervals, which are interpreted as comprising the true value with 95% probability, given the model and the data. 
+
+From the first row of `r figr("m9_condPlot")` we can infer that instructions had an effect on the mean, while arm had not. The second row suggests that instruction had a larger, and opposing, effect on skewness compared to arm arm, and finally, the third row claims the same for spread.
+
+On a different level of understanding these results this means that `transSC` is lower in the normal strokes, with almost no skewness (alpha is close to zero) and lower spread than in controlled strokes.
+
+Based on the above we can infer that instruction causes the most pronounced differences in `transSC`, while the playing arm only seems to invoke minor to no differences.
+
+## Adding the Response `transFlat` 
+
+In the following, the descriptor `transFlat` is added as an outcome to our model. Technically speaking, we would need to re-start our modeling attempt with the Null model and work our way up to the 'best' model as we have done with `transSC`. This is necessary because we cannot just assume that with an additional outcome (which will actually become three additional outcomes: mu, alpha and sigma) will be best explained by the same model as was with just one outcome variable.
+
+But we take a short cut here and just add `transFlat` to the best model of `transSC`.
+
+To be able to see whether skewness and spread are depending on both experimental manipulation and arm, the model formulas for 'sigma' and 'alpha' are updated accordingly:
+
+```{r}
+(m10_form <-bf(mvbind(transSC, transFlat) ~ cond + arm + 
+                 (1|p|cond) +
+                 (1|q|arm) + 
+                 (1|r|subj),
+               sigma ~ cond + arm,
+               alpha ~ arm + cond))
+```
+
+The prior probability on the individual intercepts needs to reflect that there are now two response variables:
+
+```{r}
+(m10_prior <- c(
+  set_prior("lkj(2)",         class = "cor"),
+  
+  set_prior("normal(0, 0.1)", class = "sd",        resp = "transFlat"),
+  set_prior("normal(0, 2)",   class = "b",         resp = "transFlat", dpar = "alpha"),
+  set_prior("normal(0, 2)",   class = "Intercept", resp = "transFlat", dpar = "alpha"),
+  set_prior("normal(0, 1)",   class = "Intercept", resp = "transFlat", dpar = "sigma"),
+  set_prior("normal(0, 1)",   class = "b",         resp = "transFlat", dpar = "sigma"),
+  
+  set_prior("normal(0, 0.1)", class = "sd",        resp = "transSC"),
+  set_prior("normal(0, 2)",   class = "b",         resp = "transSC",   dpar = "alpha"),
+  set_prior("normal(0, 2)",   class = "Intercept", resp = "transSC",   dpar = "alpha"),
+  set_prior("normal(0, 2)",   class = "Intercept", resp = "transSC",   dpar = "sigma"),
+  set_prior("normal(0, 2)",   class = "b",         resp = "transSC",   dpar = "sigma")
+))
+```
+
+```{r}
+if (MODEL) {
+  t <- Sys.time()
+  m10 <- brm(m10_form,            
+            prior = m10_prior,
+            family = skew_normal(),
+            data = drum_beats,
+            inits = "0")
+  print(Sys.time() - t)
+  m10 <- add_criterion(m10, 
+                      "loo",
+                      reloo = TRUE)
+  save(m10, 
+       file = "m10.rda")
+} else {
+  # load("m10.rda")
+}
+```
+
+***
+
+`r figr("m10_summary", type = TABREF)`. *Model summary.*
+
+```{r m10_summary, achor = TABREF}
+# (m10_summary <- summary(m10, 
+#                        priors = TRUE))
+```
+
+In the Population-Level Effects section of `r figr("m10_summary")` are now three estimates for the skewness parameter alpha, as well as three estimates for spread ('sigma').
+
+```{r m10_ppcheck, anchor=FIGREF}
+# pp_check(m10, resp = "transSC", nsamples = 100)
+# pp_check(m10, resp = "transFlat", nsamples = 100)
+```
+
+`r figr("m10_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+```{r m10_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
+# p <- plot(conditional_effects(m10,
+#                               dpar = "mu"),
+#           plot = FALSE)
+# p1 <- wrap_plots(p[[1]] + xlab("") +
+#                    p[[2]] + xlab("") + ylab("") +
+#                    p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+# p <- plot(conditional_effects(m10,
+#                               dpar = "alpha"),
+#           plot = FALSE)
+# p2 <- wrap_plots(p[[1]] + xlab("") +
+#                    p[[2]] + xlab("") + ylab("") +
+#                    p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+# p <- plot(conditional_effects(m10,
+#                               dpar = "sigma"),
+#           plot = FALSE)
+# p3 <- wrap_plots(p[[1]] +
+#                    p[[2]] + ylab("") +
+#                    p[[3]] + ylab("") + theme(legend.position = "bottom"))
+# wrap_plots(p1, p2, p3, 
+#            ncol = 1) +
+#   plot_annotation(tag_levels = "A")
+```
+
+`r figr("m10_condPlot", type = FIGREF)`. *Conditional plots.*
+
+***
+
+In `r figr("m10_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). There is a difference in estimated skewness ('alpha') both between instructions (D) and sides (E), but with opposing trends. Nevertheless, there is no interaction between them (F). 'sigma' shows a clear difference between instructions (G) as well as for side (H), but albeit their opposing trends, there is no interaction (I).
 
 
 ## transCrest
 
 # System Setup
 
-Data wrangling and analyses were carried out with the statistical package `R` [`r version$version.string`; @RCT2020]. Bayesian modeling was done with the package `brms` [@Buerkner2017;@Buerkner2018] which uses the probabilistic language Stan as back end [@Carpenter2017]. Plots were done with the packages `bayesplot` [@Gabry2020] and `ggplot2` [@Wickham2016].
+Data wrangling and analyses were carried out with the statistical package `R` [`r version$version.string`; @RCT2020]. Bayesian modeling was done with the package `brms` [@Buerkner2017;@Buerkner2018] which uses the probabilistic language Stan as back end [@Carpenter2017]. Plots were done with the packages `bayesplot` [@Gabry2020] and `ggplot2` [@Wickham3016].
 
 # References 
