@@ -275,7 +275,7 @@ Let's start with `transSC`<strike>`totDur`</strike>. Using an extended model des
 
 which claims that `transSC` is explained by ('~') an intercept, denoted by '1', and an additional term '(1 | subj)'. The '1' in parentheses again stands for the intercept, but the pipe '|' assigns an intercept to each level of the factor 'subj'. In this particular case this means that the model will estimate an individual intercept for each unique drummer listed in the data set column `subj`. These individual, or varying, intercepts are then used in informing the estimation of the population intercept.
 
-Note: set `MODEL` to `TRUE` at the top of the script if you didn't compile/build your model yet.
+Note: set `MODEL` to `TRUE` at the top of the script if you haven't compile/build your model yet.
 
 ```{r}
 if (MODEL) {
@@ -386,7 +386,8 @@ pp_check(m1, nsamples = 100)
 The posterior predictive plot in `r figr("m1_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the groups.
 
 ```{r}
-conditional_effects(m1)
+conditional_effects(m1,
+                    dpar = "mu")
 ```
 
 ### Group + Condition Model
@@ -449,7 +450,8 @@ pp_check(m2, nsamples = 100)
 The posterior predictive plot in `r figr("m2_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
 
 ```{r}
-conditional_effects(m2)
+conditional_effects(m2,
+                    dpar = "mu")
 ```
 
 ### Group + ConditionVI Model
@@ -507,7 +509,8 @@ pp_check(m3, nsamples = 100)
 The posterior predictive plot in `r figr("m3_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
 
 ```{r}
-conditional_effects(m3)
+conditional_effects(m3,
+                    dpar = "mu")
 ```
 
 ### Group x ConditionVI
@@ -565,7 +568,8 @@ pp_check(m4, nsamples = 100)
 The posterior predictive plot in `r figr("m4_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
 
 ```{r}
-conditional_effects(m4)
+conditional_effects(m4,
+                    dpar = "mu")
 ```
 
 ### Group x ConditionVI + Arm Model
@@ -619,7 +623,8 @@ pp_check(m5, nsamples = 100)
 ***
 
 ```{r}
-conditional_effects(m5)
+conditional_effects(m5,
+                    dpar = "mu")
 ```
 
 ### Group x Condition + ArmVI Model
@@ -673,10 +678,13 @@ pp_check(m6, nsamples = 100)
 
 ***
 
-```{r, fig.width=12}
-wrap_plots(plot(conditional_effects(m6),
-             plot = FALSE)) +
-  plot_annotation(tag_levels = "A")
+```{r}
+# , fig.width=12
+# wrap_plots(plot(conditional_effects(m6),
+#              plot = FALSE)) +
+#   plot_annotation(tag_levels = "A")
+conditional_effects(m6,
+                    dpar = "mu")
 ```
 
 ### Group x Condition x ArmVI Model
@@ -731,16 +739,19 @@ pp_check(m6a, nsamples = 100)
 ***
 
 ```{r m6a_conditionalPlots, fig.width=12}
-wrap_plots(plot(conditional_effects(m6a),
-                plot = FALSE)) +
-    plot_annotation(tag_levels = "A")
+# wrap_plots(plot(conditional_effects(m6a),
+#                 plot = FALSE)) +
+#     plot_annotation(tag_levels = "A")
 ```
 
 ```{r m6a_3_way_intPlots}
+conditional_effects(m6a,
+                    dpar = "mu")
 conditions <- make_conditions(drum_beats, 
                               vars = "arm")
-conditional_effects(m6a, 
-                    effects = "patient:cond", 
+conditional_effects(m6a,
+                    dpar = "mu",
+                    effects = "patient:cond",
                     conditions = conditions)
 ```
 
@@ -761,9 +772,10 @@ This model has now two outcomes, not just one, as the models before. Spread is e
 Here's the non-standard (additional) prior:
 
 ```{r}
-(m7_prior <- c(set_prior("normal(0, 3)",   class = "sd"),
-               set_prior("normal(0, 2)",   class = "alpha"),
-               set_prior("normal(0, 2)",   dpar = "sigma")))
+(m7_prior <- c(set_prior("normal(0, 3)", class = "sd"),
+               set_prior("normal(0, 2)", class = "alpha"),
+               set_prior("normal(0, 2)", class = "Intercept", dpar = "sigma"),
+               set_prior("normal(0, 2)", class = "b",         dpar = "sigma")))
 ```
 
 ```{r}
@@ -790,6 +802,12 @@ if (MODEL) {
 ```{r m7_summary, achor = TABREF}
 (m7_summary <- summary(m7, 
                        priors = TRUE))
+conditions <- make_conditions(drum_beats, 
+                              vars = "arm")
+conditional_effects(m7,
+                    dpar = "mu",
+                    effects = "patient:cond",
+                    conditions = conditions)
 ```
 
 In the Links section of the summary (`r figr("m7_summary")`) we note that sigma is no longer modeled on the identity scale but on the $\log_{2}$ scale. In the Population-Level Effects section of `r figr("m7_summary")` we now find not only the estimates for the Intercept and `condN` but also two estimates for sigma (one for the controlled [`sigma_Intercept`] and one for the normal condition [`sigma_condN`]). Because of this, there is no entry for sigma in the Family Specific section anymore. All this due to our explicit modeling of sigma conditional on instruction condition.
@@ -802,22 +820,27 @@ pp_check(m7, nsamples = 100)
 
 ***
 
-```{r m7_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
-p <- plot(conditional_effects(m7,
-                              dpar = "mu"),
-          plot = FALSE)
-p1 <- wrap_plots(p[[1]]+
-                   p[[2]] +
-                   p[[3]])
-p <- plot(conditional_effects(m7,
-                              dpar = "sigma"),
-          plot = FALSE)
-p2 <- wrap_plots(p[[1]]+
-                   p[[2]] +
-                   p[[3]])
-wrap_plots(p1, p2,
-           ncol = 1) +
-  plot_annotation(tag_levels = "A")
+```{r m7_condPlot, anchor=FIGREF}
+# , fig.width=12, fig.height=8
+# p <- plot(conditional_effects(m7,
+#                               dpar = "mu"),
+#           plot = FALSE)
+# p1 <- wrap_plots(p[[1]]+
+#                    p[[2]] +
+#                    p[[3]])
+# p <- plot(conditional_effects(m7,
+#                               dpar = "sigma"),
+#           plot = FALSE)
+# p2 <- wrap_plots(p[[1]]+
+#                    p[[2]] +
+#                    p[[3]])
+# wrap_plots(p1, p2,
+#            ncol = 1) +
+#   plot_annotation(tag_levels = "A")
+conditional_effects(m7,
+                    dpar = "mu")
+conditional_effects(m7,
+                    dpar = "sigma")
 ```
 
 `r figr("m7_condPlot", type = FIGREF)`. *Conditional plot.*
@@ -843,9 +866,11 @@ At least in some descriptors in `r figr("DescriptorDensities")` the skewness of 
 
 
 ```{r}
-(m8_prior <- c(set_prior("normal(0, 3)",   class = "sd"),
-               set_prior("normal(0, 2)",   dpar = "sigma"),
-               set_prior("normal(0, 2)",   dpar = "alpha")))
+(m8_prior <- c(set_prior("normal(0, 3)", class = "sd"),
+               set_prior("normal(0, 2)", class = "Intercept", dpar = "sigma"),
+               set_prior("normal(0, 2)", class = "b",         dpar = "sigma"),
+               set_prior("normal(0, 2)", class = "Intercept", dpar = "alpha"),
+               set_prior("normal(0, 2)", class = "b",         dpar = "alpha")))
 ```
 
 ```{r}
@@ -884,28 +909,49 @@ pp_check(m8, nsamples = 100)
 
 ***
 
-```{r m8_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
-p <- plot(conditional_effects(m8,
-                              dpar = "mu"),
-          plot = FALSE)
-p1 <- wrap_plots(p[[1]] + xlab("") +
-                   p[[2]] + xlab("") + ylab("") +
-                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
-p <- plot(conditional_effects(m8,
-                              dpar = "alpha"),
-          plot = FALSE)
-p2 <- wrap_plots(p[[1]] + xlab("") +
-                   p[[2]] + xlab("") + ylab("") +
-                   p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
-p <- plot(conditional_effects(m8,
-                              dpar = "sigma"),
-          plot = FALSE)
-p3 <- wrap_plots(p[[1]] +
-                   p[[2]] + ylab("") +
-                   p[[3]] + ylab("") + theme(legend.position = "bottom"))
-wrap_plots(p1, p2, p3, 
-           ncol = 1) +
-  plot_annotation(tag_levels = "A")
+```{r m8_condPlot, anchor=FIGREF}
+# , fig.width=12, fig.height=12
+# p <- plot(conditional_effects(m8,
+#                               dpar = "mu"),
+#           plot = FALSE)
+# p1 <- wrap_plots(p[[1]] + xlab("") +
+#                    p[[2]] + xlab("") + ylab("") +
+#                    p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+# p <- plot(conditional_effects(m8,
+#                               dpar = "alpha"),
+#           plot = FALSE)
+# p2 <- wrap_plots(p[[1]] + xlab("") +
+#                    p[[2]] + xlab("") + ylab("") +
+#                    p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
+# p <- plot(conditional_effects(m8,
+#                               dpar = "sigma"),
+#           plot = FALSE)
+# p3 <- wrap_plots(p[[1]] +
+#                    p[[2]] + ylab("") +
+#                    p[[3]] + ylab("") + theme(legend.position = "bottom"))
+# wrap_plots(p1, p2, p3, 
+#            ncol = 1) +
+#   plot_annotation(tag_levels = "A")
+conditional_effects(m8,
+                    dpar = "mu")
+conditions <- make_conditions(drum_beats, 
+                              vars = "arm")
+conditional_effects(m8,
+                    dpar = "mu",
+                    effects = "patient:cond",
+                    conditions = conditions)
+conditional_effects(m8,
+                    dpar = "sigma")
+conditional_effects(m8,
+                    dpar = "sigma",
+                    effects = "patient:cond",
+                    conditions = conditions)
+conditional_effects(m8,
+                    dpar = "alpha")
+conditional_effects(m8,
+                    dpar = "alpha",
+                    effects = "patient:cond",
+                    conditions = conditions)
 ```
 
 `r figr("m8_condPlot", type = FIGREF)`. *Conditional plots.*
@@ -968,36 +1014,57 @@ pp_check(m9, nsamples = 100)
 
 ***
 
-```{r m9_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
-p <- plot(conditional_effects(m9, 
-                              dpar = "mu"),
-          plot = FALSE)
-p1 <- wrap_plots(p[[1]] + xlab("") +
-                   p[[2]] + xlab("") + ylab("") +
-                   p[[3]] + xlab("") + ylab("") +
-                   p[[4]] + xlab("") + ylab("") + theme(legend.position = "none") +
-                   p[[5]] + xlab("") + ylab("") + theme(legend.position = "none") +
-                   p[[6]] + xlab("") + ylab("") + theme(legend.position = "none"))
-p <- plot(conditional_effects(m9,
-                              dpar = "alpha"),
-          plot = FALSE)
-p2 <- wrap_plots(p[[1]] + xlab("") +
-                   p[[2]] + xlab("") + ylab("") +
-                   p[[3]] + xlab("") + ylab("") +
-                   p[[4]] + xlab("") + ylab("") + theme(legend.position = "none") +
-                   p[[5]] + xlab("") + ylab("") + theme(legend.position = "none") +
-                   p[[6]] + xlab("") + ylab("") + theme(legend.position = "none"))
-p <- plot(conditional_effects(m9,
-                              dpar = "sigma"),
-          plot = FALSE)
-p3 <- wrap_plots(p[[1]] +
-                   p[[2]] + ylab("") +
-                   p[[3]] + ylab("") +
-                   p[[4]] + ylab("") + theme(legend.position = "bottom") +
-                   p[[5]] + ylab("") + theme(legend.position = "bottom") +
-                   p[[6]] + ylab("") + theme(legend.position = "bottom"))
-wrap_plots(p1, p2, p3) +
-  plot_annotation(tag_levels = "A")
+```{r m9_condPlot, anchor=FIGREF}
+# , fig.width=12, fig.height=12
+# p <- plot(conditional_effects(m9, 
+#                               dpar = "mu"),
+#           plot = FALSE)
+# p1 <- wrap_plots(p[[1]] + xlab("") +
+#                    p[[2]] + xlab("") + ylab("") +
+#                    p[[3]] + xlab("") + ylab("") +
+#                    p[[4]] + xlab("") + ylab("") + theme(legend.position = "none") +
+#                    p[[5]] + xlab("") + ylab("") + theme(legend.position = "none") +
+#                    p[[6]] + xlab("") + ylab("") + theme(legend.position = "none"))
+# p <- plot(conditional_effects(m9,
+#                               dpar = "alpha"),
+#           plot = FALSE)
+# p2 <- wrap_plots(p[[1]] + xlab("") +
+#                    p[[2]] + xlab("") + ylab("") +
+#                    p[[3]] + xlab("") + ylab("") +
+#                    p[[4]] + xlab("") + ylab("") + theme(legend.position = "none") +
+#                    p[[5]] + xlab("") + ylab("") + theme(legend.position = "none") +
+#                    p[[6]] + xlab("") + ylab("") + theme(legend.position = "none"))
+# p <- plot(conditional_effects(m9,
+#                               dpar = "sigma"),
+#           plot = FALSE)
+# p3 <- wrap_plots(p[[1]] +
+#                    p[[2]] + ylab("") +
+#                    p[[3]] + ylab("") +
+#                    p[[4]] + ylab("") + theme(legend.position = "bottom") +
+#                    p[[5]] + ylab("") + theme(legend.position = "bottom") +
+#                    p[[6]] + ylab("") + theme(legend.position = "bottom"))
+# wrap_plots(p1, p2, p3) +
+#   plot_annotation(tag_levels = "A")
+conditional_effects(m9,
+                    dpar = "mu")
+conditions <- make_conditions(drum_beats, 
+                              vars = "arm")
+conditional_effects(m9,
+                    dpar = "mu",
+                    effects = "patient:cond",
+                    conditions = conditions)
+conditional_effects(m9,
+                    dpar = "sigma")
+conditional_effects(m9,
+                    dpar = "sigma",
+                    effects = "patient:cond",
+                    conditions = conditions)
+conditional_effects(m9,
+                    dpar = "alpha")
+conditional_effects(m9,
+                    dpar = "alpha",
+                    effects = "patient:cond",
+                    conditions = conditions)
 ```
 
 `r figr("m9_condPlot", type = FIGREF)`. *Conditional plots.*
@@ -1102,7 +1169,8 @@ In the Population-Level Effects section of `r figr("m10_summary")` are now three
 
 ***
 
-```{r m10_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
+```{r m10_condPlot, anchor=FIGREF}
+# , fig.width=12, fig.height=12
 # p <- plot(conditional_effects(m10,
 #                               dpar = "mu"),
 #           plot = FALSE)
