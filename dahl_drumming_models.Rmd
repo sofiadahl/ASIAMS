@@ -772,10 +772,11 @@ This model has now two outcomes, not just one, as the models before. Spread is e
 Here's the non-standard (additional) prior:
 
 ```{r}
-(m7_prior <- c(set_prior("normal(0, 3)", class = "sd"),
-               set_prior("normal(0, 2)", class = "alpha"),
-               set_prior("normal(0, 2)", class = "Intercept", dpar = "sigma"),
-               set_prior("normal(0, 2)", class = "b",         dpar = "sigma")))
+(m7_prior <- c(set_prior("normal(0, 5)", class = "sd"),
+               set_prior("normal(0, 2)",  class = "alpha"),
+               set_prior("normal(0, 10)", class = "Intercept", dpar = "sigma"),
+               set_prior("normal(0, 10)", class = "b",         dpar = "sigma")
+))
 ```
 
 ```{r}
@@ -802,12 +803,6 @@ if (MODEL) {
 ```{r m7_summary, achor = TABREF}
 (m7_summary <- summary(m7, 
                        priors = TRUE))
-conditions <- make_conditions(drum_beats, 
-                              vars = "arm")
-conditional_effects(m7,
-                    dpar = "mu",
-                    effects = "patient:cond",
-                    conditions = conditions)
 ```
 
 In the Links section of the summary (`r figr("m7_summary")`) we note that sigma is no longer modeled on the identity scale but on the $\log_{2}$ scale. In the Population-Level Effects section of `r figr("m7_summary")` we now find not only the estimates for the Intercept and `condN` but also two estimates for sigma (one for the controlled [`sigma_Intercept`] and one for the normal condition [`sigma_condN`]). Because of this, there is no entry for sigma in the Family Specific section anymore. All this due to our explicit modeling of sigma conditional on instruction condition.
@@ -839,8 +834,18 @@ pp_check(m7, nsamples = 100)
 #   plot_annotation(tag_levels = "A")
 conditional_effects(m7,
                     dpar = "mu")
+conditions <- make_conditions(drum_beats, 
+                              vars = "arm")
+conditional_effects(m7,
+                    dpar = "mu",
+                    effects = "patient:cond",
+                    conditions = conditions)
 conditional_effects(m7,
                     dpar = "sigma")
+conditional_effects(m7,
+                    dpar = "sigma",
+                    effects = "patient:cond",
+                    conditions = conditions)
 ```
 
 `r figr("m7_condPlot", type = FIGREF)`. *Conditional plot.*
@@ -866,11 +871,12 @@ At least in some descriptors in `r figr("DescriptorDensities")` the skewness of 
 
 
 ```{r}
-(m8_prior <- c(set_prior("normal(0, 3)", class = "sd"),
-               set_prior("normal(0, 2)", class = "Intercept", dpar = "sigma"),
-               set_prior("normal(0, 2)", class = "b",         dpar = "sigma"),
-               set_prior("normal(0, 2)", class = "Intercept", dpar = "alpha"),
-               set_prior("normal(0, 2)", class = "b",         dpar = "alpha")))
+(m8_prior <- c(set_prior("normal(0, 3)",  class = "sd"),
+               set_prior("normal(0, 10)", class = "Intercept", dpar = "sigma"),
+               set_prior("normal(0, 10)", class = "b",         dpar = "sigma"),
+               set_prior("normal(0, 2)",  class = "Intercept", dpar = "alpha"),
+               set_prior("normal(0, 2)",  class = "b",         dpar = "alpha"))
+)
 ```
 
 ```{r}
@@ -960,7 +966,7 @@ conditional_effects(m8,
 
 In `r figr("m8_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). On the other hand, there is a difference in estimated skewness ('alpha') between sides (E), but not instructions (D). (F) follows from that. 'sigma' shows a clear difference between instructions (G), not so for side (H), which is mirrored in (I).
 
-### Modeling Influence of Instruction and Arm on Shape 
+### Modeling Influence of Arm on Shape 
 
 To be able to see whether skewness and spread are depending on both experimental manipulation and arm, the model formulas for 'sigma' and 'alpha' are updated accordingly:
 
@@ -969,12 +975,18 @@ To be able to see whether skewness and spread are depending on both experimental
                 (1 | subj) + 
                 (1 | cond) +
                 (1 | arm),
-              sigma ~ cond + arm,
-              alpha ~ arm + cond))
+              sigma ~ cond,
+              alpha ~ arm))
 ```
 
 
 ```{r}
+# (m8_prior <- c(set_prior("normal(0, 2)", class = "sd"),
+#                set_prior("normal(0, 0.7)", class = "Intercept", dpar = "sigma"),
+#                set_prior("normal(0, 0.7)", class = "sd",        dpar = "sigma"),
+#                set_prior("normal(0, 2)", class = "Intercept", dpar = "alpha"),
+#                set_prior("normal(0, 2)", class = "sd",        dpar = "alpha"))
+# )
 (m9_prior <- m8_prior)
 ```
 
@@ -1067,31 +1079,68 @@ conditional_effects(m9,
                     conditions = conditions)
 ```
 
-`r figr("m9_condPlot", type = FIGREF)`. *Conditional plots.*
+`r figr("m9_condPlot", type = FIGREF)`. *Conditional plots. Had to take out all the fancy figure polishing, subplot lettering etc. Subplots are supposed to be numbered from A to ... starting in the top left corner, proceeding row-wise.* 
 
 ***
 
-In `r figr("m9_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). There is a difference in estimated skewness ('alpha') both between instructions (D) and sides (E), but with opposing trends. Nevertheless, there is no interaction between them (F). 'sigma' shows a clear difference between instructions (G) as well as for side (H), but albeit their opposing trends, there is no interaction (I).
+In `r figr("m9_condPlot")` the dots are the means of the posterior distributions of the respective estimate, and can be interpreted similarly to the point estimates in traditional frequentist statistics. The error bars represent 95% credible intervals, which are interpreted as comprising the true value with 95% probability, given the model and the data.
+
+There is a difference in estimated the mean ('mu') of $transSC$ conditional on group (A) and condition (B), not so on arm (C). Likewise, there is a two-way  interaction between group and arm (D), but not between condition and arm (E). Consequently, there is no three-way interaction (F).
+
+The remaining, unexplained variation 'sigma' shows a clear difference between instructions (H) and lesser so for side (I), but albeit their opposing trends, there is no interaction (J thru M).
+
+There is a difference in estimated skewness ('alpha') both between instruction (O) and side (P), but with opposing trends. Nevertheless, there is no interaction between them (Q thru T). 
+
+From a data-driven perspective this should lead to a simplification of the model, leaving out all the unnecessary interaction terms. A theory-driven approach though requires the final model to be 'full' in the sense that all explanatory variables must interact with all others, implying that not finding an interaction between factors either is due to there really not being an interaction--rendering the model mis-specified and proving the underlying theory wrong--, or due to insufficient data. Since the data set at hand is very small I vote to blame the failure to find interactions between all factors on the small sample size and would therefore keep all interactions in the model. 
 
 ### Model Comparison
 
 We compare models by their estimated log-posterior density (elpd). The smaller this value the better a model predicts the data, despite the penalty for additional covariates. When the difference between two models is more than two SE apart they are considered to be 'different enough' to warrant acceptance of one over the other despite possibly smaller parsimony.
 
 ```{r}
-loo_compare(m0, m2, m3, m5, m6, m6a, m7, m8, m9)
+univ_model_compar <- loo_compare(m0, m2, m3, m5, m6, m6a, m7, m8, m9)
+print(univ_model_compar, simplify = T)
 ```
 
-The model with the smallest `elpd` is `m9`, which corresponds to the last model. 
+The model with the smallest `elpd` is `m9`, which corresponds to the last model (see [Modeling Influence of Instruction and Arm on Shape]). The difference between the best and the second-best model is `r round(univ_model_compar["m8", "elpd_diff"], 2)`, which is more than roughly two SE (2 x `r round(univ_model_compar["m8", "se_diff"], 2)` = `r round(2 * univ_model_compar["m8", "se_diff"], 2)`) away from 0.
 
 ### Conclusion
 
-Each row of the plot in `r figr("m9_condPlot")` represents the results of one of the three outcomes, each column shows the estimates for one condition/manipulation. The dots in these plots are the means of the posterior distributions of the respective estimate, and can be interpreted similarly to the point estimates in traditional frequentist statistics. The error bars represent 95% credible intervals, which are interpreted as comprising the true value with 95% probability, given the model and the data. 
+The fact that the full model turned out to be the best-fitting one suggests that the data really are best fit by this model, and that the patient term and the interaction terms really should remain in the model.
 
-From the first row of `r figr("m9_condPlot")` we can infer that instructions had an effect on the mean, while arm had not. The second row suggests that instruction had a larger, and opposing, effect on skewness compared to arm arm, and finally, the third row claims the same for spread.
+```{r BestModel3wayInteractPlot, anchor=FIGREF, fig.width = 12}
+wrap_plots(plot(conditional_effects(m9,
+                               dpar = "mu",
+                               effects = "patient:cond",
+                               conditions = conditions),
+                plot = FALSE)[[1]] + 
+             theme(legend.position = "none"),
+           plot(conditional_effects(m9,
+                               dpar = "sigma",
+                               effects = "patient:cond",
+                               conditions = conditions),
+                plot = FALSE)[[1]] + 
+             theme(legend.position = "none"), 
+           plot(conditional_effects(m9,
+                               dpar = "alpha",
+                               effects = "patient:cond",
+                               conditions = conditions),
+                plot = FALSE)[[1]]) + 
+             plot_annotation(tag_levels = "A")
+```
 
-On a different level of understanding these results this means that `transSC` is lower in the normal strokes, with almost no skewness (alpha is close to zero) and lower spread than in controlled strokes.
+`r figr("BestModel3wayInteractPlot", type = FIGREF)`. *Three-way interaction plots of the three modeled parameters $\mu$, $\sigma$, and $\alpha$ as estimated by the best-fitting model. The x axis shows group membership (0 = healthy subjects, 1 = patients). The instruction conditions are color-coded (red = controlled strokes, green = normal strokes), and the facets show the side (1 = dominant, 2 = non-dominant).*
 
-Based on the above we can infer that instruction causes the most pronounced differences in `transSC`, while the playing arm only seems to invoke minor to no differences.
+***
+
+`r figr("BestModel3wayInteractPlot")`A suggests that $\mu$ is higher for healthy subjects than for patients, and higher for controlled strokes than for normal strokes which is really odd on an intuitive level and seems contradictive (at least to me). I would've expected `transSC` to 
+
+`r figr("BestModel3wayInteractPlot")`N might clarify why this is the case, because it shows a higher unexplained variation in the data for controlled strokes as compared to normal strokes. 
+
+ (see *e.g.*, [here](https://en.wikipedia.org/wiki/Skewness#Introduction), 
+
+On a different level of understanding these results mean that `transSC` is lower in the normal strokes, with almost no skewness (alpha is close to zero) and lower spread than in controlled strokes.
+
 
 ## Adding the Response `transFlat` 
 
@@ -1205,6 +1254,6 @@ In `r figr("m10_condPlot")` there is a clear difference in estimated mean ('mu')
 
 # System Setup
 
-Data wrangling and analyses were carried out with the statistical package `R` [`r version$version.string`; @RCT2020]. Bayesian modeling was done with the package `brms` [@Buerkner2017;@Buerkner2018] which uses the probabilistic language Stan as back end [@Carpenter2017]. Plots were done with the packages `bayesplot` [@Gabry2020] and `ggplot2` [@Wickham3016].
+Data wrangling and analyses were carried out with the statistical package `R` [`r version$version.string`; @RCT2020]. Bayesian modeling was done with the package `brms` [@Buerkner2017;@Buerkner2018] which uses the probabilistic language Stan as back end [@Carpenter2017]. Plots were done with the packages `bayesplot` [@Gabry2020] and `ggplot2` [@Wickham2016].
 
 # References 
