@@ -981,12 +981,6 @@ To be able to see whether skewness and spread are depending on both experimental
 
 
 ```{r}
-# (m8_prior <- c(set_prior("normal(0, 2)", class = "sd"),
-#                set_prior("normal(0, 0.7)", class = "Intercept", dpar = "sigma"),
-#                set_prior("normal(0, 0.7)", class = "sd",        dpar = "sigma"),
-#                set_prior("normal(0, 2)", class = "Intercept", dpar = "alpha"),
-#                set_prior("normal(0, 2)", class = "sd",        dpar = "alpha"))
-# )
 (m9_prior <- m8_prior)
 ```
 
@@ -1093,35 +1087,154 @@ There is a difference in estimated skewness ('alpha') both between instruction (
 
 From a data-driven perspective this should lead to a simplification of the model, leaving out all the unnecessary interaction terms. A theory-driven approach though requires the final model to be 'full' in the sense that all explanatory variables must interact with all others, implying that not finding an interaction between factors either is due to there really not being an interaction--rendering the model mis-specified and proving the underlying theory wrong--, or due to insufficient data. Since the data set at hand is very small I vote to blame the failure to find interactions between all factors on the small sample size and would therefore keep all interactions in the model. 
 
+### Modeling Interactions of Arm and Instruction on Shape and Spread
+
+
+```{r}
+(m10_form <-bf(transSC ~ patient * cond * arm + 
+                (1 | subj) + 
+                (1 | cond) +
+                (1 | arm),
+              sigma ~ cond * arm,
+              alpha ~ cond * arm))
+```
+
+
+```{r}
+(m10_prior <- m9_prior)
+```
+
+```{r}
+if (MODEL) {
+  m10 <- brm(m10_form,
+            prior = m10_prior,
+            family = skew_normal(),
+            inits = "0",
+            data = drum_beats)
+  m10 <- add_criterion(m10, 
+                      "loo",
+                      reloo = TRUE)
+  save(m10, 
+       file = "m10.rda")
+} else {
+  load("m10.rda")
+}
+```
+
+***
+
+`r figr("m10_summary", type = TABREF)`. *Model summary.*
+
+```{r m10_summary, achor = TABREF}
+(m10_summary <- summary(m10, 
+                       priors = TRUE))
+```
+
+
+```{r m10_ppcheck, anchor=FIGREF}
+pp_check(m10, nsamples = 100)
+```
+
+`r figr("m10_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+
+***
+
+```{r m10_condPlot, anchor=FIGREF}
+# , fig.width=12, fig.height=12
+# p <- plot(conditional_effects(m10, 
+#                               dpar = "mu"),
+#           plot = FALSE)
+# p1 <- wrap_plots(p[[1]] + xlab("") +
+#                    p[[2]] + xlab("") + ylab("") +
+#                    p[[3]] + xlab("") + ylab("") +
+#                    p[[4]] + xlab("") + ylab("") + theme(legend.position = "none") +
+#                    p[[5]] + xlab("") + ylab("") + theme(legend.position = "none") +
+#                    p[[6]] + xlab("") + ylab("") + theme(legend.position = "none"))
+# p <- plot(conditional_effects(m10,
+#                               dpar = "alpha"),
+#           plot = FALSE)
+# p2 <- wrap_plots(p[[1]] + xlab("") +
+#                    p[[2]] + xlab("") + ylab("") +
+#                    p[[3]] + xlab("") + ylab("") +
+#                    p[[4]] + xlab("") + ylab("") + theme(legend.position = "none") +
+#                    p[[5]] + xlab("") + ylab("") + theme(legend.position = "none") +
+#                    p[[6]] + xlab("") + ylab("") + theme(legend.position = "none"))
+# p <- plot(conditional_effects(m10,
+#                               dpar = "sigma"),
+#           plot = FALSE)
+# p3 <- wrap_plots(p[[1]] +
+#                    p[[2]] + ylab("") +
+#                    p[[3]] + ylab("") +
+#                    p[[4]] + ylab("") + theme(legend.position = "bottom") +
+#                    p[[5]] + ylab("") + theme(legend.position = "bottom") +
+#                    p[[6]] + ylab("") + theme(legend.position = "bottom"))
+# wrap_plots(p1, p2, p3) +
+#   plot_annotation(tag_levels = "A")
+conditional_effects(m10,
+                    dpar = "mu")
+conditions <- make_conditions(drum_beats, 
+                              vars = "arm")
+conditional_effects(m10,
+                    dpar = "mu",
+                    effects = "patient:cond",
+                    conditions = conditions)
+conditional_effects(m10,
+                    dpar = "sigma")
+conditional_effects(m10,
+                    dpar = "sigma",
+                    effects = "patient:cond",
+                    conditions = conditions)
+conditional_effects(m10,
+                    dpar = "alpha")
+conditional_effects(m10,
+                    dpar = "alpha",
+                    effects = "patient:cond",
+                    conditions = conditions)
+```
+
+`r figr("m10_condPlot", type = FIGREF)`. *Conditional plots. Had to take out all the fancy figure polishing, subplot lettering etc. Subplots are supposed to be numbered from A to ... starting in the top left corner, proceeding row-wise.* 
+
+***
+
+In `r figr("m10_condPlot")` the dots are the means of the posterior distributions of the respective estimate, and can be interpreted similarly to the point estimates in traditional frequentist statistics. The error bars represent 95% credible intervals, which are interpreted as comprising the true value with 95% probability, given the model and the data.
+
+There is a difference in estimated the mean ('mu') of $transSC$ conditional on group (A) and condition (B), not so on arm (C). Likewise, there is a two-way  interaction between group and arm (D), but not between condition and arm (E). Consequently, there is no three-way interaction (F).
+
+The remaining, unexplained variation 'sigma' shows a clear difference between instructions (H) and lesser so for side (I), but albeit their opposing trends, there is no interaction (J thru M).
+
+There is a difference in estimated skewness ('alpha') both between instruction (O) and side (P), but with opposing trends. Nevertheless, there is no interaction between them (Q thru T). 
+
+From a data-driven perspective this should lead to a simplification of the model, leaving out all the unnecessary interaction terms. A theory-driven approach though requires the final model to be 'full' in the sense that all explanatory variables must interact with all others, implying that not finding an interaction between factors either is due to there really not being an interaction--rendering the model mis-specified and proving the underlying theory wrong--, or due to insufficient data. Since the data set at hand is very small I vote to blame the failure to find interactions between all factors on the small sample size and would therefore keep all interactions in the model. 
+
 ### Model Comparison
 
 We compare models by their estimated log-posterior density (elpd). The smaller this value the better a model predicts the data, despite the penalty for additional covariates. When the difference between two models is more than two SE apart they are considered to be 'different enough' to warrant acceptance of one over the other despite possibly smaller parsimony.
 
 ```{r}
-univ_model_compar <- loo_compare(m0, m2, m3, m5, m6, m6a, m7, m8, m9)
+univ_model_compar <- loo_compare(m0, m2, m3, m5, m6, m6a, m7, m8, m9, m10)
 print(univ_model_compar, simplify = T)
 ```
 
-The model with the smallest `elpd` is `m9`, which corresponds to the last model (see [Modeling Influence of Instruction and Arm on Shape]). The difference between the best and the second-best model is `r round(univ_model_compar["m8", "elpd_diff"], 2)`, which is more than roughly two SE (2 x `r round(univ_model_compar["m8", "se_diff"], 2)` = `r round(2 * univ_model_compar["m8", "se_diff"], 2)`) away from 0.
+The model with the smallest `elpd` is `m10`, which corresponds to the last model (see [Modeling Influence of Instruction and Arm on Shape]). The difference between the best and the second-best model is `r round(univ_model_compar["m9", "elpd_diff"], 2)`, which is more than roughly two SE (2 x `r round(univ_model_compar["m9", "se_diff"], 2)` = `r round(2 * univ_model_compar["m9", "se_diff"], 2)`) away from 0.
 
 ### Conclusion
 
 The fact that the full model turned out to be the best-fitting one suggests that the data really are best fit by this model, and that the patient term and the interaction terms really should remain in the model.
 
 ```{r BestModel3wayInteractPlot, anchor=FIGREF, fig.width = 12}
-wrap_plots(plot(conditional_effects(m9,
+wrap_plots(plot(conditional_effects(m10,
                                dpar = "mu",
                                effects = "patient:cond",
                                conditions = conditions),
                 plot = FALSE)[[1]] + 
              theme(legend.position = "none"),
-           plot(conditional_effects(m9,
+           plot(conditional_effects(m10,
                                dpar = "sigma",
                                effects = "patient:cond",
                                conditions = conditions),
                 plot = FALSE)[[1]] + 
              theme(legend.position = "none"), 
-           plot(conditional_effects(m9,
+           plot(conditional_effects(m10,
                                dpar = "alpha",
                                effects = "patient:cond",
                                conditions = conditions),
@@ -1151,7 +1264,7 @@ But we take a short cut here and just add `transFlat` to the best model of `tran
 To be able to see whether skewness and spread are depending on both experimental manipulation and arm, the model formulas for 'sigma' and 'alpha' are updated accordingly:
 
 ```{r}
-(m10_form <-bf(mvbind(transSC, transFlat) ~ cond + arm + 
+(m12_form <-bf(mvbind(transSC, transFlat) ~ cond + arm + 
                  (1|p|cond) +
                  (1|q|arm) + 
                  (1|r|subj),
@@ -1162,7 +1275,7 @@ To be able to see whether skewness and spread are depending on both experimental
 The prior probability on the individual intercepts needs to reflect that there are now two response variables:
 
 ```{r}
-(m10_prior <- c(
+(m12_prior <- c(
   set_prior("lkj(2)",         class = "cor"),
   
   set_prior("normal(0, 0.1)", class = "sd",        resp = "transFlat"),
@@ -1182,57 +1295,57 @@ The prior probability on the individual intercepts needs to reflect that there a
 ```{r}
 if (MODEL) {
   t <- Sys.time()
-  m10 <- brm(m10_form,            
-            prior = m10_prior,
+  m12 <- brm(m12_form,            
+            prior = m12_prior,
             family = skew_normal(),
             data = drum_beats,
             inits = "0")
   print(Sys.time() - t)
-  m10 <- add_criterion(m10, 
+  m12 <- add_criterion(m12, 
                       "loo",
                       reloo = TRUE)
-  save(m10, 
-       file = "m10.rda")
+  save(m12, 
+       file = "m12.rda")
 } else {
-  # load("m10.rda")
+  # load("m12.rda")
 }
 ```
 
 ***
 
-`r figr("m10_summary", type = TABREF)`. *Model summary.*
+`r figr("m12_summary", type = TABREF)`. *Model summary.*
 
-```{r m10_summary, achor = TABREF}
-# (m10_summary <- summary(m10, 
+```{r m12_summary, achor = TABREF}
+# (m12_summary <- summary(m12, 
 #                        priors = TRUE))
 ```
 
-In the Population-Level Effects section of `r figr("m10_summary")` are now three estimates for the skewness parameter alpha, as well as three estimates for spread ('sigma').
+In the Population-Level Effects section of `r figr("m12_summary")` are now three estimates for the skewness parameter alpha, as well as three estimates for spread ('sigma').
 
-```{r m10_ppcheck, anchor=FIGREF}
-# pp_check(m10, resp = "transSC", nsamples = 100)
-# pp_check(m10, resp = "transFlat", nsamples = 100)
+```{r m12_ppcheck, anchor=FIGREF}
+# pp_check(m12, resp = "transSC", nsamples = 100)
+# pp_check(m12, resp = "transFlat", nsamples = 100)
 ```
 
-`r figr("m10_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+`r figr("m12_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
 
 ***
 
-```{r m10_condPlot, anchor=FIGREF}
+```{r m12_condPlot, anchor=FIGREF}
 # , fig.width=12, fig.height=12
-# p <- plot(conditional_effects(m10,
+# p <- plot(conditional_effects(m12,
 #                               dpar = "mu"),
 #           plot = FALSE)
 # p1 <- wrap_plots(p[[1]] + xlab("") +
 #                    p[[2]] + xlab("") + ylab("") +
 #                    p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
-# p <- plot(conditional_effects(m10,
+# p <- plot(conditional_effects(m12,
 #                               dpar = "alpha"),
 #           plot = FALSE)
 # p2 <- wrap_plots(p[[1]] + xlab("") +
 #                    p[[2]] + xlab("") + ylab("") +
 #                    p[[3]] + xlab("") + ylab("") + theme(legend.position = "none"))
-# p <- plot(conditional_effects(m10,
+# p <- plot(conditional_effects(m12,
 #                               dpar = "sigma"),
 #           plot = FALSE)
 # p3 <- wrap_plots(p[[1]] +
@@ -1243,11 +1356,11 @@ In the Population-Level Effects section of `r figr("m10_summary")` are now three
 #   plot_annotation(tag_levels = "A")
 ```
 
-`r figr("m10_condPlot", type = FIGREF)`. *Conditional plots.*
+`r figr("m12_condPlot", type = FIGREF)`. *Conditional plots.*
 
 ***
 
-In `r figr("m10_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). There is a difference in estimated skewness ('alpha') both between instructions (D) and sides (E), but with opposing trends. Nevertheless, there is no interaction between them (F). 'sigma' shows a clear difference between instructions (G) as well as for side (H), but albeit their opposing trends, there is no interaction (I).
+In `r figr("m12_condPlot")` there is a clear difference in estimated mean ('mu') of $transSC$ conditional on instruction (A), but not on arm (B). Consequently, there is no interaction between instruction and arm (C). There is a difference in estimated skewness ('alpha') both between instructions (D) and sides (E), but with opposing trends. Nevertheless, there is no interaction between them (F). 'sigma' shows a clear difference between instructions (G) as well as for side (H), but albeit their opposing trends, there is no interaction (I).
 
 
 ## transCrest
