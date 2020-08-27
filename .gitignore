@@ -6,6 +6,8 @@ m*.rda
 .Rproj.user
 README.html
 scriptGuide.html
+test.Rmd
+test.html
 
 # dataset
 /calibrationFiles

@@ -36,3 +36,17 @@ modify_prior <- function(x, prior = NULL, class = NULL, coef = NULL,
                          nlpar = NULL, bound = NULL) {
 
 }
+beautify_my_plot <- function(x, tag_levels = "A") {
+  n_plots <- length(x)
+  pp <- vector("list", length = n_plots)
+  for (n in 1:n_plots) {
+    pp[[n]] <- x[[n]] +
+      scale_color_colorblind()
+  }
+  if (n_plots > 1) {
+    wrap_plots(pp) +
+      plot_annotation(tag_levels = tag_levels)
+  } else {
+    wrap_plots(pp)
+  }
+}
