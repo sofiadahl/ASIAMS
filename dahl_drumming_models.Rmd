@@ -262,6 +262,84 @@ Comparing the two rows of panels in `r figr("DensIndivSeriesGroupedPlot")` revea
 
 Although tempting, we probably shouldn't get carried away and generalize to the populations of healthy drummers and ones with movement disorders, respectively.
 
+For completeness sake the same exploratory analysis was carried out for `transFlat` and transCrest`:
+
+```{r DensIndivRespPlot_transFlat, anchor=FIGREF}
+ggplot(drum_beats, aes(transFlat, 
+                       color = subj, 
+                       linetype = cond)) + 
+  geom_density(alpha = 0.1) +
+  scale_color_colorblind() 
+```
+
+`r figr("DensIndivRespPlot_transFlat", type = FIGREF)`. *`transFlat` density distribution of participants, broken down by instruction condition.*
+
+***
+
+```{r DensIndivRespGrouped_transFlatPlot, ancho=FIGREF}
+ggplot(drum_beats, aes(transFlat, 
+                       color = subj, 
+                       linetype = cond)) + 
+  geom_density(alpha = 0.1) +
+  scale_color_colorblind() +
+  facet_wrap(~ patient)
+```
+
+`r figr("DensIndivRespGrouped_transFlatPlot", type = FIGREF)`. *`transFlat` density distribution of participants, broken down by instruction condition and group (patients and healthy subjects).*
+
+***
+
+```{r DensIndivSeriesGrouped_transFlatPlot, anchor=FIGREF, fig.width=7}
+ggplot(drum_beats, aes(transFlat, 
+                       color = cond, 
+                       group = series)) + 
+  geom_density(alpha = 0.1) +
+  scale_color_colorblind() +
+  facet_wrap(~ subj, nrow = 2)
+```
+
+`r figr("DensIndivSeriesGrouped_transFlatPlot", type = FIGREF)`. *`transFlat` density plots of individual series.*
+
+***
+
+```{r DensIndivRespPlot_transCrest, anchor=FIGREF}
+ggplot(drum_beats, aes(transCrest, 
+                       color = subj, 
+                       linetype = cond)) + 
+  geom_density(alpha = 0.1) +
+  scale_color_colorblind() 
+```
+
+`r figr("DensIndivRespPlot_transCrest", type = FIGREF)`. *`transCrest` density distribution of participants, broken down by instruction condition.*
+
+***
+
+```{r DensIndivRespGrouped_transCrestPlot, ancho=FIGREF}
+ggplot(drum_beats, aes(transCrest, 
+                       color = subj, 
+                       linetype = cond)) + 
+  geom_density(alpha = 0.1) +
+  scale_color_colorblind() +
+  facet_wrap(~ patient)
+```
+
+`r figr("DensIndivRespGrouped_transCrestPlot", type = FIGREF)`. *`transCrest` density distribution of participants, broken down by instruction condition and group (patients and healthy subjects).*
+
+***
+
+```{r DensIndivSeriesGrouped_transCrestPlot, anchor=FIGREF, fig.width=7}
+ggplot(drum_beats, aes(transCrest, 
+                       color = cond, 
+                       group = series)) + 
+  geom_density(alpha = 0.1) +
+  scale_color_colorblind() +
+  facet_wrap(~ subj, nrow = 2)
+```
+
+`r figr("DensIndivSeriesGrouped_transCrestPlot", type = FIGREF)`. *`transCrest` density plots of individual series.*
+
+***
+
 ## Covariance Matrix
 
 ```{r}
