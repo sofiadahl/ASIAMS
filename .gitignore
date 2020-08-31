@@ -21,3 +21,6 @@ data.mat
 # bib
 *.bib.bak
 *.bib.sav
+
+# Listening test
+*.wav
