@@ -225,7 +225,7 @@ It is obvious that some participants do not differ substantially between the nor
 
 The wide distribution of centers of mass between individuals made me want to further break down the plot.
 
-```{r DensIndivRespGroupedPlot, ancho=FIGREF}
+```{r DensIndivRespGroupedPlot, ancho=FIGREF, fig.width=7}
 ggplot(drum_beats, aes(transSC, 
                        color = subj, 
                        linetype = cond)) + 
@@ -242,7 +242,7 @@ The above plot is interesting in that it seems to show that the four healthy sub
 
 While breaking it down it occurred to me that looking at individual variation (that is, between series) might also be enlightening.
 
-```{r DensIndivSeriesGroupedPlot, anchor=FIGREF, fig.width=7}
+```{r DensIndivSeriesGroupedPlot, anchor=FIGREF, fig.width=12, fig.height=7}
 ggplot(drum_beats, aes(transSC, 
                        color = cond, 
                        group = series)) + 
@@ -266,7 +266,7 @@ Although tempting, we probably shouldn't get carried away and generalize to the 
 
 For completeness' sake the same exploratory analysis was carried out for `transFlat` and transCrest`:
 
-```{r DensIndivRespPlot_transFlat, anchor=FIGREF}
+```{r DensIndivRespPlot_transFlat, anchor=FIGREF, fig.width=7}
 ggplot(drum_beats, aes(transFlat, 
                        color = subj, 
                        linetype = cond)) + 
@@ -278,7 +278,7 @@ ggplot(drum_beats, aes(transFlat,
 
 ***
 
-```{r DensIndivRespGrouped_transFlatPlot, ancho=FIGREF}
+```{r DensIndivRespGrouped_transFlatPlot, ancho=FIGREF, fig.width=7}
 ggplot(drum_beats, aes(transFlat, 
                        color = subj, 
                        linetype = cond)) + 
@@ -291,7 +291,7 @@ ggplot(drum_beats, aes(transFlat,
 
 ***
 
-```{r DensIndivSeriesGrouped_transFlatPlot, anchor=FIGREF, fig.width=7}
+```{r DensIndivSeriesGrouped_transFlatPlot, anchor=FIGREF, fig.width=12, fig.height=7}
 ggplot(drum_beats, aes(transFlat, 
                        color = cond, 
                        group = series)) + 
@@ -304,7 +304,7 @@ ggplot(drum_beats, aes(transFlat,
 
 ***
 
-```{r DensIndivRespPlot_transCrest, anchor=FIGREF}
+```{r DensIndivRespPlot_transCrest, anchor=FIGREF, fig.width=7}
 ggplot(drum_beats, aes(transCrest, 
                        color = subj, 
                        linetype = cond)) + 
@@ -316,7 +316,7 @@ ggplot(drum_beats, aes(transCrest,
 
 ***
 
-```{r DensIndivRespGrouped_transCrestPlot, ancho=FIGREF}
+```{r DensIndivRespGrouped_transCrestPlot, ancho=FIGREF, fig.width=7}
 ggplot(drum_beats, aes(transCrest, 
                        color = subj, 
                        linetype = cond)) + 
@@ -329,7 +329,7 @@ ggplot(drum_beats, aes(transCrest,
 
 ***
 
-```{r DensIndivSeriesGrouped_transCrestPlot, anchor=FIGREF, fig.width=7}
+```{r DensIndivSeriesGrouped_transCrestPlot, anchor=FIGREF, fig.width=12, fig.height=7}
 ggplot(drum_beats, aes(transCrest, 
                        color = cond, 
                        group = series)) + 
@@ -367,7 +367,7 @@ Let's start with `transSC`<strike>`totDur`</strike>. Using an extended model des
 
 which claims that `transSC` is explained by ('~') an intercept, denoted by '1', and an additional term '(1 | subj)'. The '1' in parentheses again stands for the intercept, but the pipe '|' assigns an intercept to each level of the factor 'subj'. In this particular case this means that the model will estimate an individual intercept for each unique drummer listed in the data set column `subj`. These individual, or varying, intercepts are then used in informing the estimation of the population intercept.
 
-Note: set `MODEL` to `TRUE` at the top of the script if you haven't compile/build your model yet.
+Note: set `MODEL` to `TRUE` at the top of the script if you haven't compiled/built your model yet.
 
 ```{r}
 if (MODEL) {
@@ -541,7 +541,7 @@ pp_check(m2, nsamples = 100)
 
 The posterior predictive plot in `r figr("m2_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
 
-```{r}
+```{r, fig.width=7}
 beautify_my_plot(plot(conditional_effects(m2,
                     dpar = "mu"),
                     plot = FALSE))
@@ -601,7 +601,7 @@ pp_check(m3, nsamples = 100)
 
 The posterior predictive plot in `r figr("m3_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
 
-```{r}
+```{r, fig.width=12, fig.height=7}
 beautify_my_plot(plot(conditional_effects(m3,
                     dpar = "mu"),
                     plot = FALSE))
@@ -661,7 +661,7 @@ pp_check(m4, nsamples = 100)
 
 The posterior predictive plot in `r figr("m4_ppcheck")` gives an impression on how this model would generate data, given the parameters it estimated from the empirical data. There is not much change from `r figr("m0_ppcheck")`, which is not very surprising given the small estimated difference between the conditions.
 
-```{r, fig.width=7}
+```{r, fig.width=12}
 beautify_my_plot(plot(conditional_effects(m4,
                     dpar = "mu"),
                     plot = FALSE))
@@ -717,7 +717,7 @@ pp_check(m5, nsamples = 100)
 
 ***
 
-```{r, fig.width=7}
+```{r, fig.width=12, fig.height=12}
 beautify_my_plot(plot(conditional_effects(m5,
                     dpar = "mu"),
                     plot = FALSE))
@@ -774,7 +774,7 @@ pp_check(m6, nsamples = 100)
 
 ***
 
-```{r, fig.width=7}
+```{r, fig.width=12, fig.height=12}
 beautify_my_plot(plot(conditional_effects(m6,
                     dpar = "mu"),
                     plot = FALSE))
@@ -831,7 +831,7 @@ pp_check(m6a, nsamples = 100)
 
 ***
 
-```{r m6a_conditionalPlots, fig.width=12}
+```{r m6a_conditionalPlots, fig.width=12, fig.height=12}
 beautify_my_plot(plot(conditional_effects(m6a,
                     dpar = "mu"),
                     plot = FALSE))
@@ -904,7 +904,7 @@ pp_check(m7, nsamples = 100)
 
 ***
 
-```{r m7_condPlot, anchor=FIGREF, fig.width=7, fig.height=8}
+```{r m7_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
 beautify_my_plot(plot(conditional_effects(m7,
                     dpar = "mu"),
                     plot = FALSE))
@@ -1177,7 +1177,7 @@ pp_check(m10, nsamples = 100)
 
 ***
 
-```{r m10_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
+```{r m10_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
 beautify_my_plot(plot(conditional_effects(m10,
                     dpar = "mu"),
                     plot = FALSE))
@@ -1272,7 +1272,7 @@ pp_check(m11, nsamples = 100)
 
 ***
 
-```{r m11_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
+```{r m11_condPlot, anchor=FIGREF, fig.width=12, fig.height=12}
 beautify_my_plot(plot(conditional_effects(m11,
                     dpar = "mu"),
                     plot = FALSE))
@@ -1330,7 +1330,7 @@ The model with the smallest `elpd` is `m10`, which corresponds to the second to 
 
 The fact that the full model turned out to be the second-best suggests (see above) that the data really are best fit by this model, and that the patient term and the interaction terms really should remain in the model.
 
-```{r BestModel3wayInteractPlot, anchor=FIGREF, fig.width = 12, fig.height=6}
+```{r BestModel3wayInteractPlot, anchor=FIGREF, fig.width=12, fig.height=6}
 wrap_plots(plot(conditional_effects(m11,
                                     dpar = "mu",
                                     effects = "patient:cond",
