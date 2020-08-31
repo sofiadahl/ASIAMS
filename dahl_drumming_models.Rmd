@@ -30,7 +30,9 @@ opts_chunk$set(comment = NULL,
                fig.width = 12,
                fig.height = 12, 
                echo = TRUE)
-theme_set(theme_light())
+theme_set(theme_light(base_size = 18,
+                      base_line_size = 18/11,
+                      base_rect_size = 18/11))
 knit_hooks$set(anchor = kfigr::hook_anchor)
 opts_knit$set(kfigr.link = TRUE,
               kfigr.prefix = TRUE)
@@ -207,7 +209,7 @@ Will start with a simple univariate model, add predictors and interactions, then
 
 The humps in the density distributions in section [Instruction Condition, and Arm Used] made me curious where they might originate from. So in the following graph the density estimates of one of the descriptors, `transSC`, are plotted broken down by `subj`. and then also by `cond`, separately for patients and healthy subjects.
 
-```{r DensIndivRespPlot, anchor=FIGREF}
+```{r DensIndivRespPlot, anchor=FIGREF, fig.width=7}
 ggplot(drum_beats, aes(transSC, 
                        color = subj, 
                        linetype = cond)) + 
@@ -262,7 +264,7 @@ Comparing the two rows of panels in `r figr("DensIndivSeriesGroupedPlot")` revea
 
 Although tempting, we probably shouldn't get carried away and generalize to the populations of healthy drummers and ones with movement disorders, respectively.
 
-For completeness sake the same exploratory analysis was carried out for `transFlat` and transCrest`:
+For completeness' sake the same exploratory analysis was carried out for `transFlat` and transCrest`:
 
 ```{r DensIndivRespPlot_transFlat, anchor=FIGREF}
 ggplot(drum_beats, aes(transFlat, 
@@ -992,8 +994,8 @@ pp_check(m8, nsamples = 100)
 
 ```{r m8_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
 beautify_my_plot(plot(conditional_effects(m8,
-                    dpar = "mu"),
-                    plot = FALSE))
+                                          dpar = "mu"),
+                      plot = FALSE))
 conditions <- make_conditions(drum_beats, 
                               vars = "arm")
 beautify_my_plot(plot(conditional_effects(m8,
@@ -1002,19 +1004,21 @@ beautify_my_plot(plot(conditional_effects(m8,
                                           conditions = conditions),
                       plot = FALSE))
 beautify_my_plot(plot(conditional_effects(m8,
-                    dpar = "sigma"),
-                    plot = FALSE))
-conditional_effects(m8,
-                    dpar = "sigma",
-                    effects = "patient:cond",
-                    conditions = conditions)
+                                          dpar = "sigma"),
+                      plot = FALSE))
 beautify_my_plot(plot(conditional_effects(m8,
-                    dpar = "alpha"),
-                    plot = FALSE))
-conditional_effects(m8,
-                    dpar = "alpha",
-                    effects = "patient:cond",
-                    conditions = conditions)
+                                          dpar = "sigma",
+                                          effects = "patient:cond",
+                                          conditions = conditions),
+                      plot = FALSE))
+beautify_my_plot(plot(conditional_effects(m8,
+                                          dpar = "alpha"),
+                      plot = FALSE))
+beautify_my_plot(plot(conditional_effects(m8,
+                                          dpar = "alpha",
+                                          effects = "patient:cond",
+                                          conditions = conditions),
+                      plot = FALSE))
 ```
 
 `r figr("m8_condPlot", type = FIGREF)`. *Conditional plots.*
@@ -1122,6 +1126,7 @@ From a data-driven perspective this should lead to a simplification of the model
 
 ### Modeling Interactions of Arm and Instruction on Shape and Spread
 
+If an interaction between `cond` and `arm` should be part of the model explaining the outcome `transSC`, then this interactin should be also present in the part of the model explaining `sigma` and `alpha`:
 
 ```{r}
 (m10_form <-bf(transSC ~ patient * cond * arm + 
@@ -1201,7 +1206,7 @@ beautify_my_plot(plot(conditional_effects(m10,
                       plot = FALSE))
 ```
 
-`r figr("m10_condPlot", type = FIGREF)`. *Conditional plots. Had to take out all the fancy figure polishing, subplot lettering etc. Subplots are supposed to be numbered from A to ... starting in the top left corner, proceeding row-wise.* 
+`r figr("m10_condPlot", type = FIGREF)`. *Conditional plots. Had to take out all the fancy figure polishing. Subplots are supposed to be numbered from A to ... starting in the top left corner, proceeding row-wise. Instead, they are now numbered from A to F, plus one un-numbered plot with the three-way interaction, for each of the estimated outcomes `transSC`, `sigma`, and `alpha`* 
 
 ***
 
@@ -1215,7 +1220,7 @@ There is a difference in estimated skewness ('alpha') both between instruction (
 
 From a data-driven perspective this should lead to a simplification of the model, leaving out all the unnecessary interaction terms. A theory-driven approach though requires the final model to be 'full' in the sense that all explanatory variables must interact with all others, implying that not finding an interaction between factors either is due to there really not being an interaction--rendering the model mis-specified and proving the underlying theory wrong--, or due to insufficient data. Since the data set at hand is very small I vote to blame the failure to find interactions between all factors on the small sample size and would therefore keep all interactions in the model. 
 
-### Modeling the Influence of Group on Shape and Spread
+### The Full Model: Modeling the Interactions of Group, Instruction, and Side on Shape and Spread
 
 
 ```{r}
@@ -1319,28 +1324,29 @@ univ_model_compar <- loo_compare(m0, m2, m3, m5, m6, m6a, m7, m8, m9, m10, m11)
 print(univ_model_compar, simplify = T)
 ```
 
-The model with the smallest `elpd` is `m10`, which corresponds to the second to last model (see [Modeling Interactions of Arm and Instruction on Shape and Spread]). The difference between the best and the second-best model (m11, [Modeling the Influence of Group on Shape and Spread]) is `r round(univ_model_compar["m11", "elpd_diff"], 2)`, which is less than roughly two SE (2 x `r round(univ_model_compar["m11", "se_diff"], 2)` = `r round(2 * univ_model_compar["m11", "se_diff"], 2)`) away from 0.
+The model with the smallest `elpd` is `m10`, which corresponds to the second to last model (see [Modeling Interactions of Arm and Instruction on Shape and Spread]). The difference between the best and the second-best model (m11, [Modeling the Influence of Group on Shape and Spread]) is `r round(univ_model_compar["m11", "elpd_diff"], 2)`, which is less than roughly two SE (2 x `r round(univ_model_compar["m11", "se_diff"], 2)` = `r round(2 * univ_model_compar["m11", "se_diff"], 2)`) away from 0. Therefore, we consider the best fitting and the second-best fitting models (roughly) equivalent. Based on theoretical grounds, modeling the three estimates `mu`, `sigma` and `alpha` should be done with the full model--*i.e.*, containing all the main effect interactions--if there is no risk of overfitting. Therefore, in the following we use the full model ([Modeling the Influence of Group on Shape and Spread]).
 
 ### Conclusion
 
-The fact that the full model turned out to be the best-fitting one suggests that the data really are best fit by this model, and that the patient term and the interaction terms really should remain in the model.
+The fact that the full model turned out to be the second-best suggests (see above) that the data really are best fit by this model, and that the patient term and the interaction terms really should remain in the model.
 
-```{r BestModel3wayInteractPlot, anchor=FIGREF, fig.width = 12}
-wrap_plots(plot(conditional_effects(m10,
+```{r BestModel3wayInteractPlot, anchor=FIGREF, fig.width = 12, fig.height=6}
+wrap_plots(plot(conditional_effects(m11,
                                     dpar = "mu",
                                     effects = "patient:cond",
                                     conditions = conditions),
+                # facet_args = list(arm = "label_value"),
                 plot = FALSE)[[1]] + 
              scale_color_colorblind() +
              theme(legend.position = "none"),
-           plot(conditional_effects(m10,
+           plot(conditional_effects(m11,
                                     dpar = "sigma",
                                     effects = "patient:cond",
                                     conditions = conditions),
                 plot = FALSE)[[1]] +
              scale_color_colorblind()  + 
              theme(legend.position = "none"), 
-           plot(conditional_effects(m10,
+           plot(conditional_effects(m11,
                                     dpar = "alpha",
                                     effects = "patient:cond",
                                     conditions = conditions),
@@ -1349,34 +1355,34 @@ wrap_plots(plot(conditional_effects(m10,
   plot_annotation(tag_levels = "A")
 ```
 
-`r figr("BestModel3wayInteractPlot", type = FIGREF)`. *Three-way interaction plots of the three modeled parameters $\mu$, $\sigma$, and $\alpha$ as estimated by the best-fitting model. The x axis shows group membership (0 = healthy subjects, 1 = patients). The instruction conditions are color-coded (black = controlled strokes, brown = normal strokes), and the facets show the side (1 = dominant, 2 = non-dominant).*
+`r figr("BestModel3wayInteractPlot", type = FIGREF)`. *Three-way interaction plots of the three modeled parameters $\mu$, $\sigma$, and $\alpha$ as estimated by the full model. The x axis shows group membership (0 = healthy subjects, 1 = patients). The instruction conditions are color-coded (black = controlled strokes, brown = normal strokes), and the facets show the side (1 = dominant, 2 = non-dominant).*
 
 ***
 
-`r figr("BestModel3wayInteractPlot")`A suggests that $\mu$ is higher for healthy subjects than for patients, and higher for controlled strokes than for normal strokes which is really odd on an intuitive level and seems contradictive (at least to me). I would've expected `transSC` to 
+`r figr("BestModel3wayInteractPlot")`A suggests that $\mu$ is higher for healthy subjects than for patients, and higher for controlled strokes than for normal strokes which is really odd on an intuitive level and seems contradictive (at least to me). I would've expected `transSC` to be at some optimal level in healthy subjects while performing normal strokes with their dominant side, and decrease from there. Yet it does not seem to be so simple. The biggest and clearest difference between any of the experimental factors is between instruction conditions "normal" and "controlled" (see `r figr("m11_summary")` for the credible intervals of these estimates). Of the interactions shown in `r figr("BestModel3wayInteractPlot")`A, only the estimate for `patient1:armND` is sufficiently far from zero, while the central 95% of the posterior distribution of `patient1:condN:armND` is, after all, located mostly to the left of zero.
 
-`r figr("BestModel3wayInteractPlot")`N might clarify why this is the case, because it shows a higher unexplained variation in the data for controlled strokes as compared to normal strokes. 
+`r figr("BestModel3wayInteractPlot")`B might clarify why this is the case, because it shows a higher unexplained variation in the data for controlled strokes as compared to normal strokes. And since higher variation is often accompanied by more extreme values, these extreme values might drive the mean of the posterior distribution of $\mu$ up. Interestingly, $\sigma$ is estimated to be almost the same low value across groups and sides in the normal instruction condition, whereas it is unanimously high in the controlled condition.
 
-(see *e.g.*, [here](https://en.wikipedia.org/wiki/Skewness#Introduction), 
+`r figr("BestModel3wayInteractPlot")`C gives the impression that in the normal condition the distribution of `transSC` roughly symmetrical around zero, in the controlled condition there is an increased amount of higher `transSC` values making the distribution heavy-tailed on the right side (see *e.g.*, [Wikipedia on skewness](https://en.wikipedia.org/wiki/Skewness#Introduction)).
 
-On a different level of understanding these results mean that `transSC` is lower in the normal strokes, with almost no skewness (alpha is close to zero) and lower spread than in controlled strokes.
+Summarizing these results, `transSC` is, on average, lower in normal strokes while approximately normally distributed, and with lower spread than in controlled strokes. The fact that there is a difference between the two instructions suggests that this descriptor might serve as a cue in listening tests.
 
 ## Univariate Models -- `transFlat`
 
-### Modeling Interactions of Arm and Instruction on Shape and Spread
+### The Full Model: Modeling the Interactions of Group, Instruction, and Side on Shape and Spread
 
 ```{r}
-(m10_transFlat_form <-bf(transFlat ~ 0 + Intercept + patient * cond * arm + 
+(m11_transFlat_form <-bf(transFlat ~ 0 + Intercept + patient * cond * arm + 
                            (1 | subj) + 
                            (1 | cond) +
                            (1 | arm),
-                         sigma ~ cond * arm,
-                         alpha ~ cond * arm))
+                         sigma ~ patient * cond * arm,
+                         alpha ~ patient * cond * arm))
 ```
 
 
 ```{r}
-(m10_transFlat_prior <- c(set_prior("normal(0.8, 10)", class = "b", coef = "Intercept"),
+(m11_transFlat_prior <- c(set_prior("normal(0.8, 10)", class = "b", coef = "Intercept"),
                           set_prior("normal(0, 10)",   class = "b"),
                           set_prior("normal(0, 5)",   class = "b", coef = "armND"),
                           set_prior("normal(0, 5)",   class = "b", coef = "condN"),
@@ -1390,100 +1396,90 @@ On a different level of understanding these results mean that `transSC` is lower
 
 ```{r}
 if (MODEL) {
-  m10_transFlat <- brm(m10_transFlat_form,
-                       prior = m10_transFlat_prior,
+  m11_transFlat <- brm(m11_transFlat_form,
+                       prior = m11_transFlat_prior,
                        family = skew_normal(),
                        inits = "0",
                        data = drum_beats)
-  m10_transFlat <- add_criterion(m10_transFlat, 
+  m11_transFlat <- add_criterion(m11_transFlat, 
                                  "loo",
                                  reloo = TRUE)
-  save(m10_transFlat, 
-       file = "m10_transFlat.rda")
+  save(m11_transFlat, 
+       file = "m11_transFlat.rda")
 } else {
-  load("m10_transFlat.rda")
+  load("m11_transFlat.rda")
 }
 ```
 
 ***
 
-`r figr("m10_transFlat_summary", type = TABREF)`. *Model summary. The model has not converged.*
+`r figr("m11_transFlat_summary", type = TABREF)`. *Model summary. The model has not converged.*
 
-```{r m10_transFlat_summary, achor = TABREF}
-(m10_transFlat_summary <- summary(m10_transFlat, 
+```{r m11_transFlat_summary, achor = TABREF}
+(m11_transFlat_summary <- summary(m11_transFlat, 
                                   priors = TRUE))
 ```
 
 
-```{r m10_transFlat_ppcheck, anchor=FIGREF}
-pp_check(m10_transFlat, nsamples = 100)
+```{r m11_transFlat_ppcheck, anchor=FIGREF}
+pp_check(m11_transFlat, nsamples = 100)
 ```
 
-`r figr("m10_transFlat_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+`r figr("m11_transFlat_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
 
 ***
 
-```{r m10_transFlat_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
-beautify_my_plot(plot(conditional_effects(m10_transFlat,
+```{r m11_transFlat_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
+beautify_my_plot(plot(conditional_effects(m11_transFlat,
                                           dpar = "mu"),
                       plot = FALSE))
 conditions <- make_conditions(drum_beats, 
                               vars = "arm")
-beautify_my_plot(plot(conditional_effects(m10_transFlat,
+beautify_my_plot(plot(conditional_effects(m11_transFlat,
                                           dpar = "mu",
                                           effects = "patient:cond",
                                           conditions = conditions),
                       plot = FALSE))
-beautify_my_plot(plot(conditional_effects(m10_transFlat,
+beautify_my_plot(plot(conditional_effects(m11_transFlat,
                                           dpar = "sigma"),
                       plot = FALSE))
-beautify_my_plot(plot(conditional_effects(m10_transFlat,
+beautify_my_plot(plot(conditional_effects(m11_transFlat,
                                           dpar = "sigma",
                                           effects = "patient:cond",
                                           conditions = conditions),
                       plot = FALSE))
-beautify_my_plot(plot(conditional_effects(m10_transFlat,
+beautify_my_plot(plot(conditional_effects(m11_transFlat,
                                           dpar = "alpha"),
                       plot = FALSE))
-beautify_my_plot(plot(conditional_effects(m10_transFlat,
+beautify_my_plot(plot(conditional_effects(m11_transFlat,
                                           dpar = "alpha",
                                           effects = "patient:cond",
                                           conditions = conditions),
                       plot = FALSE))
 ```
 
-`r figr("m10_transFlat_condPlot", type = FIGREF)`. *Conditional plots. Had to take out all the fancy figure polishing, subplot lettering etc. Subplots are supposed to be numbered from A to ... starting in the top left corner, proceeding row-wise.* 
+`r figr("m11_transFlat_condPlot", type = FIGREF)`. *Conditional plots. Had to take out all the fancy figure polishing, subplot lettering etc. Subplots are supposed to be numbered from A to ... starting in the top left corner, proceeding row-wise.* 
 
 ***
 
-In `r figr("m10_transFlat_condPlot")` the dots are the means of the posterior distributions of the respective estimate, and can be interpreted similarly to the point estimates in traditional frequentist statistics. The error bars represent 95% credible intervals, which are interpreted as comprising the true value with 95% probability, given the model and the data.
-
-There is a difference in estimated the mean ('mu') of $transSC$ conditional on group (A) and condition (B), not so on arm (C). Likewise, there is a two-way  interaction between group and arm (D), but not between condition and arm (E). Consequently, there is no three-way interaction (F).
-
-The remaining, unexplained variation 'sigma' shows a clear difference between instructions (H) and lesser so for side (I), but albeit their opposing trends, there is no interaction (J thru M).
-
-There is a difference in estimated skewness ('alpha') both between instruction (O) and side (P), but with opposing trends. Nevertheless, there is no interaction between them (Q thru T). 
-
-From a data-driven perspective this should lead to a simplification of the model, leaving out all the unnecessary interaction terms. A theory-driven approach though requires the final model to be 'full' in the sense that all explanatory variables must interact with all others, implying that not finding an interaction between factors either is due to there really not being an interaction--rendering the model mis-specified and proving the underlying theory wrong--, or due to insufficient data. Since the data set at hand is very small I vote to blame the failure to find interactions between all factors on the small sample size and would therefore keep all interactions in the model. 
-
 ### Conclusions
 
-```{r Best_transFlatModel3wayInteractPlot, anchor=FIGREF, fig.width = 12}
-wrap_plots(plot(conditional_effects(m10_transFlat,
+```{r Best_transFlatModel3wayInteractPlot, anchor=FIGREF, fig.width = 12, fig.height=6}
+wrap_plots(plot(conditional_effects(m11_transFlat,
                                     dpar = "mu",
                                     effects = "patient:cond",
                                     conditions = conditions),
                 plot = FALSE)[[1]] + 
              scale_color_colorblind() +
              theme(legend.position = "none"),
-           plot(conditional_effects(m10_transFlat,
+           plot(conditional_effects(m11_transFlat,
                                     dpar = "sigma",
                                     effects = "patient:cond",
                                     conditions = conditions),
                 plot = FALSE)[[1]] +
              scale_color_colorblind()  + 
              theme(legend.position = "none"), 
-           plot(conditional_effects(m10_transFlat,
+           plot(conditional_effects(m11_transFlat,
                                     dpar = "alpha",
                                     effects = "patient:cond",
                                     conditions = conditions),
@@ -1492,27 +1488,31 @@ wrap_plots(plot(conditional_effects(m10_transFlat,
   plot_annotation(tag_levels = "A")
 ```
 
-`r figr("BestModel3wayInteractPlot", type = FIGREF)`. *Three-way interaction plots of the three modeled parameters $\mu$, $\sigma$, and $\alpha$ as estimated by the best-fitting model. The x axis shows group membership (0 = healthy subjects, 1 = patients). The instruction conditions are color-coded (black = controlled strokes, brown = normal strokes), and the facets show the side (1 = dominant, 2 = non-dominant).*
+`r figr("BestModel3wayInteractPlot", type = FIGREF)`. *Three-way interaction plots of the three modeled parameters $\mu$, $\sigma$, and $\alpha$ as estimated by the full model. The x axis shows group membership (0 = healthy subjects, 1 = patients). The instruction conditions are color-coded (black = controlled strokes, brown = normal strokes), and the facets show the side (1 = dominant, 2 = non-dominant).*
 
 ***
 
+In `transFlat` there is a small but most likely positive difference between controls and patients, but all the other main effects are not clearly different from zero (`r figr("BestModel3wayInteractPlot")`A). Variation shows a curiously extreme estimated value for healthy subjects playing controlled strokes on the non-dominant side (`r figr("BestModel3wayInteractPlot")`B) which seems to be mostly driven by a relatively large estimated value for the non-dominant side (`sigma_armND` in `r figr("m11_transFlat_summary")`). `r figr("BestModel3wayInteractPlot")` shows that the left tail of `transFlat`'s distribution gets heavier in the controlled condition
+
+Since there is no clear difference in the average `transFlat` values between conditions this descriptor is probably not a suitable cue to distinguish between conditions in a listening test.
+
 ## Univariate Models -- `transCrest`
 
-### Modeling Interactions of Arm and Instruction on Shape and Spread
+### The Full Model: Modeling the Interactions of Group, Instruction, and Side on Shape and Spread
 
 
 ```{r}
-(m10_transCrest_form <-bf(transCrest ~ 0 + Intercept + patient * cond * arm + 
+(m11_transCrest_form <-bf(transCrest ~ 0 + Intercept + patient * cond * arm + 
                             (1 | subj) + 
                             (1 | cond) +
                             (1 | arm),
-                          sigma ~ cond * arm,
-                          alpha ~ cond * arm))
+                          sigma ~ patient * cond * arm,
+                          alpha ~ patient * cond * arm))
 ```
 
 
 ```{r}
-(m10_transCrest_prior <- c(set_prior("normal(2.5, 10)",    class = "b", coef = "Intercept"),
+(m11_transCrest_prior <- c(set_prior("normal(2.5, 10)",    class = "b", coef = "Intercept"),
                            set_prior("normal(0, 10)",  class = "b"),
                            set_prior("normal(0, 5)", class = "b", coef = "armND"),
                            set_prior("normal(0, 5)", class = "b", coef = "condN"),
@@ -1526,98 +1526,91 @@ wrap_plots(plot(conditional_effects(m10_transFlat,
 
 ```{r}
 if (MODEL) {
-  m10_transCrest <- brm(m10_transCrest_form,
-                        prior = m10_transCrest_prior,
+  m11_transCrest <- brm(m11_transCrest_form,
+                        prior = m11_transCrest_prior,
                         family = skew_normal(),
                         inits = "0",
                         control = list(max_treedepth = 15),
                         data = drum_beats)
-  m10_transCrest <- add_criterion(m10_transCrest, 
+  m11_transCrest <- add_criterion(m11_transCrest, 
                                   "loo",
                                   reloo = TRUE)
-  save(m10_transCrest, 
-       file = "m10_transCrest.rda")
+  save(m11_transCrest, 
+       file = "m11_transCrest.rda")
 } else {
-  load("m10_transCrest.rda")
+  load("m11_transCrest.rda")
 }
 ```
 
 ***
 
-`r figr("m10_transCrest_summary", type = TABREF)`. *Model summary.*
+`r figr("m11_transCrest_summary", type = TABREF)`. *Model summary.*
 
-```{r m10_transCrest_summary, achor = TABREF}
-(m10_transCrest_summary <- summary(m10_transCrest, 
+```{r m11_transCrest_summary, achor = TABREF}
+(m11_transCrest_summary <- summary(m11_transCrest, 
                                    priors = TRUE))
 ```
 
 
-```{r m10_transCrest_ppcheck, anchor=FIGREF}
-pp_check(m10_transCrest, nsamples = 100)
+```{r m11_transCrest_ppcheck, anchor=FIGREF}
+pp_check(m11_transCrest, nsamples = 100)
 ```
 
-`r figr("m10_transCrest_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
+`r figr("m11_transCrest_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
 
 ***
 
-```{r m10_transCrest_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
-beautify_my_plot(plot(conditional_effects(m10_transCrest,
+```{r m11_transCrest_condPlot, anchor=FIGREF, fig.width=12, fig.height=8}
+beautify_my_plot(plot(conditional_effects(m11_transCrest,
                     dpar = "mu"),
                     plot = FALSE))
 conditions <- make_conditions(drum_beats, 
                               vars = "arm")
-conditional_effects(m10_transCrest,
-                    dpar = "mu",
-                    effects = "patient:cond",
-                    conditions = conditions)
-beautify_my_plot(plot(conditional_effects(m10_transCrest,
+beautify_my_plot(plot(conditional_effects(m11_transCrest,
+                                          dpar = "mu",
+                                          effects = "patient:cond",
+                                          conditions = conditions),
+                      plot = FALSE))
+beautify_my_plot(plot(conditional_effects(m11_transCrest,
                     dpar = "sigma"),
                     plot = FALSE))
-conditional_effects(m10_transCrest,
-                    dpar = "sigma",
-                    effects = "patient:cond",
-                    conditions = conditions)
-beautify_my_plot(plot(conditional_effects(m10_transCrest,
-                    dpar = "alpha"),
-                    plot = FALSE))
-conditional_effects(m10_transCrest,
-                    dpar = "alpha",
-                    effects = "patient:cond",
-                    conditions = conditions)
+beautify_my_plot(plot(conditional_effects(m11_transCrest,
+                                          dpar = "sigma",
+                                          effects = "patient:cond",
+                                          conditions = conditions),
+                      plot = FALSE))
+beautify_my_plot(plot(conditional_effects(m11_transCrest,
+                                          dpar = "alpha"),
+                      plot = FALSE))
+beautify_my_plot(plot(conditional_effects(m11_transCrest,
+                                          dpar = "alpha",
+                                          effects = "patient:cond",
+                                          conditions = conditions),
+                      plot = FALSE))
 ```
 
-`r figr("m10_transCrest_condPlot", type = FIGREF)`. *Conditional plots. Had to take out all the fancy figure polishing, subplot lettering etc. Subplots are supposed to be numbered from A to ... starting in the top left corner, proceeding row-wise.* 
+`r figr("m11_transCrest_condPlot", type = FIGREF)`. *Conditional plots. Had to take out all the fancy figure polishing, subplot lettering etc. Subplots are supposed to be numbered from A to ... starting in the top left corner, proceeding row-wise.* 
 
 ***
 
-In `r figr("m10_transCrest_condPlot")` the dots are the means of the posterior distributions of the respective estimate, and can be interpreted similarly to the point estimates in traditional frequentist statistics. The error bars represent 95% credible intervals, which are interpreted as comprising the true value with 95% probability, given the model and the data.
-
-There is a difference in estimated the mean ('mu') of $transSC$ conditional on group (A) and condition (B), not so on arm (C). Likewise, there is a two-way  interaction between group and arm (D), but not between condition and arm (E). Consequently, there is no three-way interaction (F).
-
-The remaining, unexplained variation 'sigma' shows a clear difference between instructions (H) and lesser so for side (I), but albeit their opposing trends, there is no interaction (J thru M).
-
-There is a difference in estimated skewness ('alpha') both between instruction (O) and side (P), but with opposing trends. Nevertheless, there is no interaction between them (Q thru T). 
-
-From a data-driven perspective this should lead to a simplification of the model, leaving out all the unnecessary interaction terms. A theory-driven approach though requires the final model to be 'full' in the sense that all explanatory variables must interact with all others, implying that not finding an interaction between factors either is due to there really not being an interaction--rendering the model mis-specified and proving the underlying theory wrong--, or due to insufficient data. Since the data set at hand is very small I vote to blame the failure to find interactions between all factors on the small sample size and would therefore keep all interactions in the model. 
-
 ### Conclusions
 
-```{r Best_transCrestModel3wayInteractPlot, anchor=FIGREF, fig.width = 12}
-wrap_plots(plot(conditional_effects(m10_transCrest,
+```{r Best_transCrestModel3wayInteractPlot, anchor=FIGREF, fig.width = 12, fig.height=6}
+wrap_plots(plot(conditional_effects(m11_transCrest,
                                     dpar = "mu",
                                     effects = "patient:cond",
                                     conditions = conditions),
                 plot = FALSE)[[1]] + 
              scale_color_colorblind() +
              theme(legend.position = "none"),
-           plot(conditional_effects(m10_transCrest,
+           plot(conditional_effects(m11_transCrest,
                                     dpar = "sigma",
                                     effects = "patient:cond",
                                     conditions = conditions),
                 plot = FALSE)[[1]] +
              scale_color_colorblind()  + 
              theme(legend.position = "none"), 
-           plot(conditional_effects(m10_transCrest,
+           plot(conditional_effects(m11_transCrest,
                                     dpar = "alpha",
                                     effects = "patient:cond",
                                     conditions = conditions),
