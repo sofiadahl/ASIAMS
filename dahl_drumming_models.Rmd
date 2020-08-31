@@ -1361,11 +1361,11 @@ wrap_plots(plot(conditional_effects(m11,
 
 `r figr("BestModel3wayInteractPlot")`A suggests that $\mu$ is higher for healthy subjects than for patients, and higher for controlled strokes than for normal strokes which is really odd on an intuitive level and seems contradictive (at least to me). I would've expected `transSC` to be at some optimal level in healthy subjects while performing normal strokes with their dominant side, and decrease from there. Yet it does not seem to be so simple. The biggest and clearest difference between any of the experimental factors is between instruction conditions "normal" and "controlled" (see `r figr("m11_summary")` for the credible intervals of these estimates). Of the interactions shown in `r figr("BestModel3wayInteractPlot")`A, only the estimate for `patient1:armND` is sufficiently far from zero, while the central 95% of the posterior distribution of `patient1:condN:armND` is, after all, located mostly to the left of zero.
 
-`r figr("BestModel3wayInteractPlot")`B might clarify why this is the case, because it shows a higher unexplained variation in the data for controlled strokes as compared to normal strokes. And since higher variation is often accompanied by more extreme values, these extreme values might drive the mean of the posterior distribution of $\mu$ up. Interestingly, $\sigma$ is estimated to be almost the same low value across groups and sides in the normal instruction condition, whereas it is unanimously high in the controlled condition.
+`r figr("BestModel3wayInteractPlot")`B might clarify why this is the case, because it shows a higher unexplained variation in the data for controlled strokes as compared to normal strokes which was expected due to controlled strokes are executed with less automatized motor programs (at least that's what the lay person at the keyboard thinks). And since higher variation is often accompanied by more extreme values, these extreme values might drive the mean of the posterior distribution of $\mu$ up. Interestingly, $\sigma$ is estimated to have almost the same low value across groups and sides in the normal instruction condition, whereas it is unanimously high in the controlled condition.
 
-`r figr("BestModel3wayInteractPlot")`C gives the impression that in the normal condition the distribution of `transSC` roughly symmetrical around zero, in the controlled condition there is an increased amount of higher `transSC` values making the distribution heavy-tailed on the right side (see *e.g.*, [Wikipedia on skewness](https://en.wikipedia.org/wiki/Skewness#Introduction)).
+`r figr("BestModel3wayInteractPlot")`C gives the impression that in the normal condition the distribution of `transSC` is roughly symmetrical around zero, while in the controlled condition there is an increased amount of higher `transSC` values making the distribution heavy-tailed on the right side (see *e.g.*, [Wikipedia on skewness](https://en.wikipedia.org/wiki/Skewness#Introduction)).
 
-Summarizing these results, `transSC` is, on average, lower in normal strokes while approximately normally distributed, and with lower spread than in controlled strokes. The fact that there is a difference between the two instructions suggests that this descriptor might serve as a cue in listening tests.
+Summarizing these results, `transSC` is, on average, lower in normal strokes while approximately normally distributed, and with lower spread than in controlled strokes. The fact that there is a difference in the location parameter $\mu$ between the two instructions suggests that this descriptor might serve as a cue in listening tests.
 
 ## Univariate Models -- `transFlat`
 
@@ -1492,9 +1492,13 @@ wrap_plots(plot(conditional_effects(m11_transFlat,
 
 ***
 
-In `transFlat` there is a small but most likely positive difference between controls and patients, but all the other main effects are not clearly different from zero (`r figr("BestModel3wayInteractPlot")`A). Variation shows a curiously extreme estimated value for healthy subjects playing controlled strokes on the non-dominant side (`r figr("BestModel3wayInteractPlot")`B) which seems to be mostly driven by a relatively large estimated value for the non-dominant side (`sigma_armND` in `r figr("m11_transFlat_summary")`). `r figr("BestModel3wayInteractPlot")` shows that the left tail of `transFlat`'s distribution gets heavier in the controlled condition
+In `transFlat` there is a small but most likely positive difference between controls and patients, but all the other main effects are not clearly different from zero (`r figr("BestModel3wayInteractPlot")`A). 
 
-Since there is no clear difference in the average `transFlat` values between conditions this descriptor is probably not a suitable cue to distinguish between conditions in a listening test.
+Variation shows a curiously extreme estimated value for healthy subjects playing controlled strokes on the non-dominant side (`r figr("BestModel3wayInteractPlot")`B) which seems to be mostly driven by a relatively large estimated value for the non-dominant side (`sigma_armND` in `r figr("m11_transFlat_summary")`). 
+
+`r figr("BestModel3wayInteractPlot")`C shows that the left tail of `transFlat`'s distribution gets heavier in the controlled condition, suggesting a tendency in players to produce a larger amount of low-valued `transFlat` values when performing unfamiliar strokes.
+
+Since there is no clear difference in the estimated location parameter $\mu$ for `transFlat` values between conditions, this descriptor is probably not a suitable cue to distinguish between conditions in a listening test.
 
 ## Univariate Models -- `transCrest`
 
@@ -1622,6 +1626,14 @@ wrap_plots(plot(conditional_effects(m11_transCrest,
 `r figr("BestModel3wayInteractPlot", type = FIGREF)`. *Three-way interaction plots of the three modeled parameters $\mu$, $\sigma$, and $\alpha$ as estimated by the best-fitting model. The x axis shows group membership (0 = healthy subjects, 1 = patients). The instruction conditions are color-coded (black = controlled strokes, brown = normal strokes), and the facets show the side (1 = dominant, 2 = non-dominant).*
 
 ***
+
+The location parameter $\mu$ of the `transCrest` data has been estimated to be clearly different between groups, conditions, and sides such that there is even a three-way interaction between the main effects (`r figr("BestModel3wayInteractPlot", type = FIGREF)`A): patients have low $\mu$ on the dominant side and higher $\mu$ on the non-dominant side, while the opposite holds for healthy controls.
+
+The estimation of spread displays some weird patterns, with $\sigam$ generally being larger in the in the controlled instruction condition, but with one strangely small estimate in patients on the dominant side. The opposite holds for the normal instruction condition, with a saliently large value in healthy subjects when playing normal strokes with the non-dominant arm.
+
+The distributio of the data has a heavy tail on the right side seems to follow a pattern of "normal" < "controlled", and "dominant" < "non-dominat". Only for patients on the non-dominant side skewness seems to be about the same, irrespective of instruction.
+
+With the three-way interaction in the location parameter this descriptor seems a promising candidate for a listening test because if we aim for a single descriptor to be sufficient for listeners to reliably distinguish between all three factors, only a descriptor satisfying this interaction can be used to delineate the different strokes. But since the original aim--as I understand it--is to primarily distinguish between controlled and normal strokes, every descriptor with a clear difference between these two factor levels would be a good candidate from a statistical point of view. In the three descriptors investigated here, `transSC` most clearly distinguishes (again: from a stats point of view) between normal and controlled instruction conditions.
 
 # System Setup
 
