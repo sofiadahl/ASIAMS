@@ -1,0 +1,116 @@
+/*
+ * Hold any style information for MUSHRA interface. Customise if you like to make the interface your own!
+ *
+ */
+
+body {
+    /* Set the background colour (note US English spelling) to grey*/
+    background-color: #ddd
+}
+div.pageTitle {
+    width: auto;
+    height: 20px;
+    margin: 10px 0px;
+}
+div.pageTitle span {
+    font-size: 1.5em;
+}
+button {
+    /* Specify any button structure or style */
+    min-width: 20px;
+    background-color: #ddd
+}
+div#slider-holder {
+    height: inherit;
+    position: absolute;
+    left: 0px;
+    z-index: 3;
+    margin-top: 25px;
+}
+div#scale-holder {
+    height: inherit;
+    position: absolute;
+    left: 0px;
+    z-index: 2;
+}
+div#scale-text-holder {
+    position: relative;
+    float: left;
+}
+div.scale-text {
+    position: absolute;
+    font-size: 1.2em;
+}
+canvas#scale-canvas {
+    position: relative;
+    float: left;
+}
+div.track-slider {
+    float: left;
+    height: 94px;
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+    margin-left: 94px;
+    margin-bottom: 25px;
+    display: grid;
+    grid-template-columns: 113px 1fr 107px;
+}
+div.track-slider-title {
+    padding-top: 30px;
+}
+button.track-slider-button {
+    width: 90px;
+    height: 74px;
+    margin: 10px;
+}
+div#outside-reference-holder {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+button.outside-reference {
+    position: inherit;
+    margin: 0px 5px;
+}
+div.track-slider-playing {
+    background-color: rgba(255, 201, 201, 0.5);
+}
+input[type=range] {
+    height: 94px;
+    padding: 0px;
+    color: rgb(255, 144, 144);
+    background-color: rgba(0,0,0,0);
+}
+input[type=range]::-webkit-slider-runnable-track {
+    cursor: pointer;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #000;
+}
+input[type=range]::-moz-range-track {
+    height: 8px;
+    cursor: pointer;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #000;
+}
+input.track-slider-not-moved[type=range]::-webkit-slider-runnable-track {
+    background: #aaa;
+}
+input.track-slider-not-moved[type=range]::-moz-range-track {
+    background: #aaa;
+}
+div#page-count {
+    float: left;
+    margin: 0px 5px;
+}
+div#master-volume-holder {
+    position: absolute;
+    top: 10px;
+    left: 120px;
+}
+div.comment-box-playing {
+    background-color: #FFDDDD;
+}

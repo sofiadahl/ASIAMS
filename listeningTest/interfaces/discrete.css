@@ -1,0 +1,65 @@
+/*
+ * Hold any style information for MUSHRA interface. Customise if you like to make the interface your own!
+ *
+ */
+
+body {
+    /* Set the background colour (note US English spelling) to grey*/
+    background-color: #ddd
+}
+div.pageTitle {
+    width: auto;
+    height: 20px;
+    margin: 10px 0px;
+}
+div.pageTitle span {
+    font-size: 1.5em;
+}
+button {
+    /* Specify any button structure or style */
+    min-width: 20px;
+    background-color: #ddd
+}
+div#slider-box {
+    width: 75%;
+    height: auto;
+    margin: auto;
+    padding-bottom: 20px;
+}
+div#slider-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-row-gap: 10px;
+}
+div#scale-text-holder {
+    display: grid;
+    grid-template-rows: 1fr;
+    min-height: 25px;
+    text-align: center;
+}
+div.discrete-row {
+    display: grid;
+    grid-template-rows: 1fr;
+    padding: 10px;
+    border: 1px solid black;
+    height: 50px;
+}
+button.discrete-button {
+    width: 50px;
+}
+div.discrete-label {
+    width: 100px;
+    text-align: center;
+}
+div.scale-text {
+    position: relative;
+}
+div.scale-text > span {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    left: 0;
+}
+div.discrete-row-playing {
+    background-color: rgba(255, 201, 201, 0.5);
+}

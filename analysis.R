@@ -3,7 +3,7 @@ library(ggpubr)
 library(rstatix)
 library(dplyr)
 
-setwd("C:/Users/franc/Aalborg Universitet/Sofia Dahl - ASIAMS-drumstrokes/singleStrokes")
+setwd("C:/Coding/ASIAMS")
 
 ##### Implementation #####
 
@@ -324,27 +324,33 @@ crest <- allFeatures[!allFeatures$filename %in% outliers$filename[outliers$is.ex
 
 ##### Correlation analysis ####
 
-# transSPL vs transSC
-ggscatter(allFeatures[allFeatures$subj=='P1',], x = "transSPL", y = "transSC", 
-          add = "reg.line", conf.int = TRUE, 
+# transCrest vs transFlat
+ggscatter(allFeatures[allFeatures$subj=='P1',], x = "transCrest", y = "transFlat",
+          add = "reg.line", conf.int = TRUE,
           cor.coef = TRUE, cor.method = "pearson",
-          xlab = "Transient SPL [dB SPL]", ylab = "Transient spectral centroid [Hz]")
+          xlab = "Early decay crest factor", ylab = "Early decay temporal flatness")
+
+# transFlat vs transSC
+ggscatter(allFeatures[allFeatures$subj=='P1',], x = "transFlat", y = "transSC",
+          add = "reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Early decay temporal flatness", ylab = "Early decay spectral centroid [Hz]")
 
 # transSPL vs transFlat
-ggscatter(allFeatures[allFeatures$subj=='P1',], x = "transSPL", y = "transFlat", 
-          add = "reg.line", conf.int = TRUE, 
+ggscatter(allFeatures[allFeatures$subj=='P1',], x = "transSPL", y = "transFlat",
+          add = "reg.line", conf.int = TRUE,
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "Transient SPL [dB SPL]", ylab = "Transient envelope flatness [-]")
 
 # transSPL vs transSpecFlat
-ggscatter(allFeatures[allFeatures$subj=='P1',], x = "transSPL", y = "transSpecFlat", 
-          add = "reg.line", conf.int = TRUE, 
+ggscatter(allFeatures[allFeatures$subj=='P1',], x = "transSPL", y = "transSpecFlat",
+          add = "reg.line", conf.int = TRUE,
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "Transient SPL [dB SPL]", ylab = "Transient spectral flatness [-]")
 
 # transSC vs transSpecFlat
-ggscatter(allFeatures[allFeatures$subj=='P1',], x = "transSC", y = "transSpecFlat", 
-          add = "reg.line", conf.int = TRUE, 
+ggscatter(allFeatures[allFeatures$subj=='P1',], x = "transSC", y = "transSpecFlat",
+          add = "reg.line", conf.int = TRUE,
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "Transient spectral centroid [Hz]", ylab = "Transient spectral flatness [-]")
 

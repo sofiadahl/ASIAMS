@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<waet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="test-schema.xsd">
+    <setup interface="discrete" projectReturn="save.php" returnURL="" randomiseOrder="true" poolSize="2" loudness="-23" crossFade="0" randomiseAxisOrder="false" preSilence="0" postSilence="0" playOne="true" minNumberPlays="1">
+        <exitText>Thank you for taking the test! Now you can close your browser window.</exitText>
+        <!--><calibration checkFrequencies="true" checkLevels="true" checkChannels="true"/>
+        <survey location="pre" showBackButton="true">
+            <surveystatement id="intro">
+                <statement>This is the test presentation. Words words words </statement>
+            </surveystatement>
+            <surveystatement id="gdpr">
+                <statement>GDPR stuff here.</statement>
+            </surveystatement>
+            <surveynumber id="age" mandatory="true" min="0" boxsize="normal">
+                <statement>What is your age?</statement>
+            </surveynumber>
+            <surveyquestion id="country" name="country" mandatory="true" boxsize="normal">
+                <statement>In which country did you grow up?</statement>
+            </surveyquestion>
+            <surveyquestion id="testEnvironment" name="testEnvironment" mandatory="true" boxsize="normal">
+                <statement>Please describe where and in what situation you are taking the test (at home, at work, on public transportation, ...).</statement>
+            </surveyquestion>
+            <surveycheckbox id="musicExp" name="musicExp" mandatory="true" min="1" max="NaN">
+                <statement>How would you judge your musical expertise in general?</statement>
+                <option name="musicProf">Professional musician or sound engineer</option>
+                <option name="amateur">Amateur musician or sound engineer</option>
+                <option name="musicLover">Music lover</option>
+                <option name="noExp">No expertise at all</option>
+                <option name="other">Other (please explain)</option>
+            </surveycheckbox>
+            <surveycheckbox id="drumExp" name="drumExp" mandatory="true" min="1" max="NaN">
+                <statement>How would you judge your expertise with drum sounds specifically?</statement>
+                <option name="drumProf">I am a trained drummer</option>
+                <option name="notDrumProfMusician">I am familiar with musical timbres (as a musician with some degree of experience), but not with drums specifically</option>
+                <option name="noExpWithDrum">I'm not sure I will be able to tell the difference between drum sounds</option>
+            </surveycheckbox>
+            <surveystatement id="surveyEnd">
+                <statement>Before we can start the test, we will ask you to do a brief calibration to adjust your listening level. This will help us assess that the sounds are played in a good enough quality.</statement>
+            </surveystatement>
+        </survey><-->
+        <survey location="post" showBackButton="true"/>
+        <metric>
+            <metricenable>testTimer</metricenable>
+            <metricenable>elementListenTracker</metricenable>
+            <metricenable>elementFlagListenedTo</metricenable>
+        </metric>
+        <interface>
+            <interfaceoption type="check" name="fragmentPlayed"/>
+            <interfaceoption type="show" name="volume"/>
+            <interfaceoption type="show" name="page-count"/>
+            <scales>
+                <scalelabel position="25">Normal</scalelabel>
+                <scalelabel position="50">Controlled</scalelabel>
+            </scales>
+        </interface>
+    </setup>
+    <page id="training" hostURL="media/example/" randomiseOrder="false" repeatCount="0" poolSize="5" loop="false" synchronous="false" label="none" alwaysInclude="true" position="0" preSilence="0" postSilence="0" restrictMovement="false" minNumberPlays="0">
+        <interface>
+            <title>Training session: which playing technique has been used?</title>
+            <image src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Drumkit-icon.png"/>
+            <scales>
+                <scalelabel position="25">Normal</scalelabel>
+                <scalelabel position="50">Controlled</scalelabel>
+            </scales>
+        </interface>
+        <audioelement url="0.wav" id="zero" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="1.wav" id="one" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="2.wav" id="two" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="3.wav" id="three" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="4.wav" id="four" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+    </page>
+    <page id="test-P1" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" poolSize="5" alwaysInclude="false" preSilence="0" postSilence="0" restrictMovement="false" minNumberPlays="0">
+        <interface>
+            <title>P1: which playing technique has been used?</title>
+            <image src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Drumkit-icon.png"/>
+            <scales>
+                <scalelabel position="25">Normal</scalelabel>
+                <scalelabel position="50">Controlled</scalelabel>
+            </scales>
+        </interface>
+        <audioelement url="P1L36N008.wav" id="P1L36N008" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1L38N001.wav" id="P1L38N001" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R62C001.wav" id="P1R62C001" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R62C009.wav" id="P1L38C009" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R63N006.wav" id="P1R63N006" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R73N010.wav" id="P1R73N010" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R73N006.wav" id="P1R73N006" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R74C003.wav" id="P1R74C003" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R74C005.wav" id="P1R74C005" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R76C007.wav" id="P1R76C007" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+    </page>
+    <page id="test-S2" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" poolSize="5" alwaysInclude="false" preSilence="0" postSilence="0" restrictMovement="false" minNumberPlays="0">
+        <interface>
+            <title>S2: which playing technique has been used?</title>
+            <image src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Drumkit-icon.png"/>
+            <scales>
+                <scalelabel position="25">Normal</scalelabel>
+                <scalelabel position="50">Controlled</scalelabel>
+            </scales>
+        </interface>
+        <audioelement url="S2L56C001.wav" id="S2L56C001" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L56C004.wav" id="S2L56C004" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L56C009.wav" id="S2L56C009" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L57N001.wav" id="S2L57N001" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L58C001.wav" id="S2L58C001" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L58C007.wav" id="S2L58C007" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L59N003.wav" id="S2L59N003" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L59N006.wav" id="S2L59N006" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L68N005.wav" id="S2L68N005" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L68N007.wav" id="S2L68N007" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+    </page>
+</waet>

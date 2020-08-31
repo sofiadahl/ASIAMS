@@ -1,0 +1,1 @@
+This folder is where the remote PHP server (through save.php) or local server (python/pythonServer.py) will save the received test results. 

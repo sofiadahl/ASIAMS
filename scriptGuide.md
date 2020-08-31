@@ -61,3 +61,46 @@ Various obsolete R code chunks, including a linear mixed model which I never got
 RStudio project files. The most interesting file is probably dahl_drumming_models.html, as it contains everything you want without the need to 'run' any files in R. Once you opened the html file with your browser you can click on the [Show Code] buttons to, well, show the R code. The dahl_drumming_models.Rmd file is the R markdown file from which the html is produced.
 
 As of 2020-07-14 (version vive-la-france!) it only contains some exploratory graphs, some musings on response variable choice as well as on model choice. As of 2020-07-16, it also has a first model.
+
+# listeningTest (folder)
+
+To run locally, open a local server by running *~/ASIAMS/listeningTest/python/pythonServer.py* (requires Python), after which you can access the test at [http://localhost:8000/test.html?url=tests/drumStrokes.xml](http://localhost:8000/test.html?url=tests/drumStrokes.xml)
+
+To be able to run the test, copy the following wav files in the folder *~/ASIAMS/listeningTest/media*:
+
+- P1L36N008.wav
+- P1L38N001.wav
+- P1R62C001.wav
+- P1R62C009.wav
+- P1R63N006.wav
+- P1R73N010.wav
+- P1R73N006.wav
+- P1R74C003.wav
+- P1R74C005.wav
+- P1R76C007.wav
+- S2L56C001.wav
+- S2L56C004.wav
+- S2L56C009.wav
+- S2L57N001.wav
+- S2L58C001.wav
+- S2L58C007.wav
+- S2L59N003.wav
+- S2L59N006.wav
+- S2L68N005.wav
+- S2L68N007.wav
+
+At the moment, the test contains three pages: training, P1, S2, so we are blocking per subject. The randomization happens on the client side: the pool size is 2, meaning that the test will contain the training page (always played, always on top) and one page between P1 and S2. Inside the P1/S2 pages, a pool size of 5 is selected, meaning that 5 strokes out of 10 (5 normal + 5 controlled) will be picked at random. This type of setup is affected by the sample size: with a few participants, we will be far from a uniform distribution of responses wrt subject and number of played strokes.
+
+The server tracks a number of variables along with the actual response: total test time, time spent on each page, number of plays per stroke, master volume moved, etc.
+
+The responses are saved as xml files in the *~/ASIAMS/listeningTest/saves/* folder (locally, in this case).
+
+TODOs:
+
+- Move some of the survey at the bottom
+- Replace texts
+- Tweak interface if needed
+- Prepare the training page (select strokes, create instructions and feedback)
+- Select subjects and strokes
+- Find feasible amount of strokes to be played in each test
+

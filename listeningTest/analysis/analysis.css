@@ -1,0 +1,16 @@
+div.chart-holder {
+    border: 1px black solid;
+    margin: 10px 0px;
+}
+div.code {
+    margin: 5px;
+    padding-left: 15px;
+    background-color: rgb(200, 200, 200);
+    border: 2px dashed black;
+}
+table td tr {
+    padding: 5px;
+}
+div.filter-entry {
+    padding: 5px;
+}
