@@ -344,11 +344,19 @@ ggplot(drum_beats, aes(transCrest,
 
 ## Covariance Matrix
 
-```{r}
+```{r, fig.width=12, fig.height=12}
 cov_mat <- cov(drum_beats[-c(1:5, ncol(drum_beats))], 
                use = "pairwise.complete.obs")
 kable(cov_mat, digits = 2)
-heatmap(cov_mat)
+# heatmap(cov_mat)
+# image(cov_mat)
+cov_mat.z <- scale(cov_mat, center = T, scale = T)
+cov_mat.z_melt <- reshape2::melt(cov_mat.z)
+ggplot(cov_mat.z_melt, aes(Var1, Var2)) +
+  geom_tile(aes(fill = value)) +
+  scale_fill_gradient2(low = "red", mid = "orange", high = "yellow") +
+  theme(axis.text.x = element_text(angle = 90),
+        axis.title = element_blank())
 ```
 
 # Modeling
