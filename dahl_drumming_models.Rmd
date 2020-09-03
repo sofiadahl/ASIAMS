@@ -345,7 +345,12 @@ ggplot(drum_beats, aes(transCrest,
 ## Covariance Matrix
 
 ```{r, fig.width=12, fig.height=12}
-cov_mat <- cov(drum_beats[-c(1:5, ncol(drum_beats))], 
+new_names <- drum_beats
+names(new_names) <- gsub(pattern = "trans", 
+                         replacement = "earlyDecay", 
+                         x = names(new_names), 
+                         fixed = TRUE)
+cov_mat <- cov(new_names[-c(1:5, ncol(new_names))], 
                use = "pairwise.complete.obs")
 kable(cov_mat, digits = 2)
 # heatmap(cov_mat)
@@ -355,7 +360,7 @@ cov_mat.z_melt <- reshape2::melt(cov_mat.z)
 ggplot(cov_mat.z_melt, aes(Var1, Var2)) +
   geom_tile(aes(fill = value)) +
   scale_fill_gradient2(low = "red", mid = "orange", high = "yellow") +
-  theme(axis.text.x = element_text(angle = 90),
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         axis.title = element_blank())
 ```
 
