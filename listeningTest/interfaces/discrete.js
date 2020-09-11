@@ -1,10 +1,15 @@
-/*globals window, interfaceContext, testState, Interface, audioEngineContext, console, document, specification, $, storage*/
+/**
+ *  discrete.js
+ *  Create the radio interface
+ */
+/*globals window, interfaceContext, document, $, specification, audioEngineContext, console, testState, storage */
 // Once this is loaded and parsed, begin execution
 loadInterface();
 
 function loadInterface() {
-    // Use this to do any one-time page / element construction. For instance, placing any stationary text objects,
-    // holding div's, or setting up any nodes which are present for the entire test sequence
+    // Get the dimensions of the screen available to the page
+    var width = window.innerWidth;
+    var height = window.innerHeight;
 
     // The injection point into the HTML page
     interfaceContext.insertPoint = document.getElementById("topLevelBody");
@@ -45,7 +50,7 @@ function loadInterface() {
     var playback = document.createElement("button");
     playback.innerHTML = 'Stop';
     playback.id = 'playback-button';
-    playback.style.float = 'left';
+    playback.style.display = 'inline-block';
     // onclick function. Check if it is playing or not, call the correct function in the
     // audioEngine, change the button text to reflect the next state.
     playback.onclick = function () {
@@ -61,7 +66,7 @@ function loadInterface() {
     submit.innerHTML = 'Next';
     submit.onclick = buttonSubmitClick;
     submit.id = 'submit-button';
-    submit.style.float = 'left';
+    submit.style.display = 'inline-block';
 
     // Create the sort button
     var sort = document.createElement("button");
@@ -81,16 +86,30 @@ function loadInterface() {
     var outsideRef = document.createElement("div");
     outsideRef.id = "outside-reference-holder";
 
-    // Create a holder for the slider rows
-    var sliderBox = document.createElement("div");
+
+    // Create a slider box
+    var sliderBox = document.createElement('div');
+    sliderBox.style.width = "40%";
+    sliderBox.style.height = window.innerHeight - 200 + 12 + 'px';
+    sliderBox.style.marginBottom = '40px';
+    //sliderBox.id = 'slider';
     sliderBox.id = 'slider-box';
+    var scaleHolder = document.createElement('div');
+    scaleHolder.id = "scale-holder";
+    sliderBox.appendChild(scaleHolder);
     var sliderGrid = document.createElement("div");
     sliderGrid.id = "slider-grid";
     sliderBox.appendChild(sliderGrid);
     var scaleText = document.createElement('div');
     scaleText.id = "scale-text-holder";
-    sliderGrid.appendChild(scaleText);
-
+    scaleHolder.appendChild(scaleText);
+    //var scaleCanvas = document.createElement('canvas');
+    //scaleCanvas.id = "scale-canvas";
+    //scaleHolder.appendChild(scaleCanvas);
+    var sliderObjectHolder = document.createElement('div');
+    sliderObjectHolder.id = 'slider-holder';
+    sliderObjectHolder.align = "center";
+    sliderBox.appendChild(sliderObjectHolder);
 
     // Global parent for the comment boxes on the page
     var feedbackHolder = document.createElement('div');
@@ -113,33 +132,31 @@ function loadInterface() {
     testState.advanceState();
 }
 
-function loadTest(page) {
-    // Called each time a new test page is to be build. The page specification node is the only item passed in
+function loadTest(audioHolderObject) {
+    var id = audioHolderObject.id;
 
     var feedbackHolder = document.getElementById('feedbackHolder');
     var sliderBox = document.getElementById('slider-box');
     var sliderGrid = document.getElementById("slider-grid");
+    sliderGrid.innerHTML = "";
     var scaleTextHolder = document.getElementById("scale-text-holder");
-    var interfaceObj = interfaceContext.getCombinedInterfaces(page);
-    var commentBoxPrefix = "Comment on track";
-    var loopPlayback = page.loop;
     feedbackHolder.innerHTML = "";
-
+    var interfaceObj = interfaceContext.getCombinedInterfaces(audioHolderObject);
     if (interfaceObj.length > 1) {
         console.log("WARNING - This interface only supports one <interface> node per page. Using first interface node");
     }
     interfaceObj = interfaceObj[0];
 
     // Set the page title
-    if (typeof page.title == "string" && page.title.length > 0) {
-        document.getElementById("test-title").textContent = page.title;
+    if (typeof audioHolderObject.title == "string" && audioHolderObject.title.length > 0) {
+        document.getElementById("test-title").textContent = audioHolderObject.title;
     }
-    // Set the axis title
+
     if (interfaceObj.title !== null) {
         document.getElementById("pageTitle").textContent = interfaceObj.title;
     }
 
-    if (interfaceObj.image !== undefined || page.audioElements.some(function (elem) {
+    if (interfaceObj.image !== undefined || audioHolderObject.audioElements.some(function (elem) {
             return elem.image !== undefined;
         })) {
         document.getElementById("testContent").insertBefore(interfaceContext.imageHolder.root, document.getElementById("slider"));
@@ -147,44 +164,30 @@ function loadTest(page) {
     }
 
     // Delete outside reference
-    document.getElementById("outside-reference-holder").innerHTML = "";
+    var outsideReferenceHolder = document.getElementById("outside-reference-holder");
+    outsideReferenceHolder.innerHTML = "";
 
-    // Get the comment box prefix
+    //var sliderBox = document.getElementById('slider-holder');
+    //sliderBox.innerHTML = "";
+
+    var commentBoxPrefix = "Comment on track";
     if (interfaceObj.commentBoxPrefix !== undefined) {
         commentBoxPrefix = interfaceObj.commentBoxPrefix;
     }
+    var loopPlayback = audioHolderObject.loop;
 
-    // Populate the comment questions
-    $(page.commentQuestions).each(function (index, element) {
-        var node = interfaceContext.createCommentQuestion(element);
-        feedbackHolder.appendChild(node.holder);
-    });
+    var currentTestHolder = document.createElement('audioHolder');
+    currentTestHolder.id = audioHolderObject.id;
+    currentTestHolder.repeatCount = audioHolderObject.repeatCount;
 
-    var interfaceOptions = interfaceObj.options;
-    // Clear the interfaceElements
-    {
-        var node = document.getElementById('playback-holder');
-        if (node) {
-            feedbackHolder.removeChild(node);
-        }
-        node = document.getElementById('page-count');
-        if (node) {
-            document.getElementById('interface-buttons').removeChild(node);
-        }
-        node = document.getElementById('master-volume-holder-float');
-        if (node) {
-            feedbackHolder.removeChild(node);
-        }
-    }
-    
     // Configure the grid
-    var numRows = page.audioElements.filter(function (a) {
+    var numRows = audioHolderObject.audioElements.filter(function (a) {
         return (a.type !== "outside-reference");
     }).length;
-    var numColumns = page.interfaces[0].scales.length;
-    sliderGrid.style.gridTemplateRows = "50px repeat(" + numRows + ", 72px)";
+    var numColumns = audioHolderObject.interfaces[0].scales.length;
+    sliderGrid.style.gridTemplateRows = "72px repeat(" + numRows + ", 72px)";
     scaleTextHolder.style.gridTemplateColumns = "100px repeat(" + numColumns + ", 1fr) 100px";
-    page.interfaces[0].scales.sort(function (a, b) {
+    audioHolderObject.interfaces[0].scales.sort(function (a, b) {
         if (a.position > b.position) {
             return 1;
         } else if (a.position < b.position) {
@@ -203,23 +206,33 @@ function loadTest(page) {
 
     // Find all the audioElements from the audioHolder
     var index = 0;
-    var labelType = page.label;
+    var interfaceScales = testState.currentStateMap.interfaces[0].scales;
+    var labelType = audioHolderObject.label;
     if (labelType == "default") {
         labelType = "number";
     }
-    $(page.audioElements).each(function (pageIndex, element) {
+    $(audioHolderObject.audioElements).each(function (pageIndex, element) {
         // Find URL of track
         // In this jQuery loop, variable 'this' holds the current audioElement.
 
         var audioObject = audioEngineContext.newTrack(element);
         if (element.type == 'outside-reference') {
             // Construct outside reference;
-            var orNode = new interfaceContext.outsideReferenceDOM(audioObject, index, document.getElementById("outside-reference-holder"));
+            var orNode = new interfaceContext.outsideReferenceDOM(audioObject, index, outsideReferenceHolder);
             audioObject.bindInterface(orNode);
         } else {
             // Create a slider per track
-            var label = interfaceContext.getLabel(labelType, index, page.labelStart);
+            var label = element.label || interfaceContext.getLabel(labelType, index, audioHolderObject.labelStart);
+            //var sliderObj = new sliderObject(audioObject, label);
             var sliderObj = new discreteObject(audioObject, label);
+            //if (typeof audioHolderObject.initialPosition === "number") {
+                // Set the values
+            //    sliderObj.slider.value = audioHolderObject.initalPosition;
+            //} else {
+                // Distribute it randomnly
+            //    sliderObj.slider.value = Math.random();
+            //}
+            //sliderBox.appendChild(sliderObj.holder);
             sliderGrid.appendChild(sliderObj.DOMRoot);
             audioObject.bindInterface(sliderObj);
             interfaceContext.commentBoxes.createCommentBox(audioObject);
@@ -227,7 +240,19 @@ function loadTest(page) {
         }
 
     });
-    interfaceObj.options.forEach(function (option) {
+
+    if (testState.currentStateMap.restrictMovement) {
+        $(".track-slider-range").addClass("track-slider-range-disabled");
+        $(".track-slider-range").each(function (i, e) {
+            e.disabled = true;
+        });
+    }
+
+
+    var interfaceOptions = interfaceObj.options;
+    var sortButton = document.getElementById("sort-fragments");
+    sortButton.style.visibility = "hidden";
+    interfaceOptions.forEach(function (option) {
         if (option.type == "show") {
             switch (option.name) {
                 case "playhead":
@@ -237,7 +262,7 @@ function loadTest(page) {
                         playbackHolder.style.width = "100%";
                         playbackHolder.align = 'center';
                         playbackHolder.appendChild(interfaceContext.playhead.object);
-                        feedbackHolder.appendChild(playbackHolder);
+                        feedbackHolder.insertBefore(playbackHolder, feedbackHolder.firstElementChild);
                     }
                     break;
                 case "page-count":
@@ -245,6 +270,7 @@ function loadTest(page) {
                     if (pagecountHolder === null) {
                         pagecountHolder = document.createElement('div');
                         pagecountHolder.id = 'page-count';
+                        pagecountHolder.style.display = 'inline-block';
                     }
                     pagecountHolder.innerHTML = '<span>Page ' + (testState.stateIndex + 1) + ' of ' + testState.stateMap.length + '</span>';
                     var inject = document.getElementById('interface-buttons');
@@ -265,10 +291,170 @@ function loadTest(page) {
             }
         }
     });
+
+    $(audioHolderObject.commentQuestions).each(function (index, element) {
+        var node = interfaceContext.createCommentQuestion(element);
+        feedbackHolder.appendChild(node.holder);
+    });
+
     // Auto-align
     resizeWindow(null);
 }
+/*
+function sliderObject(audioObject, label) {
+    // Constructs the slider object. We use the HTML5 slider object
+    var page = testState.currentStateMap;
+    this.parent = audioObject;
+    this.holder = document.createElement('div');
+    this.title = document.createElement('span');
+    this.slider = document.createElement('input');
+    this.play = document.createElement('button');
 
+    this.holder.className = 'track-slider';
+    this.holder.style.height = window.innerHeight - 200 + 'px';
+    this.holder.appendChild(this.title);
+    this.holder.appendChild(this.slider);
+    this.holder.appendChild(this.play);
+    this.holder.align = "center";
+    if (label === 0) {
+        this.holder.style.marginLeft = '0px';
+    }
+    this.holder.setAttribute('trackIndex', audioObject.id);
+
+    this.title.textContent = label;
+    this.title.style.width = "100%";
+    this.title.style.float = "left";
+
+    this.slider.type = "range";
+    this.slider.className = "track-slider-range track-slider-not-moved";
+    this.slider.min = "0";
+    this.slider.max = "1";
+    this.slider.step = "0.01";
+    this.slider.setAttribute('orient', 'vertical');
+    this.slider.style.height = window.innerHeight - 250 + 'px';
+    this.slider.onchange = function () {
+        var time = audioEngineContext.timer.getTestTime();
+        var id = Number(this.parentNode.getAttribute('trackIndex'));
+        audioEngineContext.audioObjects[id].metric.moved(time, this.value);
+        console.log('slider ' + id + ' moved to ' + this.value + ' (' + time + ')');
+        $(this).removeClass('track-slider-not-moved');
+    };
+
+    this.play.textContent = "Loading...";
+    this.play.value = audioObject.id;
+    this.play.style.float = "left";
+    this.play.style.width = "100%";
+    this.play.disabled = true;
+    this.play.setAttribute("playstate", "ready");
+    this.play.onclick = function (event) {
+        var id = Number(event.currentTarget.value);
+        //audioEngineContext.metric.sliderPlayed(id);
+        if (event.currentTarget.getAttribute("playstate") == "ready") {
+            audioEngineContext.play(id);
+        } else if (event.currentTarget.getAttribute("playstate") == "playing") {
+            audioEngineContext.stop();
+        }
+    };
+
+    this.enable = function () {
+        this.play.disabled = false;
+        this.play.textContent = "Play";
+        $(this.slider).removeClass('track-slider-disabled');
+    };
+
+    this.exportXMLDOM = function (audioObject) {
+        // Called by the audioObject holding this element. Must be present
+        var node = storage.document.createElement('value');
+        node.textContent = this.slider.value;
+        var iname = testState.getCurrentTestPage().interfaces[0].name;
+        if (typeof iname == "string") {
+            node.setAttribute("interface-name", iname);
+        }
+        return node;
+    };
+    this.startPlayback = function () {
+        var self = this;
+        // Called when playback has begun
+        this.play.setAttribute("playstate", "playing");
+        $(".track-slider").removeClass('track-slider-playing');
+        $(this.holder).addClass('track-slider-playing');
+        interfaceContext.commentBoxes.highlightById(audioObject.id);
+        var outsideReference = document.getElementById('outside-reference');
+        if (outsideReference !== null) {
+            $(outsideReference).removeClass('track-slider-playing');
+        }
+        this.play.textContent = "Stop";
+        if (page.restrictMovement) {
+            if (page.loop) {
+                $(this.slider).removeClass("track-slider-range-disabled");
+                this.slider.removeAttribute("disabled");
+            } else {
+                $(".track-slider-range").addClass("track-slider-range-disabled");
+                $(this.slider).removeClass("track-slider-range-disabled");
+                $(".track-slider-range").each(function (i, m) {
+                    if (m == self.slider) {
+                        m.removeAttribute("disabled");
+                    } else {
+                        m.setAttribute("disabled", "true");
+                    }
+                });
+            }
+        }
+        if (audioObject.specification.image !== undefined) {
+            interfaceContext.imageHolder.setImage(audioObject.specification.image);
+        }
+    };
+    this.stopPlayback = function () {
+        // Called when playback has stopped. This gets called even if playback never started!
+        this.play.setAttribute("playstate", "ready");
+        $(this.holder).removeClass('track-slider-playing');
+        this.play.textContent = "Play";
+        if (page.restrictMovement && page.loop) {
+            $(this.slider).addClass("track-slider-range-disabled");
+            this.slider.setAttribute("disabled", "true");
+        }
+        var box = interfaceContext.commentBoxes.boxes.find(function (a) {
+            return a.id === audioObject.id;
+        });
+        if (box) {
+            box.highlight(false);
+        }
+        if (audioObject.specification.parent.interfaces[0].image !== undefined) {
+            interfaceContext.imageHolder.setImage(audioObject.specification.parent.interfaces[0].image);
+        } else {
+            interfaceContext.imageHolder.setImage("");
+        }
+    };
+    this.getValue = function () {
+        return this.slider.value;
+    };
+
+    this.resize = function (event, height) {
+        this.holder.style.height = height - 20 + 'px';
+        this.slider.style.height = height - 70 + 'px';
+    };
+    this.updateLoading = function (progress) {
+        progress = String(progress);
+        progress = progress.substr(0, 5);
+        this.play.textContent = "Loading: " + progress + "%";
+    };
+
+    if (this.parent.state == 1) {
+        this.enable();
+    }
+    this.getPresentedId = function () {
+        return this.title.textContent;
+    };
+    this.canMove = function () {
+        return true;
+    };
+    this.error = function () {
+        // audioObject has an error!!
+        this.playback.textContent = "Error";
+        $(this.playback).addClass("error-colour");
+    };
+}
+*/
 function discreteObject(audioObject, label) {
     // An example node, you can make this however you want for each audioElement.
     // However, every audioObject (audioEngineContext.audioObject) MUST have an interface object with the following
@@ -388,7 +574,93 @@ function discreteObject(audioObject, label) {
 }
 
 function resizeWindow(event) {
-    // Called on every window resize event, use this to scale your page properly
+    // Function called when the window has been resized.
+    // MANDATORY FUNCTION
+
+    var outsideRef = document.getElementById('outside-reference'),
+        imageHeight = 0,
+        minHeight = Math.max(Math.floor(window.screen.height * 0.33), 200),
+        maxHeight = Math.floor(window.screen.height * 0.5);
+    if (document.getElementById("imageController")) {
+        imageHeight = $(interfaceContext.imageHolder.root).height();
+    }
+    if (outsideRef !== null) {
+        outsideRef.style.left = (window.innerWidth - 120) / 2 + 'px';
+    }
+
+    // Auto-align
+    var numObj = document.getElementsByClassName('track-slider').length;
+    var totalWidth = (numObj - 1) * 150 + 100;
+    var diff = (window.innerWidth - totalWidth) / 2;
+    var height = window.innerHeight - 180 - imageHeight;
+    height = Math.min(height, maxHeight);
+    height = Math.max(height, minHeight);
+    document.getElementById('slider').style.height = height + 'px';
+    if (diff <= 0) {
+        diff = 0;
+    }
+    document.getElementById('slider-holder').style.marginLeft = diff + 'px';
+    for (var i in audioEngineContext.audioObjects) {
+        if (audioEngineContext.audioObjects[i].specification.type != 'outside-reference') {
+            audioEngineContext.audioObjects[i].interfaceDOM.resize(event, height);
+        }
+    }
+    document.getElementById('scale-holder').style.marginLeft = (diff - 100) + 'px';
+    document.getElementById('scale-text-holder').style.height = height - 14 + 'px';
+    // Cheers edge for making me delete a canvas every resize.
+    //var canvas = document.getElementById('scale-canvas');
+    //var new_canvas = document.createElement("canvas");
+    //new_canvas.id = 'scale-canvas';
+    //canvas.parentElement.appendChild(new_canvas);
+    //canvas.parentElement.removeChild(canvas);
+    //new_canvas.width = totalWidth;
+    //new_canvas.height = height - 14;
+    drawScale();
+}
+
+function drawScale() {
+    var interfaceObj = testState.currentStateMap.interfaces[0];
+    var scales = testState.currentStateMap.interfaces[0].scales;
+    var ticks = specification.interfaces.options.concat(interfaceObj.options).find(function (a) {
+        return (a.type == "show" && a.name == "ticks");
+    });
+    if (ticks !== undefined) {
+        ticks = true;
+    } else {
+        ticks = false;
+    }
+    scales = scales.sort(function (a, b) {
+        return a.position - b.position;
+    });
+    var canvas = document.getElementById('scale-canvas');
+    var ctx = canvas.getContext("2d");
+    var height = canvas.height;
+    var width = canvas.width;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var draw_heights = [24, height - 34];
+    var textHolder = document.getElementById('scale-text-holder');
+    textHolder.innerHTML = "";
+    var lastHeight = 0;
+    scales.forEach(function (scale) {
+        var posPercent = scale.position / 100.0;
+        var posPix = (1 - posPercent) * (draw_heights[1] - draw_heights[0]) + draw_heights[0];
+        if (ticks) {
+            ctx.fillStyle = "#000000";
+            ctx.setLineDash([1, 2]);
+            ctx.moveTo(0, posPix);
+            ctx.lineTo(width, posPix);
+            ctx.stroke();
+        }
+        var text = document.createElement('div');
+        text.align = "right";
+        var textC = document.createElement('span');
+        textC.textContent = scale.text;
+        text.appendChild(textC);
+        text.className = "scale-text";
+        textHolder.appendChild(text);
+        text.style.top = (posPix - 9) + 'px';
+        lastHeight = posPix;
+    });
 }
 
 function buttonSortFragmentClick() {
@@ -450,12 +722,12 @@ function buttonSubmitClick() // TODO: Only when all songs have been played!
                 case 'scalerange':
                     // Check the scale has been used effectively
                     checkState = interfaceContext.checkScaleRange(checks[i].errorMessage);
-
                     break;
                 default:
                     console.log("WARNING - Check option " + checks[i].check + " is not supported on this interface");
                     break;
             }
+
         }
         if (checkState === false) {
             canContinue = false;
@@ -470,7 +742,7 @@ function buttonSubmitClick() // TODO: Only when all songs have been played!
             // This function is called when the submit button is clicked. Will check for any further tests to perform, or any post-test options
         } else {
             if (audioEngineContext.timer.testStarted === false) {
-                interfaceContext.lightbox.post("Warning", 'You have not started the test! Please press start to begin the test!');
+                interfaceContext.lightbox.post("Message", 'You have not started the test! Please press start to begin the test!');
                 return;
             }
         }

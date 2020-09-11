@@ -1,5 +1,5 @@
 /*
- * Hold any style information for MUSHRA interface. Customise if you like to make the interface your own!
+ * Hold any style information for radio interface. Customise if you like to make the interface your own!
  *
  */
 
@@ -48,7 +48,7 @@ button.discrete-button {
     width: 50px;
 }
 div.discrete-label {
-    width: 100px;
+    width: 50px;
     text-align: center;
 }
 div.scale-text {
