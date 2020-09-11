@@ -89,18 +89,32 @@ To be able to run the test, copy the following wav files in the folder *~/ASIAMS
 - S2L68N005.wav
 - S2L68N007.wav
 
+Then, copy the following wav files from the [original repository](https://github.com/BrechtDeMan/WebAudioEvaluationTool) (folder */media/example*) to the folder *~/ASIAMS/listeningTest/media/example*:
+
+- 1.wav
+- 2.wav
+- 3.wav
+- 4.wav
+- 5.wav
+
 At the moment, the test contains three pages: training, P1, S2, so we are blocking per subject. The randomization happens on the client side: the pool size is 2, meaning that the test will contain the training page (always played, always on top) and one page between P1 and S2. Inside the P1/S2 pages, a pool size of 5 is selected, meaning that 5 strokes out of 10 (5 normal + 5 controlled) will be picked at random. This type of setup is affected by the sample size: with a few participants, we will be far from a uniform distribution of responses wrt subject and number of played strokes.
 
 The server tracks a number of variables along with the actual response: total test time, time spent on each page, number of plays per stroke, master volume moved, etc.
 
 The responses are saved as xml files in the *~/ASIAMS/listeningTest/saves/* folder (locally, in this case).
 
-TODOs:
+Status:
 
-- Move some of the survey at the bottom
-- Replace texts
-- Tweak interface if needed
-- Prepare the training page (select strokes, create instructions and feedback)
-- Select subjects and strokes
-- Find feasible amount of strokes to be played in each test
-
+- Tested on Firefox/Win10 and Chrome/Win10.
+- Survey texts should be reviewed, and some of the questions should be moved at the bottom.
+- Fixed the interface, that now refreshes the content correctly when a new page is loaded.
+- Bug: the interface pools between audio elements inside a page, but does not pool between pages.
+- Bug: the interface does randomize the page order.
+- Bug: the interface does not allow to prevent randomization of audio elements inside a page.
+- Bug: the interface looks slightly different in Firefox and Chrome (but we can live with that).
+- Decide length of the training session (select strokes, create instructions and feedback).
+- Select subjects and strokes.
+- Find feasible amount of strokes to be played in each test.
+- If the test is too hard, consider length and character of the training set.
+- If the test is too hard, consider putting two reference strokes on each page.
+- If the test is too hard, consider moving to an audio evaluation test (e.g. a MUSHRA test on perceptual attributes).

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <waet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="test-schema.xsd">
-    <setup interface="discrete" projectReturn="save.php" returnURL="" randomiseOrder="true" poolSize="2" loudness="-23" crossFade="0" randomiseAxisOrder="false" preSilence="0" postSilence="0" playOne="true" minNumberPlays="1">
+    <setup interface="discrete" projectReturn="save.php" returnURL="" poolSize="1" loudness="-23" crossFade="0" randomiseAxisOrder="false" preSilence="0" postSilence="0" playOne="true" minNumberPlays="1">
         <exitText>Thank you for taking the test! Now you can close your browser window.</exitText>
         <!--><calibration checkFrequencies="true" checkLevels="true" checkChannels="true"/>
         <survey location="pre" showBackButton="true">
@@ -62,11 +62,11 @@
                 <scalelabel position="50">Controlled</scalelabel>
             </scales>
         </interface>
-        <audioelement url="0.wav" id="zero" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="1.wav" id="one" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="2.wav" id="two" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="3.wav" id="three" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="4.wav" id="four" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="1.wav" id="P1L36N008t" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="2.wav" id="P1R62C009t" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="3.wav" id="S2L57N001t" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="4.wav" id="S2L68N007t" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="5.wav" id="S2L58C007t" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
     </page>
     <page id="test-P1" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" poolSize="5" alwaysInclude="false" preSilence="0" postSilence="0" restrictMovement="false" minNumberPlays="0">
         <interface>

@@ -45,7 +45,7 @@ div.discrete-row {
     height: 50px;
 }
 button.discrete-button {
-    width: 50px;
+    width: 100px;
 }
 div.discrete-label {
     width: 50px;
@@ -57,7 +57,7 @@ div.scale-text {
 div.scale-text > span {
     position: absolute;
     bottom: 0;
-    width: 100%;
+    width: 20%;
     left: 0;
 }
 div.discrete-row-playing {
