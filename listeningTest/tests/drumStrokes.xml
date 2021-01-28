@@ -1,50 +1,122 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <waet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="test-schema.xsd">
-    <setup interface="discrete" projectReturn="save.php" returnURL="" poolSize="1" loudness="-23" crossFade="0" randomiseAxisOrder="false" preSilence="0" postSilence="0" playOne="true" minNumberPlays="1">
-        <exitText>Thank you for taking the test! Now you can close your browser window.</exitText>
-        <!--><calibration checkFrequencies="true" checkLevels="true" checkChannels="true"/>
-        <survey location="pre" showBackButton="true">
+    <setup interface="discrete" projectReturn="save.php" returnURL="" randomiseOrder="true" poolSize="4" loudness="-23" crossFade="0" randomiseAxisOrder="false" preSilence="0" postSilence="0" playOne="true" minNumberPlays="1">
+        <exitText>
+This is the end of the listening test. Thank you again for your participation!
+If you have questions or would like to hear more about this research, contact Associate Professor Sofia Dahl: [sof@create.aau.dk](mailto:sof@create.aau.dk)</exitText>
+        <calibration checkFrequencies="true" checkLevels="true" checkChannels="true"/>
+        <survey location="pre" showBackButton="false">
             <surveystatement id="intro">
-                <statement>This is the test presentation. Words words words </statement>
+                <statement>
+Thank you for your interest in participating in this listening test. 
+
+The aim with this study is to identify whether different types of drum strokes can be identified based on their sound. This will provide us knowledge to better understand human perception of timbre (or "sound colour") and how musicians control it. There is no personal compensation or gain in your participation other than the opportunity to assist in better understanding how we perceive and communicate with sounds.
+
+The test will take approximately 20 minutes and consists of four parts: 
+
+1) A brief sound calibration, where we will ask you to to adjust your listening level.
+
+2) A training session, where you will hear the type of sounds that will appear in the test.
+
+3) The actual listening test, where you will be asked to listen and classify 40 sounds in total.
+
+4) A questionnaire, where we will ask you some general personal information such as your age, country of origin, and musical experience. 
+
+Your participation is completely voluntary, and you can withdraw from the test at any point without any consequences for you. Your identity is not known to any of the researchers involved. The collected data will remain anonymous and will be used for research purposes only.
+ 
+If you have questions, do not hesitate to contact Associate Professor Sofia Dahl ([sof@create.aau.dk](mailto:sof@create.aau.dk)) who is responsible for the study.
+
+Please read this information carefully. If you agree to participate and are prepared to proceed, please click "Next".</statement>
             </surveystatement>
-            <surveystatement id="gdpr">
-                <statement>GDPR stuff here.</statement>
+            <surveyquestion id="test_environment_1" mandatory="true">
+                <statement>
+Before we can start the test, we will ask you to do a brief calibration to adjust your listening level. This will help us assess that the sounds are played in a good enough quality. Please wear headphones while taking the test.
+
+Now, please describe briefly where you are taking the test (home, work, on public transportation, ...). 
+
+(Please write below)
+                </statement>
+            </surveyquestion>
+            <surveyslider id="test_environment_2" mandatory="true" min="0" max="100">
+                <statement>
+To what degree would you describe your surroundings at this moment as "noisy"? 
+
+(Please move the slider below)
+
+Not at all, it is very quiet &lt;&lt;-------------&gt;&gt; Very much, it is very noisy 
+                </statement>
+            </surveyslider>
+        </survey>
+        <survey location="post" showBackButton="false">
+            <surveystatement id="test_end">
+                <statement>The listening test is now over. The following is a brief questionnaire.</statement>
             </surveystatement>
-            <surveynumber id="age" mandatory="true" min="0" boxsize="normal">
-                <statement>What is your age?</statement>
+            <surveyquestion id="subject_feedback" mandatory="true">
+                <statement>
+Please tell us about your experience from doing the test. Was this a difficult task? Did you use a particular listening strategy? 
+
+(Please write in the field below)
+                </statement>
+            </surveyquestion>
+            <surveyslider id="music_expertise" min="0" max="100">
+                <statement>
+How would you judge your musical expertise in general? 
+
+Not musically trained at all &lt;&lt;-------------&gt;&gt; Highly trained and professional musician
+
+(Please move the slider below)
+                </statement>
+            </surveyslider>
+            <surveyslider id="drum_expertise" min="0" max="100">
+                <statement>
+How would you judge your expertise with listening to drum sounds in particular?
+
+Not trained at all &lt;&lt;-------------&gt;&gt; Highly trained and professional
+
+(Please move the slider below)
+                </statement>
+            </surveyslider>
+            <surveyquestion id="hearing_impairment" mandatory="false">
+                <statement>
+To the best of your knowledge, do you have any hearing impairment that might have affected your ability to hear the subtle differences in the test? 
+
+(If yes, please write below)
+                </statement>
+            </surveyquestion>
+            <surveynumber id="age" mandatory="true" min="0" max="100">
+                <statement>
+Please tell us your age. 
+
+(Please write in the field below)
+                </statement>
             </surveynumber>
-            <surveyquestion id="country" name="country" mandatory="true" boxsize="normal">
-                <statement>In which country did you grow up?</statement>
+            <surveyquestion id="country" mandatory="true">
+                <statement>
+In what country did you grow up?
+
+(Please write in the field below)
+                </statement>
             </surveyquestion>
-            <surveyquestion id="testEnvironment" name="testEnvironment" mandatory="true" boxsize="normal">
-                <statement>Please describe where and in what situation you are taking the test (at home, at work, on public transportation, ...).</statement>
-            </surveyquestion>
-            <surveycheckbox id="musicExp" name="musicExp" mandatory="true" min="1" max="NaN">
-                <statement>How would you judge your musical expertise in general?</statement>
-                <option name="musicProf">Professional musician or sound engineer</option>
-                <option name="amateur">Amateur musician or sound engineer</option>
-                <option name="musicLover">Music lover</option>
-                <option name="noExp">No expertise at all</option>
-                <option name="other">Other (please explain)</option>
-            </surveycheckbox>
-            <surveycheckbox id="drumExp" name="drumExp" mandatory="true" min="1" max="NaN">
-                <statement>How would you judge your expertise with drum sounds specifically?</statement>
-                <option name="drumProf">I am a trained drummer</option>
-                <option name="notDrumProfMusician">I am familiar with musical timbres (as a musician with some degree of experience), but not with drums specifically</option>
-                <option name="noExpWithDrum">I'm not sure I will be able to tell the difference between drum sounds</option>
-            </surveycheckbox>
-            <surveystatement id="surveyEnd">
-                <statement>Before we can start the test, we will ask you to do a brief calibration to adjust your listening level. This will help us assess that the sounds are played in a good enough quality.</statement>
-            </surveystatement>
-        </survey><-->
-        <survey location="post" showBackButton="true"/>
+            <surveyradio id="gender" mandatory="true">
+                <statement>
+Please indicate your gender.
+
+(Select one below)
+                </statement>
+                <option name="male">Male</option>
+                <option name="female">Female</option>
+                <option name="non-binary">Non-Binary</option>
+            </surveyradio>
+        </survey>
         <metric>
             <metricenable>testTimer</metricenable>
             <metricenable>elementListenTracker</metricenable>
             <metricenable>elementFlagListenedTo</metricenable>
+            <metricenable>elementTimer</metricenable>
         </metric>
         <interface>
             <interfaceoption type="check" name="fragmentPlayed"/>
+            <interfaceoption type="check" name="fragmentMoved"/>
             <interfaceoption type="show" name="volume"/>
             <interfaceoption type="show" name="page-count"/>
             <scales>
@@ -53,59 +125,110 @@
             </scales>
         </interface>
     </setup>
-    <page id="training" hostURL="media/example/" randomiseOrder="false" repeatCount="0" poolSize="5" loop="false" synchronous="false" label="none" alwaysInclude="true" position="0" preSilence="0" postSilence="0" restrictMovement="false" minNumberPlays="0">
+
+    <page id="training_feedback" hostURL="media/example/" randomiseOrder="false" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" poolSize="6" alwaysInclude="true" position="1" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
+        <commentboxprefix>Comment on track</commentboxprefix>
+        <interface>
+            <title>Training feedback: which playing technique has been used?</title>
+            <scales>
+                <scalelabel position="25">Normal</scalelabel>
+                <scalelabel position="50">Controlled</scalelabel>
+            </scales>
+        </interface>
+        <audioelement url="1.wav" id="one_fb" gain="0" label="Normal"/>
+        <audioelement url="2.wav" id="two_fb" gain="0" label="Controlled"/>
+        <audioelement url="3.wav" id="three_fb" gain="0" label="Controlled"/>
+        <audioelement url="4.wav" id="four_fb" gain="0" label="Normal"/>
+        <audioelement url="5.wav" id="five_fb" gain="0" label="Normal"/>
+        <audioelement url="6.wav" id="six_fb" gain="0" label="Controlled"/>
+        <survey location="pre" showBackButton="false">
+            <surveystatement id="training_fb_start">
+                <statement>Now, the same sounds will be shown and you will get feedback on your answers. Please take time to listen carefully.</statement>
+            </surveystatement>
+        </survey>
+        <survey location="post" showBackButton="true">
+            <surveystatement id="end_training">
+                <statement>Once you have completed the training and formed an understanding of the sounds, press "Submit" to proceed to the listening test.</statement>
+            </surveystatement>
+        </survey>
+    </page>
+
+    <page id="training" hostURL="media/example/" randomiseOrder="false" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" poolSize="6" alwaysInclude="true" position="0" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
+        <commentboxprefix>Comment on track</commentboxprefix>
         <interface>
             <title>Training session: which playing technique has been used?</title>
-            <image src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Drumkit-icon.png"/>
             <scales>
                 <scalelabel position="25">Normal</scalelabel>
                 <scalelabel position="50">Controlled</scalelabel>
             </scales>
         </interface>
-        <audioelement url="1.wav" id="P1L36N008t" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="2.wav" id="P1R62C009t" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="3.wav" id="S2L57N001t" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="4.wav" id="S2L68N007t" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="5.wav" id="S2L58C007t" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="1.wav" id="one" gain="0" label="1"/>
+        <audioelement url="2.wav" id="two" gain="0" label="2"/>
+        <audioelement url="3.wav" id="three" gain="0" label="3"/>
+        <audioelement url="4.wav" id="four" gain="0" label="4"/>
+        <audioelement url="5.wav" id="five" gain="0" label="5"/>
+        <audioelement url="6.wav" id="six" gain="0" label="6"/>
+        <survey location="pre" showBackButton="false">
+            <surveystatement id="training_instructions">
+                <statement>
+You will now listen to a set of drum strokes played with two different instructions: "Normal" and "Controlled".
+
+For "Normal" strokes, the player was instructed to play a mezzoforte stroke using a normal technique.
+
+For "Controlled" strokes, the player was instructed to stop the drumstick as soon as possible AFTER the stroke. That is, the drumstick should come to rest as close as possible to the drum skin.
+
+For the following 6 strokes, please listen and select whether you believe them to be "Normal" or "Controlled" strokes. You will receive feedback, can keep listening carefully to hear what you perceive to be the difference between "Normal" and "Controlled" strokes in terms of sound. The differences are likely to be subtle.
+
+Please read this information carefully before starting the training session. Then click "Start" when you are ready.
+                </statement>
+            </surveystatement>
+        </survey>
+        <survey location="post" showBackButton="false"/>
     </page>
-    <page id="test-P1" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" poolSize="5" alwaysInclude="false" preSilence="0" postSilence="0" restrictMovement="false" minNumberPlays="0">
-        <interface>
-            <title>P1: which playing technique has been used?</title>
-            <image src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Drumkit-icon.png"/>
-            <scales>
-                <scalelabel position="25">Normal</scalelabel>
-                <scalelabel position="50">Controlled</scalelabel>
-            </scales>
-        </interface>
-        <audioelement url="P1L36N008.wav" id="P1L36N008" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1L38N001.wav" id="P1L38N001" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R62C001.wav" id="P1R62C001" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R62C009.wav" id="P1L38C009" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R63N006.wav" id="P1R63N006" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R73N010.wav" id="P1R73N010" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R73N006.wav" id="P1R73N006" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R74C003.wav" id="P1R74C003" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R74C005.wav" id="P1R74C005" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R76C007.wav" id="P1R76C007" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-    </page>
-    <page id="test-S2" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" poolSize="5" alwaysInclude="false" preSilence="0" postSilence="0" restrictMovement="false" minNumberPlays="0">
+
+    <page id="test_S2" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" poolSize="10" alwaysInclude="true" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
+        <commentboxprefix>Comment on track</commentboxprefix>
         <interface>
             <title>S2: which playing technique has been used?</title>
-            <image src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Drumkit-icon.png"/>
             <scales>
                 <scalelabel position="25">Normal</scalelabel>
                 <scalelabel position="50">Controlled</scalelabel>
             </scales>
         </interface>
-        <audioelement url="S2L56C001.wav" id="S2L56C001" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L56C004.wav" id="S2L56C004" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L56C009.wav" id="S2L56C009" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L57N001.wav" id="S2L57N001" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L58C001.wav" id="S2L58C001" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L58C007.wav" id="S2L58C007" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L59N003.wav" id="S2L59N003" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L59N006.wav" id="S2L59N006" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L68N005.wav" id="S2L68N005" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L68N007.wav" id="S2L68N007" gain="0" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1L36N008.wav" id="P1L36N008" gain="0" label="1" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1L38N001.wav" id="P1L38N001" gain="0" label="2" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R62C001.wav" id="P1R62C001" gain="0" label="3" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R62C009.wav" id="P1L38C009" gain="0" label="4" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R63N006.wav" id="P1R63N006" gain="0" label="5" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R73N010.wav" id="P1R73N010" gain="0" label="6" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R73N006.wav" id="P1R73N006" gain="0" label="7" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R74C003.wav" id="P1R74C003" gain="0" label="8" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R74C005.wav" id="P1R74C005" gain="0" label="9" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P1R76C007.wav" id="P1R76C007" gain="0" label="10" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <survey location="pre" showBackButton="true"/>
+        <survey location="post" showBackButton="true"/>
+    </page>
+
+    <page id="test_P3" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" poolSize="10" alwaysInclude="true" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
+        <commentboxprefix>Comment on track</commentboxprefix>
+        <interface>
+            <title>P3: which playing technique has been used?</title>
+            <scales>
+                <scalelabel position="25">Normal</scalelabel>
+                <scalelabel position="50">Controlled</scalelabel>
+            </scales>
+        </interface>
+        <audioelement url="S2L56C001.wav" id="S2L56C001" gain="0" label="1" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L56C004.wav" id="S2L56C004" gain="0" label="2" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L56C009.wav" id="S2L56C009" gain="0" label="3" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L57N001.wav" id="S2L57N001" gain="0" label="4" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L58C001.wav" id="S2L58C001" gain="0" label="5" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L58C007.wav" id="S2L58C007" gain="0" label="6" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L59N003.wav" id="S2L59N003" gain="0" label="7" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L59N006.wav" id="S2L59N006" gain="0" label="8" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L68N005.wav" id="S2L68N005" gain="0" label="9" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L68N007.wav" id="S2L68N007" gain="0" label="10" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <survey location="pre" showBackButton="true"/>
+        <survey location="post" showBackButton="true"/>
     </page>
 </waet>

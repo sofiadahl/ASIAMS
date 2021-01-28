@@ -106,15 +106,11 @@ The responses are saved as xml files in the *~/ASIAMS/listeningTest/saves/* fold
 Status:
 
 - Tested on Firefox/Win10 and Chrome/Win10.
-- Survey texts should be reviewed, and some of the questions should be moved at the bottom.
-- Fixed the interface, that now refreshes the content correctly when a new page is loaded.
-- Bug: the interface pools between audio elements inside a page, but does not pool between pages.
-- Bug: the interface does randomize the page order.
-- Bug: the interface does not allow to prevent randomization of audio elements inside a page.
+- Todo: select strokes for training and test session.
+- Todo: upload to server.
+- Todo: check parsing scripts for the results.
 - Bug: the interface looks slightly different in Firefox and Chrome (but we can live with that).
-- Decide length of the training session (select strokes, create instructions and feedback).
-- Select subjects and strokes.
-- Find feasible amount of strokes to be played in each test.
+- Bug: for some reason, the xml parser shows "Submit" instead of "Next" at the end of the training feedback page.
 - If the test is too hard, consider length and character of the training set.
 - If the test is too hard, consider putting two reference strokes on each page.
 - If the test is too hard, consider moving to an audio evaluation test (e.g. a MUSHRA test on perceptual attributes).
