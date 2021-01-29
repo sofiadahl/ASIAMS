@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <waet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="test-schema.xsd">
-    <setup interface="discrete" projectReturn="save.php" returnURL="" randomiseOrder="true" poolSize="4" loudness="-23" crossFade="0" randomiseAxisOrder="false" preSilence="0" postSilence="0" playOne="true" minNumberPlays="1">
+    <setup interface="discrete" projectReturn="save.php" returnURL="" randomiseOrder="false" poolSize="0" loudness="-23" crossFade="0" randomiseAxisOrder="false" preSilence="0" postSilence="0" playOne="true" minNumberPlays="1">
         <exitText>
 This is the end of the listening test. Thank you again for your participation!
-If you have questions or would like to hear more about this research, contact Associate Professor Sofia Dahl: [sof@create.aau.dk](mailto:sof@create.aau.dk)</exitText>
+
+If you have questions or would like to hear more about this research, contact Associate Professor Sofia Dahl: [sof@create.aau.dk](mailto:sof@create.aau.dk)
+
+You can now close your browser window.
+        </exitText>
         <calibration checkFrequencies="true" checkLevels="true" checkChannels="true"/>
         <survey location="pre" showBackButton="false">
             <surveystatement id="intro">
@@ -126,7 +130,7 @@ Please indicate your gender.
         </interface>
     </setup>
 
-    <page id="training_feedback" hostURL="media/example/" randomiseOrder="false" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" poolSize="6" alwaysInclude="true" position="1" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
+    <page id="training_feedback" hostURL="media/training/" randomiseOrder="false" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" alwaysInclude="true" position="1" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
         <commentboxprefix>Comment on track</commentboxprefix>
         <interface>
             <title>Training feedback: which playing technique has been used?</title>
@@ -135,25 +139,25 @@ Please indicate your gender.
                 <scalelabel position="50">Controlled</scalelabel>
             </scales>
         </interface>
-        <audioelement url="1.wav" id="one_fb" gain="0" label="Normal"/>
-        <audioelement url="2.wav" id="two_fb" gain="0" label="Controlled"/>
-        <audioelement url="3.wav" id="three_fb" gain="0" label="Controlled"/>
-        <audioelement url="4.wav" id="four_fb" gain="0" label="Normal"/>
-        <audioelement url="5.wav" id="five_fb" gain="0" label="Normal"/>
-        <audioelement url="6.wav" id="six_fb" gain="0" label="Controlled"/>
+        <audioelement url="S2L57N004.wav" id="S2L57N004_fb" gain="0" label="Normal"/>
+        <audioelement url="P3L64C007.wav" id="P3L64C007_fb" gain="0" label="Controlled"/>
+        <audioelement url="P3L64C008.wav" id="P3L64C008_fb" gain="0" label="Controlled"/>
+        <audioelement url="S2R30C006.wav" id="S2R30C006_fb" gain="0" label="Controlled"/>
+        <audioelement url="S2L57N005.wav" id="S2L57N005_fb" gain="0" label="Normal"/>
+        <audioelement url="P3L56N004.wav" id="P3L56N004_fb" gain="0" label="Normal"/>
         <survey location="pre" showBackButton="false">
             <surveystatement id="training_fb_start">
-                <statement>Now, the same sounds will be shown and you will get feedback on your answers. Please take time to listen carefully.</statement>
+                <statement>Now, the same sounds will be presented once more, but this time the correct answers will be visible beside each sound. Please take time to listen carefully and select once again.</statement>
             </surveystatement>
         </survey>
         <survey location="post" showBackButton="true">
             <surveystatement id="end_training">
-                <statement>Once you have completed the training and formed an understanding of the sounds, press "Submit" to proceed to the listening test.</statement>
+                <statement>Now you have completed the training, and you are moving to the actual test. You will have to classify 40 sounds (20 per page). Press "Submit" to proceed.</statement>
             </surveystatement>
         </survey>
     </page>
 
-    <page id="training" hostURL="media/example/" randomiseOrder="false" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" poolSize="6" alwaysInclude="true" position="0" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
+    <page id="training" hostURL="media/training/" randomiseOrder="false" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" alwaysInclude="true" position="0" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
         <commentboxprefix>Comment on track</commentboxprefix>
         <interface>
             <title>Training session: which playing technique has been used?</title>
@@ -162,12 +166,12 @@ Please indicate your gender.
                 <scalelabel position="50">Controlled</scalelabel>
             </scales>
         </interface>
-        <audioelement url="1.wav" id="one" gain="0" label="1"/>
-        <audioelement url="2.wav" id="two" gain="0" label="2"/>
-        <audioelement url="3.wav" id="three" gain="0" label="3"/>
-        <audioelement url="4.wav" id="four" gain="0" label="4"/>
-        <audioelement url="5.wav" id="five" gain="0" label="5"/>
-        <audioelement url="6.wav" id="six" gain="0" label="6"/>
+        <audioelement url="S2L57N004.wav" id="S2L57N004" gain="0" label="1"/>
+        <audioelement url="P3L64C007.wav" id="P3L64C007" gain="0" label="2"/>
+        <audioelement url="P3L64C008.wav" id="P3L64C008" gain="0" label="3"/>
+        <audioelement url="S2R30C006.wav" id="S2R30C006" gain="0" label="4"/>
+        <audioelement url="S2L57N005.wav" id="S2L57N005" gain="0" label="5"/>
+        <audioelement url="P3L56N004.wav" id="P3L56N004" gain="0" label="6"/>
         <survey location="pre" showBackButton="false">
             <surveystatement id="training_instructions">
                 <statement>
@@ -186,48 +190,68 @@ Please read this information carefully before starting the training session. The
         <survey location="post" showBackButton="false"/>
     </page>
 
-    <page id="test_S2" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" poolSize="10" alwaysInclude="true" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
+    <page id="test_S2" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" alwaysInclude="true" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
         <commentboxprefix>Comment on track</commentboxprefix>
         <interface>
-            <title>S2: which playing technique has been used?</title>
+            <title>Which playing technique has been used?</title>
             <scales>
                 <scalelabel position="25">Normal</scalelabel>
                 <scalelabel position="50">Controlled</scalelabel>
             </scales>
         </interface>
-        <audioelement url="P1L36N008.wav" id="P1L36N008" gain="0" label="1" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1L38N001.wav" id="P1L38N001" gain="0" label="2" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R62C001.wav" id="P1R62C001" gain="0" label="3" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R62C009.wav" id="P1L38C009" gain="0" label="4" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R63N006.wav" id="P1R63N006" gain="0" label="5" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R73N010.wav" id="P1R73N010" gain="0" label="6" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R73N006.wav" id="P1R73N006" gain="0" label="7" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R74C003.wav" id="P1R74C003" gain="0" label="8" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R74C005.wav" id="P1R74C005" gain="0" label="9" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="P1R76C007.wav" id="P1R76C007" gain="0" label="10" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L59N004.wav" id="S2L59N004" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L59N004.wav" id="S2L59N004_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L70N003.wav" id="S2L70N003" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2L70N003.wav" id="S2L70N003_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R17N001.wav" id="S2R17N001" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R17N001.wav" id="S2R17N001_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R17N002.wav" id="S2R17N002" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R17N002.wav" id="S2R17N002_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R31N001.wav" id="S2R31N001" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R31N001.wav" id="S2R31N001_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R18C005.wav" id="S2R18C005" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R18C005.wav" id="S2R18C005_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R18C007.wav" id="S2R18C007" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R18C007.wav" id="S2R18C007_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R30C005.wav" id="S2R30C005" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R30C005.wav" id="S2R30C005_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R30C007.wav" id="S2R30C007" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R30C007.wav" id="S2R30C007_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R30C008.wav" id="S2R30C008" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="S2R30C008.wav" id="S2R30C008_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
         <survey location="pre" showBackButton="true"/>
         <survey location="post" showBackButton="true"/>
     </page>
 
-    <page id="test_P3" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" poolSize="10" alwaysInclude="true" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
+    <page id="test_P3" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" alwaysInclude="true" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
         <commentboxprefix>Comment on track</commentboxprefix>
         <interface>
-            <title>P3: which playing technique has been used?</title>
+            <title>Which playing technique has been used?</title>
             <scales>
                 <scalelabel position="25">Normal</scalelabel>
                 <scalelabel position="50">Controlled</scalelabel>
             </scales>
         </interface>
-        <audioelement url="S2L56C001.wav" id="S2L56C001" gain="0" label="1" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L56C004.wav" id="S2L56C004" gain="0" label="2" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L56C009.wav" id="S2L56C009" gain="0" label="3" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L57N001.wav" id="S2L57N001" gain="0" label="4" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L58C001.wav" id="S2L58C001" gain="0" label="5" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L58C007.wav" id="S2L58C007" gain="0" label="6" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L59N003.wav" id="S2L59N003" gain="0" label="7" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L59N006.wav" id="S2L59N006" gain="0" label="8" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L68N005.wav" id="S2L68N005" gain="0" label="9" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
-        <audioelement url="S2L68N007.wav" id="S2L68N007" gain="0" label="10" type="normal" alwaysInclude="false" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L56N006.wav" id="P3L56N006" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L56N006.wav" id="P3L56N006_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3R15N001.wav" id="P3R15N001" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3R15N001.wav" id="P3R15N001_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L56N001.wav" id="P3L56N001" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L56N001.wav" id="P3L56N001_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L63N009.wav" id="P3L63N009" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L63N009.wav" id="P3L63N009_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3R27N003.wav" id="P3R27N003" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3R27N003.wav" id="P3R27N003_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L55C005.wav" id="P3L55C005" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L55C005.wav" id="P3L55C005_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L66C005.wav" id="P3L66C005" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L66C005.wav" id="P3L66C005_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L64C001.wav" id="P3L64C001" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L64C001.wav" id="P3L64C001_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L55C006.wav" id="P3L55C006" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L55C006.wav" id="P3L55C006_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L53C003.wav" id="P3L53C003" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
+        <audioelement url="P3L53C003.wav" id="P3L53C003_rep" gain="0" type="normal" alwaysInclude="true" preSilence="0" postSilence="0" minNumberPlays="0"/>
         <survey location="pre" showBackButton="true"/>
         <survey location="post" showBackButton="true"/>
     </page>
