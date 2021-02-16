@@ -1377,7 +1377,7 @@ function stateMachine() {
         } else if (this.stateIndex == -1) {
             if (interfaceContext.calibrationTests.checkFrequencies) {
                 popup.showPopup();
-                popup.popupTitle.textContent = "Set the levels so all tones are of equal amplitude. Move your mouse over the sliders to hear the tones. The red slider is the reference tone";
+                popup.popupTitle.textContent = "Set the levels so all tones are of equal amplitude. Move your mouse over the sliders to hear the tones.";
                 interfaceContext.calibrationTests.performFrequencyCheck(popup.popupResponse);
                 popup.hidePreviousButton();
             } else if (interfaceContext.calibrationTests.checkChannels) {

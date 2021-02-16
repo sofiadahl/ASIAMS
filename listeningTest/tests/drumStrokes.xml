@@ -71,7 +71,7 @@ Not musically trained at all &lt;&lt;-------------&gt;&gt; Highly trained and pr
 (Please move the slider below)
                 </statement>
             </surveyslider>
-            <surveyslider id="drum_expertise" min="0" max="100">
+            <surveyslider id="drum_expertise_rating" min="0" max="100">
                 <statement>
 How would you judge your expertise with listening to drum sounds in particular?
 
@@ -80,6 +80,13 @@ Not trained at all &lt;&lt;-------------&gt;&gt; Highly trained and professional
 (Please move the slider below)
                 </statement>
             </surveyslider>
+            <surveyquestion id="drum_expertise_question" mandatory="false">
+                <statement>
+Please specify in what way you have gained your expertise (if any).
+
+(Please write in the field below)
+                </statement>
+            </surveyquestion>
             <surveyquestion id="hearing_impairment" mandatory="false">
                 <statement>
 To the best of your knowledge, do you have any hearing impairment that might have affected your ability to hear the subtle differences in the test? 
@@ -133,18 +140,18 @@ Please indicate your gender.
     <page id="training_feedback" hostURL="media/training/" randomiseOrder="false" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" alwaysInclude="true" position="1" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
         <commentboxprefix>Comment on track</commentboxprefix>
         <interface>
-            <title>Training feedback: which playing technique has been used?</title>
+            <title>"Normal": Mezzoforte stroke using a normal technique. "Controlled": Mezzoforte stroke stopping the drumstick as soon as possible AFTER the stroke.</title>
             <scales>
                 <scalelabel position="25">Normal</scalelabel>
                 <scalelabel position="50">Controlled</scalelabel>
             </scales>
         </interface>
-        <audioelement url="S2L57N004.wav" id="S2L57N004_fb" gain="0" label="Normal"/>
-        <audioelement url="P3L64C007.wav" id="P3L64C007_fb" gain="0" label="Controlled"/>
-        <audioelement url="P3L64C008.wav" id="P3L64C008_fb" gain="0" label="Controlled"/>
-        <audioelement url="S2R30C006.wav" id="S2R30C006_fb" gain="0" label="Controlled"/>
-        <audioelement url="S2L57N005.wav" id="S2L57N005_fb" gain="0" label="Normal"/>
-        <audioelement url="P3L56N004.wav" id="P3L56N004_fb" gain="0" label="Normal"/>
+        <audioelement url="S2L57N004.wav" id="S2L57N004_fb" gain="0" label="NORMAL"/>
+        <audioelement url="P3L64C007.wav" id="P3L64C007_fb" gain="0" label="CONTROLLED"/>
+        <audioelement url="P3L64C008.wav" id="P3L64C008_fb" gain="0" label="CONTROLLED"/>
+        <audioelement url="S2R30C006.wav" id="S2R30C006_fb" gain="0" label="CONTROLLED"/>
+        <audioelement url="S2L57N005.wav" id="S2L57N005_fb" gain="0" label="NORMAL"/>
+        <audioelement url="P3L56N004.wav" id="P3L56N004_fb" gain="0" label="NORMAL"/>
         <survey location="pre" showBackButton="false">
             <surveystatement id="training_fb_start">
                 <statement>Now, the same sounds will be presented once more, but this time the correct answers will be visible beside each sound. Please take time to listen carefully and select once again.</statement>
@@ -160,7 +167,7 @@ Please indicate your gender.
     <page id="training" hostURL="media/training/" randomiseOrder="false" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" alwaysInclude="true" position="0" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
         <commentboxprefix>Comment on track</commentboxprefix>
         <interface>
-            <title>Training session: which playing technique has been used?</title>
+            <title>"Normal": Mezzoforte stroke using a normal technique. "Controlled": Mezzoforte stroke stopping the drumstick as soon as possible AFTER the stroke.</title>
             <scales>
                 <scalelabel position="25">Normal</scalelabel>
                 <scalelabel position="50">Controlled</scalelabel>
@@ -193,7 +200,7 @@ Please read this information carefully before starting the training session. The
     <page id="test_S2" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" alwaysInclude="true" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
         <commentboxprefix>Comment on track</commentboxprefix>
         <interface>
-            <title>Which playing technique has been used?</title>
+            <title>"Normal": Mezzoforte stroke using a normal technique. "Controlled": Mezzoforte stroke stopping the drumstick as soon as possible AFTER the stroke.</title>
             <scales>
                 <scalelabel position="25">Normal</scalelabel>
                 <scalelabel position="50">Controlled</scalelabel>
@@ -226,7 +233,7 @@ Please read this information carefully before starting the training session. The
     <page id="test_P3" hostURL="media/" randomiseOrder="true" repeatCount="0" loop="false" synchronous="false" label="none" labelStart="" alwaysInclude="true" preSilence="0" postSilence="0" playOne="false" restrictMovement="false" minNumberPlays="1">
         <commentboxprefix>Comment on track</commentboxprefix>
         <interface>
-            <title>Which playing technique has been used?</title>
+            <title>"Normal": Mezzoforte stroke using a normal technique. "Controlled": Mezzoforte stroke stopping the drumstick as soon as possible AFTER the stroke.</title>
             <scales>
                 <scalelabel position="25">Normal</scalelabel>
                 <scalelabel position="50">Controlled</scalelabel>
