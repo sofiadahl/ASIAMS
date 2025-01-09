@@ -76,12 +76,7 @@ read.csv("features.csv") %>%
 In a first attempt to get an overview, the descriptors' density estimates were plotted, broken down by `arm` and `cond`.
 
 ```{r DescriptorDensities, anchor=FIGREF, fig.width=12, fig.height=18}
-dep_vars <- names(drum_beats)[which(!(names(drum_beats) %in% c("subj", 
-                                                               "arm", 
-                                                               "cond", 
-                                                               "no",
-                                                               "series",
-                                                               "patient")))]
+dep_vars <- names(drum_beats)[which(!(names(drum_beats) %in% c("subj", "arm", "cond", "no", "series", "patient")))]
 n_vars <- length(dep_vars)
 plot_lst <- vector("list", length = n_vars)
 plt_cnt <- 1
@@ -97,7 +92,7 @@ for (dv in dep_vars) {
     ylab <- ""
   }
   plot_lst[[plt_cnt]] <- ggplot(drum_beats, 
-                                aes_string(x = dv, 
+                                aes_string(x = dv,
                                            color = "cond")) +
     geom_density(na.rm = TRUE) + 
     scale_color_colorblind() +
@@ -387,7 +382,7 @@ Note: set `MODEL` to `TRUE` at the top of the script if you haven't compiled/bui
 if (MODEL) {
   m0 <- brm(m0_form,
             family = skew_normal(),
-            inits = "0",
+            init = "0",
             data = drum_beats)
   m0 <- add_criterion(m0, 
                       "loo",
@@ -419,7 +414,7 @@ The Null model's ICC amounts to `r round(m0_icc, 2)`, which suggests that approx
 The intercept in `r figr("m0_summary")` amounts to roughly `r round(m0_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the data set average. The table also shows that the inter-individual standard deviation (`sd(Intercept)`) is large compared to the unexplained variation (`sigma`). This led to the large ICC value above. By adding more and more independent factors to the model specification, we will later try to decrease $\sigma$, *i.e.* 'explain away' as much remaining variation as possible. 
 
 ```{r m0_ppcheck, anchor=FIGREF}
-pp_check(m0, nsamples = 100)
+pp_check(m0, ndraws = 100)
 ```
 
 `r figr("m0_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -457,7 +452,7 @@ and leave the rest of the priors as suggested by the package `brms` (see `r figr
 if (MODEL) {
   m1 <- brm(m1_form,
             prior = m1_prior,
-            inits = "0",
+            init = "0",
             family = skew_normal(),
             data = drum_beats)
   m1 <- add_criterion(m1, 
@@ -482,7 +477,7 @@ if (MODEL) {
 The intercept in `r figr("m1_summary")` amounts to roughly `r round(m1_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `patient1` value is the mean of the posterior distribution *difference* between the healthy subjects and the patients (`r round(m1_summary$fixed["patient1", "Estimate"])`). The table also shows that the interindividual standard deviation (`sd(Intercept)` $\approx$ `r round(m1_summary$random$subj["sd(Intercept)", "Estimate"])` is still large compared to the unexplained variation (`sigma` $\approx$ `r round(m1_summary$spec_pars["sigma", "Estimate"])`). 
 
 ```{r m1_ppcheck, anchor=FIGREF}
-pp_check(m1, nsamples = 100)
+pp_check(m1, ndraws = 100)
 ```
 
 `r figr("m1_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -522,7 +517,7 @@ if (MODEL) {
   m2 <- brm(m2_form,
             prior = m2_prior,
             family = skew_normal(),
-            inits = "0",
+            init = "0",
             data = drum_beats)
   m2 <- add_criterion(m2, 
                       "loo",
@@ -546,7 +541,7 @@ if (MODEL) {
 The intercept in `r figr("m2_summary")` amounts to roughly `r round(m2_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m2_summary$fixed["condN", "Estimate"])`). The table also shows that the interindividual standard deviation (`sd(Intercept)` $\approx$ `r round(m2_summary$random$subj["sd(Intercept)", "Estimate"])` is still large compared to the unexplained variation (`sigma` $\approx$ `r round(m2_summary$spec_pars["sigma", "Estimate"])`). 
 
 ```{r m2_ppcheck, anchor=FIGREF}
-pp_check(m2, nsamples = 100)
+pp_check(m2, ndraws = 100)
 ```
 
 `r figr("m2_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -582,7 +577,7 @@ if (MODEL) {
   m3 <- brm(m3_form,
             prior = m3_prior,
             family = skew_normal(),
-            inits = "0",
+            init = "0",
             data = drum_beats)
   m3 <- add_criterion(m3, 
                       "loo",
@@ -606,7 +601,7 @@ if (MODEL) {
 The intercept in `r figr("m3_summary")` amounts to roughly `r round(m3_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m3_summary$fixed["condN", "Estimate"])`). The table also shows that the inter-individual standard deviation (`sd(Intercept)` $\approx$ `r round(m3_summary$random$subj["sd(Intercept)", "Estimate"])` is not large anymore compared to the unexplained variation (`sigma` $\approx$ `r round(m3_summary$spec_pars["sigma", "Estimate"])`). 
 
 ```{r m3_ppcheck, anchor=FIGREF}
-pp_check(m3, nsamples = 100)
+pp_check(m3, ndraws = 100)
 ```
 
 `r figr("m3_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -642,7 +637,7 @@ if (MODEL) {
   m4 <- brm(m4_form,
             prior = m4_prior,
             family = skew_normal(),
-            inits = "0",
+            init = "0",
             data = drum_beats)
   m4 <- add_criterion(m4, 
                       "loo",
@@ -666,7 +661,7 @@ if (MODEL) {
 The intercept in `r figr("m4_summary")` amounts to roughly `r round(m4_summary$fixed["Intercept", "Estimate"])`. In this model specification, the intercept is identical to the controlled strokes, while the `condN` value is the mean of the posterior distribution *difference* between controlled and normal strokes (`r round(m4_summary$fixed["condN", "Estimate"])`). The table also shows that the inter-individual standard deviation (`sd(Intercept)` $\approx$ `r round(m4_summary$random$subj["sd(Intercept)", "Estimate"])` is not large anymore compared to the unexplained variation (`sigma` $\approx$ `r round(m4_summary$spec_pars["sigma", "Estimate"])`). 
 
 ```{r m4_ppcheck, anchor=FIGREF}
-pp_check(m4, nsamples = 100)
+pp_check(m4, ndraws = 100)
 ```
 
 `r figr("m4_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -700,7 +695,7 @@ if (MODEL) {
   m5 <- brm(m5_form,
             prior = m5_prior,
             family = skew_normal(),
-            inits = "0",
+            init = "0",
             data = drum_beats)
   m5 <- add_criterion(m5, 
                       "loo",
@@ -724,7 +719,7 @@ if (MODEL) {
 In the Population-Level Effects section of `r figr("m5_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
 
 ```{r m5_ppcheck, anchor=FIGREF}
-pp_check(m5, nsamples = 100)
+pp_check(m5, ndraws = 100)
 ```
 
 `r figr("m5_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -757,7 +752,7 @@ if (MODEL) {
   m6 <- brm(m6_form,
             prior = m6_prior,
             family = skew_normal(),
-            inits = "0",
+            init = "0",
             data = drum_beats)
   m6 <- add_criterion(m6, 
                       "loo",
@@ -781,7 +776,7 @@ if (MODEL) {
 In the Population-Level Effects section of `r figr("m6_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
 
 ```{r m6_ppcheck, anchor=FIGREF}
-pp_check(m6, nsamples = 100)
+pp_check(m6, ndraws = 100)
 ```
 
 `r figr("m6_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -814,7 +809,7 @@ if (MODEL) {
   m6a <- brm(m6a_form,
              prior = m6a_prior,
              family = skew_normal(),
-             inits = "0",
+             init = "0",
              data = drum_beats)
   m6a <- add_criterion(m6a, 
                        "loo",
@@ -838,7 +833,7 @@ if (MODEL) {
 In the Population-Level Effects section of `r figr("m6a_summary")` are now two estimates for the skewness parameter alpha (one for the controlled [`alpha_Intercept`] and one for the normal condition [`alpha_condN`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on instruction condition.
 
 ```{r m6a_ppcheck, anchor=FIGREF}
-pp_check(m6a, nsamples = 100)
+pp_check(m6a, ndraws = 100)
 ```
 
 `r figr("m6a_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -887,7 +882,7 @@ if (MODEL) {
   m7 <- brm(m7_form,
             prior = m7_prior,
             family = skew_normal(),
-            inits = "0",
+            init = "0",
             data = drum_beats)
   m7 <- add_criterion(m7, 
                       "loo",
@@ -911,7 +906,7 @@ if (MODEL) {
 In the Links section of the summary (`r figr("m7_summary")`) we note that sigma is no longer modeled on the identity scale but on the $\log_{2}$ scale. In the Population-Level Effects section of `r figr("m7_summary")` we now find not only the estimates for the Intercept and `condN` but also two estimates for sigma (one for the controlled [`sigma_Intercept`] and one for the normal condition [`sigma_condN`]). Because of this, there is no entry for sigma in the Family Specific section anymore. All this due to our explicit modeling of sigma conditional on instruction condition.
 
 ```{r m7_ppcheck, anchor=FIGREF}
-pp_check(m7, nsamples = 100)
+pp_check(m7, ndraws = 100)
 ```
 
 `r figr("m7_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -975,7 +970,7 @@ if (MODEL) {
   m8 <- brm(m8_form,
             prior = m8_prior,
             family = skew_normal(),
-            inits = "0",
+            init = "0",
             data = drum_beats)
   m8 <- add_criterion(m8, 
                       "loo",
@@ -999,7 +994,7 @@ if (MODEL) {
 In the Population-Level Effects section of `r figr("m8_summary")` are now two estimates for the skewness parameter alpha (one for the dominant [`alpha_Intercept`] and one for the non-dominant arm [`alpha_armND`]), while there is no entry for alpha in the Family Specific section anymore. All this due to our explicit modeling of alpha conditional on arm.
 
 ```{r m8_ppcheck, anchor=FIGREF}
-pp_check(m8, nsamples = 100)
+pp_check(m8, ndraws = 100)
 ```
 
 `r figr("m8_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -1064,7 +1059,7 @@ if (MODEL) {
   m9 <- brm(m9_form,
             prior = m9_prior,
             family = skew_normal(),
-            inits = "0",
+            init = "0",
             data = drum_beats)
   m9 <- add_criterion(m9, 
                       "loo",
@@ -1088,7 +1083,7 @@ if (MODEL) {
 In the Population-Level Effects section of `r figr("m9_summary")` are now three estimates for the skewness parameter alpha, as well as three estimates for spread ('sigma').
 
 ```{r m9_ppcheck, anchor=FIGREF}
-pp_check(m9, nsamples = 100)
+pp_check(m9, ndraws = 100)
 ```
 
 `r figr("m9_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -1161,7 +1156,7 @@ if (MODEL) {
   m10 <- brm(m10_form,
              prior = m10_prior,
              family = skew_normal(),
-             inits = "0",
+             init = "0",
              data = drum_beats)
   m10 <- add_criterion(m10, 
                        "loo",
@@ -1184,7 +1179,7 @@ if (MODEL) {
 
 
 ```{r m10_ppcheck, anchor=FIGREF}
-pp_check(m10, nsamples = 100)
+pp_check(m10, ndraws = 100)
 ```
 
 `r figr("m10_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -1256,7 +1251,7 @@ if (MODEL) {
   m11 <- brm(m11_form,
              prior = m11_prior,
              family = skew_normal(),
-             inits = "0",
+             init = "0",
              data = drum_beats)
   m11 <- add_criterion(m11, 
                        "loo",
@@ -1279,7 +1274,7 @@ if (MODEL) {
 
 
 ```{r m11_ppcheck, anchor=FIGREF}
-pp_check(m11, nsamples = 100)
+pp_check(m11, ndraws = 100)
 ```
 
 `r figr("m11_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -1413,7 +1408,7 @@ if (MODEL) {
   m11_transFlat <- brm(m11_transFlat_form,
                        prior = m11_transFlat_prior,
                        family = skew_normal(),
-                       inits = "0",
+                       init = "0",
                        data = drum_beats)
   m11_transFlat <- add_criterion(m11_transFlat, 
                                  "loo",
@@ -1436,7 +1431,7 @@ if (MODEL) {
 
 
 ```{r m11_transFlat_ppcheck, anchor=FIGREF}
-pp_check(m11_transFlat, nsamples = 100)
+pp_check(m11_transFlat, ndraws = 100)
 ```
 
 `r figr("m11_transFlat_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
@@ -1547,7 +1542,7 @@ if (MODEL) {
   m11_transCrest <- brm(m11_transCrest_form,
                         prior = m11_transCrest_prior,
                         family = skew_normal(),
-                        inits = "0",
+                        init = "0",
                         control = list(max_treedepth = 15),
                         data = drum_beats)
   m11_transCrest <- add_criterion(m11_transCrest, 
@@ -1571,7 +1566,7 @@ if (MODEL) {
 
 
 ```{r m11_transCrest_ppcheck, anchor=FIGREF}
-pp_check(m11_transCrest, nsamples = 100)
+pp_check(m11_transCrest, ndraws = 100)
 ```
 
 `r figr("m11_transCrest_ppcheck", type = FIGREF)`. *Posterior predictive check. The thick blue line shows the distribution of the empirical data. The thin blue lines are one-hundred realizations of data generated from parameters estimated by the model.*
