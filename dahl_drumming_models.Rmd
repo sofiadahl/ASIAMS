@@ -38,7 +38,8 @@ opts_knit$set(kfigr.link = TRUE,
               kfigr.prefix = TRUE)
 knitr::opts_chunk$set(fig.width = 3.5,
                       fig.height = 3.5)
-options(mc.cores = parallel::detectCores())
+options(mc.cores = parallelly::availableCores(),
+        brms.backend = "cmdstanr")
 rstan::rstan_options(auto_write = TRUE)
 # Constants:
 MODEL <- FALSE
