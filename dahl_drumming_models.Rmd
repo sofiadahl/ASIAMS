@@ -82,7 +82,8 @@ plot_lst <- vector("list", length = n_vars)
 plt_cnt <- 1
 for (dv in dep_vars) {
   if (plt_cnt == n_vars) {
-    plt_pos <- c(2, 0.5)
+    # plt_pos <- c(2, 0.5)
+    plt_pos <- "right"
   } else {
     plt_pos <- "none"
   }
@@ -92,8 +93,8 @@ for (dv in dep_vars) {
     ylab <- ""
   }
   plot_lst[[plt_cnt]] <- ggplot(drum_beats, 
-                                aes_string(x = dv,
-                                           color = "cond")) +
+                                aes(x = .data[[dv]],
+                                color = .data[["cond"]])) +
     geom_density(na.rm = TRUE) + 
     scale_color_colorblind() +
     ylab(ylab) +
