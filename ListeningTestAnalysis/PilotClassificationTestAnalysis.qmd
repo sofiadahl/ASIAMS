@@ -191,9 +191,11 @@ feedb_long %>%
 Then we can compare the observations with the predicted classification for Controlled (C) and Normal (N) strokes. The confusion matrix for training becomes:
 
 ```{r}
+#| label: tbl-confmat
+#| column: margin
 cm <- train_truth %>%
   conf_mat(obs, instruction)
-cm
+kable(cm$table)
 ```
 
 In the above, the two participants not passing the classifications are still part of the data. The column sums add up with the length of train_truth data, so it is as expected.
@@ -203,10 +205,12 @@ cmP3 <- P3_long %>%
   conf_mat(obs, instruction) # data=obs, truth=instruction
 ```
 
-The confusion matrix for P3 block show more confusion between N and C strokes, but still pretty good, `r round(cmP3$table[1, 1] / sum(cmP3$table[, 1]) * 100)` % (and not 78 as you wrote!?) of C-strokes correctly classified as C.
+The confusion matrix for P3 block show more confusion between N and C strokes, but still pretty good, `r round(cmP3$table[1, 1] / sum(cmP3$table[, 1]) * 100)` % <!--# and not 78 as you wrote!? --> of C-strokes correctly classified as C.
 
 ```{r}
-cmP3
+#| label: tbl-confmatP3
+#| column: margin
+kable(cmP3$table)
 ```
 
 ```{r}
@@ -214,10 +218,12 @@ cmS2 <- S2_long %>%
   conf_mat(obs, instruction)
 ```
 
-The confusion matrix for the S2 block shows `r round(cmS2$table[1, 1] / sum(cmS2$table[, 1]) * 100)` % (and not 80 % as you wrote) of C-strokes correctly classified as C-strokes.
+The confusion matrix for the S2 block shows `r round(cmS2$table[1, 1] / sum(cmS2$table[, 1]) * 100)` % <!--#  and not 80 % as you wrote --> of C-strokes correctly classified as C-strokes.
 
 ```{r}
-cmS2
+#| label: tbl-confmatS2
+#| column: margin
+kable(cmS2$table)
 # autoplot(cmS2, type = "heatmap") #Heatmap plot
 ```
 
