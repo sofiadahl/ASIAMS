@@ -1,0 +1,252 @@
+---
+title-block-banner: "#FF1493"
+title: Pilot Classification Test Analysis
+subtitle: ""
+author: 
+  - name: Sofia Dahl
+    email: sof@create.aau.dk
+    orcid: 0000-0002-0687-7810
+    affiliation: 
+      - name: Aalborg Universitet -- Copenhagen, Denmark
+        department: Section for Media Technology - Campus Copenhagen
+        url: https://vbn.aau.dk/en/persons/sof
+        corresponding: true
+  - name: Michael Großbach
+    email: michael.grossbach@hmtm-hannover.de
+    orcid: 0000-0003-1351-0985
+    affiliation: 
+      - name: Hochschule für Musik, Theater und Medien -- Hannover, Germany
+        department: Institut für Musikphysiologie und Musiker-Medizin
+        address: Neues Haus 1
+        city: Hannover
+        state: Nds
+        country: Germany
+        postal-code: 30175
+        url: https://www.immm.hmtm-hannover.de/de/institut/personen/michael-grossbach
+date: last-modified
+date-format: "YYYY-MM-DD"
+abstract: |
+  The abstract appears here.
+tbl-cap-location: top
+reference-location: block
+citations-hover: true
+bibliography: ../asiams.bib
+csl: /home/grossbach/files/devel/r/templates/frontiers-in-neuroscience.csl
+editor_options: 
+  chunk_output_type: console
+format: 
+  html:
+    toc: true
+    toc_float: true
+    toc-depth: 3
+    toc-location: "left"
+    number-sections: true
+    standalone: true
+    embed-resources: true
+    cap-location: margin
+    echo: true
+    code-fold: true
+    comment: ""
+    df-print: paged
+---
+
+```{r setup}
+#| message: false
+# Install the required package
+#install.packages("tidyverse")
+#install.packages("yardstick")
+
+# Load and conditionally install libraries
+library(tidyverse)
+library(conflicted)
+library(knitr)
+library(yardstick)
+theme_set(theme_light(base_size = 8))
+options(mc.cores = parallelly::availableCores(),
+        digits = 3, 
+        scipen = 3,
+        knitr.kable.NA = '')
+opts_chunk$set(echo = TRUE)
+```
+
+This is analysis of the pilot data from the drum stroke classification listening test, where students were asked to classify drum strokes from P3 and S2 as either normal or controlled strokes. <!--# Am I correct in assuming that P3's and S2's data were used as test data for this pilot, and there are more patient and healthy participant data for the actual test? -->
+Test [@Danielsen2015]
+
+**TO DO**
+
+- [ ] use file_keys to read in and store test-time data, flags etc. From xml files
+    - [ ] testTimer: total test page time in s, found in xml files as \<metricresult id="testTime"\> 8.60299319727892 \</metricresult\>
+    - [ ] elementTimer: total time in s the audio fragment has been played \<metricresult name="enableElementTimer"\> 1.0042630385487428 \</metricresult\>
+    - [ ] elementFlagListenedTo: One per audio fragment per test page. Boolean response, set to true if listened to: \<metricresult name="elementFlagListenedTo"\>true\</metricresult\>
+- [ ] check if other participants file_keys should be removed.
+- [ ] Confusion matrix showing also R/L arm as well (later relate to moCap )
+
+# Loading and checking training sessions
+
+We start by loading training sessions and check that the listeners could do the task. First load the original csv file saved on the server.
+
+```{r}
+trainfeedb<-read.csv("pilottraining_feedback-default-ratings.csv")
+```
+
+Since each sound file has information about the recording conditions (player, arm used,instruction...) the data is transformed to long format. A regexp is used to separate the individual file names into four groups which we use to separate different cases.
+
+```{r}
+trainfeedb %>%
+  pivot_longer(
+    cols = !file_keys,
+    names_to = c("player","file_ID", "instruction", "stroke_ID", "rep"),
+    names_pattern = "(^[PS]\\d)([RL]\\d+)([NC])(\\d+)(_[a-z]+?)",  #regexp to separate four groups
+    values_to = "categorized",
+    values_drop_na = TRUE
+  ) -> feedb_long
+```
+
+After this, we can use the instruction (C or N) to check if participants classified ok with feedback during training. The file keys of participants that did not classify correctly during training are stored so we can remove them from main bulk of data.
+
+```{r}
+feedb_long %>%
+  mutate(
+    correct= (if_else(
+      (instruction == "C" & categorized == 1 | instruction == "N" & categorized ==0), 1, 0))
+  ) -> tmp
+#save those that messed up WITH feedback to be removed from the test
+not_passed <-
+  tmp %>% 
+  dplyr::filter(tmp$correct == 0)
+
+#dim(feedb_long) # dimensions with participants that have to be removed from real test
+
+rm(tmp)
+```
+
+# Listeners' stroke classification
+
+We now load the actual classification data without the non-passing participants and organize the actual data in the same long format with factors.
+
+## Player P3
+
+```{r}
+P3 <- read.csv("pilottest_P3-default-ratings.csv")
+P3 %>%
+ # dplyr::filter(P3$file_keys != not_passed$file_keys)%>%
+ dplyr::filter(file_keys != not_passed$file_keys) %>%
+  pivot_longer(
+    cols = !file_keys,
+    names_to = c("player","file_ID", "instruction", "stroke_ID", "rep"),
+    names_pattern = "(^[PS]\\d)([RL]\\d+)([NC])(\\d+)(_[a-z]+)?",  #regexp to separate four groups
+    values_to = "categorized",
+    values_drop_na = TRUE
+  ) -> temp
+temp %>%
+  mutate(
+    obs = factor(if_else(
+      (categorized == "1"), "C", "N")),
+    instruction = as.factor(instruction)) -> 
+  P3_long
+# P3_long$instruction = as.factor(P3_long$instruction) # Make factor to allow confusion matrix
+rm(temp)
+```
+
+## Player S2
+
+```{r}
+S2 <-read.csv("pilottest_S2-default-ratings.csv")
+S2 %>%
+  dplyr::filter(S2$file_keys != not_passed$file_keys) %>%
+  pivot_longer(
+    cols = !file_keys,
+    names_to = c("player","file_ID", "instruction", "stroke_ID", "rep"),
+    names_pattern = "(^[PS]\\d)([RL]\\d+)([NC])(\\d+)(_[a-z]+)?",  #regexp to separate four groups
+    values_to = "categorized",
+    values_drop_na = TRUE
+  ) -> temp
+temp %>%
+  mutate(
+    obs= factor(if_else(
+      (categorized == "1"), "C", "N")),
+    instruction = as.factor(instruction)) -> 
+  S2_long
+# S2_long$instruction=as.factor(S2_long$instruction) #Make factor to allow confusion matrix
+rm(temp)
+
+```
+
+# CONFUSION MATRIX
+
+The yardstick library is used to make confusion matrices. First we generate ground truth from the training file, and make factors.
+
+```{r}
+#Generating training truth data from categorization where 1 is Controlled, else Normal
+feedb_long %>%
+      mutate(
+        obs = factor(if_else((categorized == "1"), "C", "N")),
+        instruction = as.factor(instruction)
+      ) -> 
+  train_truth
+# train_truth$instruction=as.factor(train_truth$instruction) #Make factor to allow confusion matrix
+#is.factor(train_truth$instruction) #check
+```
+
+Then we can compare the observations with the predicted classification for Controlled (C) and Normal (N) strokes. The confusion matrix for training becomes:
+
+```{r}
+cm <- train_truth %>%
+  conf_mat(obs, instruction)
+cm
+```
+
+In the above, the two participants not passing the classifications are still part of the data. The column sums add up with the length of train_truth data, so it is as expected.
+
+```{r}
+cmP3 <- P3_long %>%
+  conf_mat(obs, instruction) # data=obs, truth=instruction
+```
+
+The confusion matrix for P3 block show more confusion between N and C strokes, but still pretty good, `r round(cmP3$table[1, 1] / sum(cmP3$table[, 1]) * 100)` % (and not 78 as you wrote!?) of C-strokes correctly classified as C.
+
+```{r}
+cmP3
+```
+
+```{r}
+cmS2 <- S2_long %>%
+  conf_mat(obs, instruction)
+```
+
+The confusion matrix for the S2 block shows `r round(cmS2$table[1, 1] / sum(cmS2$table[, 1]) * 100)` % (and not 80 % as you wrote) of C-strokes correctly classified as C-strokes.
+
+```{r}
+cmS2
+# autoplot(cmS2, type = "heatmap") #Heatmap plot
+```
+
+Intra-subject reliability check if repeated strokes classified the same. <!--# comment -->
+
+```{r}
+
+#P3_long has repetition listed as every other
+#comparing categorization by selecting every other (first odd then even) 
+rep_sameP3 <- P3_long$categorized[c(TRUE, FALSE)] == P3_long$categorized[!c(TRUE, FALSE)]
+P3percent <- sum(rep_sameP3)/340*100
+
+#print('Percentage of repeated strokes for P3 classified the same=')
+#print(P3percent)
+```
+
+`r round(P3percent)` percent of repeated strokes for P3 were classified the same
+
+```{r}
+#comparing by selecting every other (first odd then even) 
+rep_sameS2<-S2_long$categorized[c(TRUE, FALSE)]==S2_long$categorized[!c(TRUE, FALSE)]
+S2percent=sum(rep_sameS2)/340*100
+#print('Percentage of repeated strokes for S2 classified the same=')
+#print(S2percent)
+```
+
+`r round(S2percent)` percent of repeated strokes for S2 were classified the same
+
+Overall, this is promising results given that these were students without any particular auditory listening training or drumming expertise.
+
+# References
+
